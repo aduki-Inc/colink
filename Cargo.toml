@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.4.0"
+dotenv = "0.15"
+tokio = "1"
+sqlx = {version = "0.7.2", features = ["postgres"]}
