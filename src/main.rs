@@ -1,14 +1,15 @@
-use actix_web::{App, HttpServer};
-use routes::{auth, user};
+use actix_web::{web, App, HttpServer};
+mod routes;
 
-fn main() -> std::io::Result<()> {
-	let app = App::new()
-		.service(auth())
-		.service(user());
-
-	HttpServer::new(|| app)
-		.bind("127.0.0.1:8080")?
-		.run()?;
-
-	Ok(())
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+  HttpServer::new(|| {
+    App::new()
+      .service(web::resource("/").to(|| async { "hello world" }))
+			.service(routes::auth::user())
+			.service(routes::auth::auth())
+  })
+  .bind(("127.0.0.1", 8080))?
+  .run()
+  .await
 }
