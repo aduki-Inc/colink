@@ -2,15 +2,20 @@
 
 diesel::table! {
   users (id) {
-    id -> Integer,
+    id -> Int4,
+    #[max_length = 250]
     username -> Varchar,
+    #[max_length = 50]
     password -> Varchar,
+    #[max_length = 250]
     email -> Varchar,
+    #[max_length = 250]
     name -> Varchar,
     active -> Bool,
-    bio -> Varchar,
-    dob -> Date,
-    picture -> Varchar,
+    bio -> Nullable<Text>,
+    dob -> Timestamp,
+    #[max_length = 500]
+    picture -> Nullable<Varchar>,
     created_at -> Timestamp,
   }
 }
