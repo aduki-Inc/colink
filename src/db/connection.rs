@@ -1,21 +1,15 @@
-use sqlx::postgres::PgConnectOptions;
-use sqlx::PgPool;
-use crate::config::postgres::DatabaseConfig;
+use diesel::pg::PgConnection;
+use diesel::prelude::*;
+use dotenv::dotenv;
+use std::env;
 
-pub async fn establish_connection() -> Result<PgPool, sqlx::Error>{
-  
-  //Retrieve database connection details from config
-  let db_config = DatabaseConfig::init();
+pub async fn establish_connection() -> PgConnection{
+  dotenv().ok();
 
-  //Create a database connection options
-  let db_options = PgConnectOptions::new()
-    .database(&db_config.db_name)
-    .username(&db_config.db_user)
-    .password(&db_config.db_password)
-    .host(&db_config.db_host)
-    .port(&db_config.db_port);
+  //Get database url from env file
+  let database_url = env::var("DATABASE_URL")
+    .expect("Database url must be set in .env file");
 
-  //Create a database connection pool
-  let pool = PgPool::connect_with(db_options).await?;
-  Ok(pool)
+  PgConnection::establish(&database_url)
+    .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
