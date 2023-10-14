@@ -1,9 +1,9 @@
 use diesel::prelude::*;
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, NaiveDate};
 
-#[derive(Debug, Queryable, Selectable)]
-// #[table(name = "users")]
-#[diesel(table_name = create::schema::users)]
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::db::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 
 pub struct User {
@@ -14,7 +14,7 @@ pub struct User {
   pub name: String,
   pub active: bool,
   pub bio: String,
-  pub dob: NaiveDateTime,
+  pub dob: NaiveDate,
   pub picture: String,
   pub created_at: NaiveDateTime,
 }

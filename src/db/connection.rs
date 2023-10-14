@@ -1,6 +1,6 @@
 use sqlx::postgres::PgConnectOptions;
 use sqlx::PgPool;
-use config::DatabaseConfig;
+use crate::config::postgres::DatabaseConfig;
 
 pub async fn establish_connection() -> Result<PgPool, sqlx::Error>{
   
