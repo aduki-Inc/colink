@@ -3,12 +3,11 @@ use sqlx::PgPool;
 use config::DatabaseConfig;
 
 pub async fn establish_connection() -> Result<PgPool, sqlx::Error>{
+  
   //Retrieve database connection details from config
-
   let db_config = DatabaseConfig::init();
 
   //Create a database connection options
-
   let db_options = PgConnectOptions::new()
     .database(&db_config.db_name)
     .username(&db_config.db_user)
