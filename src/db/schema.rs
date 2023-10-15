@@ -13,7 +13,7 @@ diesel::table! {
     name -> Varchar,
     active -> Bool,
     bio -> Nullable<Text>,
-    dob -> Timestamptz,
+    dob -> Nullable<Timestamptz>,
     #[max_length = 500]
     picture -> Nullable<Varchar>,
     created_at -> Nullable<Timestamptz>,
