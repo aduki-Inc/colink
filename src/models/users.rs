@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use chrono::{NaiveDateTime, NaiveDate};
+use chrono::NaiveDateTime;
 
 
 #[derive(Queryable, Selectable)]
@@ -13,8 +13,8 @@ pub struct User {
   pub email: String,
   pub name: String,
   pub active: bool,
-  pub bio: String,
-  pub dob: NaiveDate,
-  pub picture: String,
+  pub bio: Option<String>,
+  pub dob: NaiveDateTime,
+  pub picture: Option<String>,
   pub created_at: NaiveDateTime,
 }
