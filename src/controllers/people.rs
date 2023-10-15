@@ -22,7 +22,7 @@ pub async fn show_people() {
         println!("-----------\n");
         println!("{}", user.username);
         println!("-----------\n");
-        println!("{}", user.dob);
+        println!("{:?}", user.dob);
         println!("-----------\n");
         println!("{}", user.email);
     }

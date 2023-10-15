@@ -5,7 +5,7 @@ CREATE TABLE users (
     password VARCHAR(50) NOT NULL,
     email VARCHAR(250) NOT NULL,
     name VARCHAR(250) NOT NULL,
-    active BOOLEAN NOT NULL DEFAULT true,
+    active BOOLEAN DEFAULT true,
     bio TEXT,
     dob TIMESTAMP WITH TIME ZONE,
     picture VARCHAR(500),
