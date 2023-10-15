@@ -3,12 +3,13 @@ mod routes;
 mod models;
 mod db;
 mod controllers;
+mod middlewares;
 
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
   // controllers::people::show_people().await;
-  
+
   HttpServer::new(|| {
     App::new()
       .service(web::resource("/").to(|| async { "hello world" }))

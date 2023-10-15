@@ -5,7 +5,7 @@ use crate::db::connection::establish_connection;
 use crate::db::schema::users;
 use crate::models::users::NewUser;
 use serde_json::json;
-// use serde::{Deserialize, Serialize};
+use crate::middlewares::auth_middleware::{email_exists, username_exists};
 
 
 // Define an Actix route for user registration with JSON data.
@@ -14,6 +14,27 @@ pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
   let mut conn = establish_connection().await;
 
   let registration_data = data.into_inner();
+
+  // Check if the email already exists
+  if email_exists(&registration_data.email, &mut conn) {
+    return HttpResponse::Conflict().json(
+        json!({
+            "success": false,
+            "message": "Email already exists"
+        })
+    );
+  }
+
+  // Check if the username already exists
+  if username_exists(&registration_data.username, &mut conn) {
+      return HttpResponse::Conflict().json(
+          json!({
+              "success": false,
+              "message": "Username already exists"
+          })
+      );
+  }
+
 
   // Hash the user's password securely using bcrypt.
   let hashed_password = match hash(&registration_data.password, 12) {
