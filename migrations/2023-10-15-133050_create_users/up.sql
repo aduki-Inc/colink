@@ -2,7 +2,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(250) NOT NULL,
-    password VARCHAR(50) NOT NULL,
+    password VARCHAR(500) NOT NULL,
     email VARCHAR(250) NOT NULL,
     name VARCHAR(250) NOT NULL,
     active BOOLEAN DEFAULT true,

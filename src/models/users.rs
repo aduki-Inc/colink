@@ -1,6 +1,7 @@
 use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use crate::db::schema::users;
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::users)]
@@ -19,7 +20,8 @@ pub struct User {
   pub created_at: Option<NaiveDateTime>,
 }
 
-#[derive(Insertable, Clone)]
+
+#[derive(Insertable, Clone, Serialize, Deserialize)]
 #[table_name = "users"]
 pub struct NewUser {
   pub username: String,
@@ -32,4 +34,3 @@ pub struct NewUser {
   pub picture: Option<String>,
   pub created_at: Option<NaiveDateTime>,
 }
-

@@ -5,7 +5,7 @@ diesel::table! {
         id -> Int4,
         #[max_length = 250]
         username -> Varchar,
-        #[max_length = 50]
+        #[max_length = 500]
         password -> Varchar,
         #[max_length = 250]
         email -> Varchar,
