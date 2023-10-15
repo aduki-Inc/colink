@@ -18,3 +18,18 @@ pub struct User {
   pub picture: Option<String>,
   pub created_at: NaiveDateTime,
 }
+
+#[derive(Insertable)]
+#[table_name = "users"]
+pub struct NewUser {
+  pub username: String,
+  pub password: String,
+  pub email: String,
+  pub name: String,
+  pub active: bool,
+  pub bio: Option<String>,
+  pub dob: NaiveDateTime,
+  pub picture: Option<String>,
+  pub created_at: NaiveDateTime,
+}
+
