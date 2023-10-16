@@ -2,7 +2,6 @@ use diesel::prelude::*;
 use crate::db::schema::users::dsl::*;
 use crate::models::users::User;
 use crate::db::connection::establish_connection;
-// use tokio; // You may need to import Tokio to handle asynchronous code.
 
 pub async fn show_people() {
     // Establish the database connection asynchronously.
