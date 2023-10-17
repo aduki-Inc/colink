@@ -2,10 +2,12 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
 use std::env;
-// use crate::configs::config::Config;
+use actix_web::web;
+use crate::AppState;
+
 
 pub async fn establish_connection() -> PgConnection{
-  dotenv().ok();
+  let app_state = web::Data<(Arc<AppState>);
 
   // Get database url from env file
   let database_url = env::var("DATABASE_URL")
