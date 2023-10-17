@@ -59,15 +59,24 @@ pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
     created_at: None
   };
 
-  diesel::insert_into(users::table)
-    .values(&new_user.clone())
+  match diesel::insert_into(users::table)
+    .values(&new_user)
     .execute(&mut conn)
-    .expect("Error inserting new user");
-
-    HttpResponse::Ok().json(
+  {
+    Ok(_) => HttpResponse::Ok().json(
       json!({
         "success": true,
         "message": "User registered successfully"
       })
-    ) 
+    ),
+    Err(err) => {
+      // Handle the database error and return an error response
+      HttpResponse::InternalServerError().json(
+        json!({
+          "success": false,
+          "error": format!("Failed to register user: {}", err.to_string())
+          })
+      )
+    }
+  }
 }
