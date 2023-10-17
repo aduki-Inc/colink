@@ -4,11 +4,12 @@ mod models;
 mod db;
 mod controllers;
 mod middlewares;
+mod configs;
 
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-  // controllers::people::show_people().await;
+  configs::config::Config::init();
 
   HttpServer::new(|| {
     App::new()
