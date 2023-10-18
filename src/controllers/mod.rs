@@ -1,2 +1,2 @@
 pub mod people;
-pub mod register;
+pub mod auth_controller;
