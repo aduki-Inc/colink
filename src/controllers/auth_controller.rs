@@ -112,31 +112,42 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
     };
 
     // Compare the provided password with the stored hashed password
-    if verify(&login_data.password, &user.password).is_err() {
+    match verify(&login_data.password, &user.password) {
+      Ok(true) => {
+        // Password is correct
+        // Generate a JWT for the user
+        let jwt_result = generate_jwt(user.id, &user.username, &user.email);
+        match jwt_result {
+          Ok(jwt) => {
+            // Respond with a successful login message, user info, and the generated JWT
+            HttpResponse::Ok().json(json!({
+              "success": true,
+              "message": "Login successful",
+              "user": user, // Include user data
+              "token": jwt, // Include the JWT
+            }))
+          }
+          Err(_) => {
+            HttpResponse::Unauthorized().json(json!({
+              "success": false,
+              "message": "JWT generation failed"
+            }))
+          }
+        }
+      }
+      Ok(false) => {
+        // Incorrect password
         return HttpResponse::Unauthorized().json(json!({
-            "success": false,
-            "message": "Invalid password"
+          "success": false,
+          "message": "Invalid password"
         }));
-    }
-
-    // Password is correct
-    // Generate a JWT for the user
-    let jwt_result = generate_jwt(user.id, &user.username, &user.email);
-    match jwt_result {
-      Ok(jwt) => {
-        // Respond with a successful login message, user info, and the generated JWT
-        HttpResponse::Ok().json(json!({
-          "success": true,
-          "message": "Login successful",
-          "user": user, // Include user data
-          "token": jwt, // Include the JWT
-        }))
       }
       Err(_) => {
-        HttpResponse::Unauthorized().json(json!({
+        // Handle password verification error
+        return HttpResponse::InternalServerError().json(json!({
           "success": false,
-          "message": "JWT generation failed"
-        }))
+          "message": "Password verification failed"
+        }));
       }
-  }
+    }
 }
