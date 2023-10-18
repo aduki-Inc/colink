@@ -4,7 +4,9 @@ use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use diesel::result::Error;
 use serde::{Serialize, Deserialize};
-
+use crate::configs::config::Config;
+use std::time::{SystemTime, UNIX_EPOCH};
+use jsonwebtoken::{encode, Header, Algorithm, EncodingKey};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct UserClaims {
@@ -36,50 +38,33 @@ pub fn username_exists(other_username: &str, conn: &mut PgConnection) -> bool {
   }
 }
 
-//Public function to generate jwt
-pub fn generate_jwt(user_id: &str) -> Result<String, jsonwebtoken::errors::Error> {
-    // ... (other code)
+pub fn generate_jwt(user_id: u32, other_username: &str, other_email: &str) -> Result<String, jsonwebtoken::errors::Error> {
+  let config = Config::init();
+    
+  // Set the expiration time for the token (e.g., 1 hour from now)
+  let exp_time = SystemTime::now()
+    .duration_since(UNIX_EPOCH)
+    .expect("Time went backward")
+    .as_secs() + config.jwt_expires_in;
 
-    // Create a UserClaims instance with user-specific data
-    let user_claims = UserClaims {
-        user_id: 123, // Replace with the actual user's ID
-        username: "example_user".to_string(),
-        email: "user@example.com".to_string(),
-    };
+  // Create a UserClaims instance with user-specific data
+  let user_claims = UserClaims {
+    user_id,
+    username: other_username.to_string(),
+    email: other_email.to_string(),
+  };
 
-    let claims = Claims {
-        sub: user_id.to_string(),
-        exp: exp_time as usize,
-        user: user_claims, // Include the UserClaims in the payload
-    };
+  // Create the claims for the JWT
+  let claims = Claims {
+    sub: user_id.to_string(),
+    exp: exp_time as usize,
+    user: user_claims, // Include the UserClaims in the payload
+  };
 
-    // ... (other code)
-}
+  
+  // Encode the JWT using the secret key
+  let header = Header::new(Algorithm::HS256);
+  let token = encode(&header, &claims, &EncodingKey::from_secret(config.jwt_secret.as_ref()))?;
 
-
-// Define a secret key to sign and verify the JWT
-const SECRET_KEY: &str = env::var("JWT_SECRET").expect("JWT_SECRET is not set");
-
-
-// Function to generate a JWT token
-fn generate_jwt(user_id: &str) -> Result<String, jsonwebtoken::errors::Error> {
-  let expiration = env::var("JWT_EXPIRED_IN")
-        .unwrap_or_else(|_| "3600".to_string()) // Default to 1 hour (3600 seconds) if not set
-        .parse::<u64>()
-        .expect("Invalid JWT_EXPIRED_IN value");
-
-    let exp_time = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backward")
-        .as_secs() + expiration;
-
-    let claims = Claims {
-        sub: user_id.to_string(),
-        exp: exp_time as usize,
-    };
-
-    let header = Header::new(jsonwebtoken::Algorithm::HS256);
-    let key = EncodingKey::from_secret(SECRET_KEY.as_ref());
-
-    encode(&header, &claims, &key)
+  Ok(token)
 }
