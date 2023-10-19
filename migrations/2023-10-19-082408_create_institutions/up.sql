@@ -2,13 +2,13 @@
 
 -- Define an ENUM type
 create type institution_type as enum (
-  'Elementary School',
-  'Middle School',
-  'High School',
+  'elementary',
+  'high',
   'College',
-  'University',
-  'Vocational/Technical School',
-  'Other'
+  'university',
+  'vocational',
+  'technical',
+  'other'
 );
 
 -- Create institutions table

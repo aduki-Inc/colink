@@ -1,4 +1,5 @@
 use actix_web::{web, App, HttpServer};
+extern crate diesel_derive_enum;
 mod routes;
 mod models;
 mod db;
