@@ -3,7 +3,7 @@ use diesel::serialize::{ToSql, IsNull};
 use diesel::deserialize::{FromSql, Result as FromSqlResult, FromSqlRow};
 use diesel::pg::Pg;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, FromSqlRow)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, FromSqlRow, Queryable)]
 #[serde(rename_all = "snake_case")]
 pub enum InstitutionType {
   Vocational,
