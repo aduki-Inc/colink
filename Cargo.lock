@@ -456,7 +456,6 @@ dependencies = [
  "chrono",
  "diesel",
  "diesel-derive-enum",
- "diesel-enum",
  "diesel_migrations",
  "dotenv",
  "jsonwebtoken",
@@ -617,17 +616,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.38",
-]
-
-[[package]]
-name = "diesel-enum"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d273018d979b8e14451bcbf4709e6b0f9f1c41b68a5bacbf56d647f7a1a1b06"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
