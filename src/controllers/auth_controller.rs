@@ -101,7 +101,7 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
   // Retrieve the user from the database based on the user_key (email or username)
   let user = match users::table
     .filter(users::columns::email.eq(&login_data.user_key).or(users::columns::username.eq(&login_data.user_key)))
-    .select((users::columns::id, users::columns::username, users::columns::password, users::columns::email))
+    .select((users::columns::id, users::columns::username, users::columns::password, users::columns::email, users::columns::name))
     .first::<LoggedUser>(&mut conn) {
         Ok(user) => user,
         Err(_) => {
@@ -124,7 +124,12 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
             HttpResponse::Ok().json(json!({
               "success": true,
               "message": "Login successful",
-              "user": user, // Include user data
+              "user": {
+                "id": &user.id,
+                "username": &user.username,
+                "email": &user.email,
+                "name": &user.name
+              }, // Include user data
               "token": jwt, // Include the JWT
             }))
           }

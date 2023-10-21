@@ -30,6 +30,7 @@ pub struct LoggedUser {
   pub username: String,
   pub password: String,
   pub email: String,
+  pub name: String,
 }
 
 #[derive(Insertable, Clone, Serialize, Deserialize)]
