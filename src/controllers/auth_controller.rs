@@ -4,7 +4,7 @@ use diesel::prelude::*;
 use bcrypt::{hash, verify};
 use crate::db::connection::establish_connection;
 use crate::db::schema::users;
-use crate::models::users::{User, NewUser, LoginData};
+use crate::models::users::{LoggedUser, NewUser, LoginData};
 use serde_json::json;
 use crate::middlewares::auth_middleware::{email_exists, username_exists};
 use crate::middlewares::auth_middleware::generate_jwt;
@@ -99,16 +99,17 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
   }
 
   // Retrieve the user from the database based on the user_key (email or username)
-  let user = match users
-    .filter(email.eq(&login_data.user_key).or(username.eq(&login_data.user_key)))
-    .first::<User>(&mut conn){
-      Ok(user) => user,
-      Err(_) => {
-        return HttpResponse::InternalServerError().json(json!({
-            "success": false,
-            "message": "Error retrieving user data"
-        }));
-      }
+  let user = match users::table
+    .filter(users::columns::email.eq(&login_data.user_key).or(users::columns::username.eq(&login_data.user_key)))
+    .select((users::columns::id, users::columns::username, users::columns::password, users::columns::email))
+    .first::<LoggedUser>(&mut conn) {
+        Ok(user) => user,
+        Err(_) => {
+            return HttpResponse::InternalServerError().json(json!({
+                "success": false,
+                "message": "Error retrieving user data"
+            }));
+        }
     };
 
     // Compare the provided password with the stored hashed password
