@@ -1,28 +1,33 @@
-use actix_web::{Error, HttpRequest, HttpResponse, Result};
-use actix_web::dev::Service;
+use core::fmt;
+use actix_web::http::StatusCode;
+use actix_web::{HttpRequest, Result, dev::Payload, FromRequest};
+use std::future::{ready, Ready};
 use crate::db::schema::users::dsl::*;
 use crate::models::users::User;
 use diesel::prelude::*;
+use diesel::result::Error;
 use diesel::pg::PgConnection;
 use serde::{Serialize, Deserialize};
 use crate::configs::config::Config;
 use std::time::{SystemTime, UNIX_EPOCH};
 use jsonwebtoken::{encode, decode, DecodingKey, Validation, Header, Algorithm, EncodingKey};
-
+use actix_web::error::ErrorUnauthorized;
+use actix_web::{Error as ActixWebError, HttpResponse};
 
 #[derive(Debug, Serialize, Deserialize)]
-struct UserClaims {
-  user_id: i32,
-  username: String,
-  email: String,
+pub struct UserClaims {
+  pub user_id: i32,
+  pub username: String,
+  pub email: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-  sub: String, // Subject (usually the user's ID)
-  exp: usize,  // Expiration time (Unix timestamp)
-  user: UserClaims,
+pub struct Claims {
+  pub sub: String, // Subject (usually the user's ID)
+  pub exp: usize,  // Expiration time (Unix timestamp)
+  pub user: UserClaims,
 }
+
 
 pub fn email_exists(other_email: &str, conn: &mut PgConnection) -> bool {
   match users.filter(email.eq(other_email)).first::<User>(conn) {
@@ -73,22 +78,78 @@ pub fn generate_jwt(user_id: i32, other_username: &str, other_email: &str) -> Re
 }
 
 
-// Function to verify the JWT token
-fn verify_token(token: &str) -> Result<()> {
-  let secret = "your_secret_key"; 
-  let decoding_key = DecodingKey::from_secret(secret.as_ref());
-    
-  let validation = Validation {
-    validate_exp: true, // Validate token expiration
-    validate_nbf: true, // Validate "not before" time
-    ..Default::default()
-  };
-    
-  match decode::<Claims>(token, &decoding_key, &validation) {
-    Ok(_) => Ok(()), // Token is valid
-    Err(e) => Err(e.into()), // Token is invalid
+#[derive(Debug, Serialize, Deserialize)]
+struct ErrorResponse {
+  success: bool,
+  message: String,
+}
+
+impl ErrorResponse {
+  fn new(message: &str) -> Self {
+    ErrorResponse {
+      success: false,
+      message: message.to_string(),
+    }
   }
 }
 
 
+impl fmt::Display for ErrorResponse {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{}", serde_json::to_string(&self).unwrap())
+  }
+}
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JwtMiddleware {
+  pub claims: Claims,
+}
+
+impl FromRequest for JwtMiddleware {
+  type Error = ActixWebError;
+  type Future = Ready<Result<Self, Self::Error>>;
+
+  fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
+    let token = req
+      .cookie("x-access-token")
+      .map(|c| c.value().to_string())
+      .or_else(|| {
+        req.headers()
+          .get("x-access-token")
+          .and_then(|h| h.to_str().ok())
+          .map(|s| s.to_string())
+      });
+
+
+    if token.is_none() {
+      let json_error = ErrorResponse {
+        success: false,
+        message: "You are not logged in, please provide token".to_string(),
+      };
+      return ready(Err(ErrorUnauthorized(json_error)));
+    }
+
+    let config = Config::init();
+    let decoding_key = DecodingKey::from_secret(config.jwt_secret.as_ref());
+  
+    if let Some(token) = token {
+
+      match decode::<Claims>(&token,  &decoding_key, &Validation::default()) {
+        Ok(c) => {
+          ready(Ok(JwtMiddleware {claims: c.claims}))
+        }
+        Err(_) => {
+          println!("Invalid token");
+          // In case of an error, create and return the error response
+          // let error_response = create_error_response("Invalid token");
+          let json_error = ErrorResponse::new ("Invalid token");
+          return ready(Err(ErrorUnauthorized(json_error)));
+        }
+      }
+    }
+    else {
+      let json_error = ErrorResponse::new("You are not logged in, please provide a token");
+      ready(Err(ErrorUnauthorized(json_error)))
+    }
+  }
+}

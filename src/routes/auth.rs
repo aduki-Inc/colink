@@ -1,5 +1,5 @@
 use actix_web::{web, Scope, HttpResponse};
-use crate::controllers::auth_controller::{register_user, login_user};
+use crate::controllers::auth_controller::{register_user, login_user, check_user};
 
 pub fn user() -> Scope {
   web::scope("/user")
@@ -11,4 +11,5 @@ pub fn auth() -> Scope {
   web::scope("api/v1/auth")
     .route("/register", web::post().to(register_user))
     .route("/login", web::post().to(login_user))
+    .route("/check", web::post().to(check_user))
 }

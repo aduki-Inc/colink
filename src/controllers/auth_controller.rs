@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 // use crate::db::schema::users::dsl::*;
 use diesel::prelude::*;
 use bcrypt::{hash, verify};
@@ -6,8 +6,7 @@ use crate::db::connection::establish_connection;
 use crate::db::schema::users;
 use crate::models::users::{LoggedUser, NewUser, LoginData};
 use serde_json::json;
-use crate::middlewares::auth_middleware::{email_exists, username_exists};
-use crate::middlewares::auth_middleware::generate_jwt;
+use crate::middlewares::auth_middleware::{email_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
 
 
 // Define an Actix route for user registration with JSON data.
@@ -84,7 +83,7 @@ pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
 }
 
 
-// Define an Actix route for user login
+// Define an Actix route for user login 
 pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
   let mut conn = establish_connection().await;
 
@@ -156,4 +155,16 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
         }));
       }
     }
+}
+
+
+pub async fn check_user(req: HttpRequest, _: JwtMiddleware) -> impl Responder {
+  let ext = req.extensions();
+  let claims = ext.get::<Claims>().unwrap();
+  let user_info = &claims.user;
+    
+  return HttpResponse::Ok().json(json!({
+    "success": true,
+    "user": user_info
+  }));
 }
