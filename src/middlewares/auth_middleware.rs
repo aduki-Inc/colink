@@ -1,12 +1,14 @@
+use actix_web::{Error, HttpRequest, HttpResponse, Result};
+use actix_web::dev::Service;
 use crate::db::schema::users::dsl::*;
 use crate::models::users::User;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
-use diesel::result::Error;
 use serde::{Serialize, Deserialize};
 use crate::configs::config::Config;
 use std::time::{SystemTime, UNIX_EPOCH};
-use jsonwebtoken::{encode, Header, Algorithm, EncodingKey};
+use jsonwebtoken::{encode, decode, DecodingKey, Validation, Header, Algorithm, EncodingKey};
+
 
 #[derive(Debug, Serialize, Deserialize)]
 struct UserClaims {
@@ -15,7 +17,7 @@ struct UserClaims {
   email: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Claims {
   sub: String, // Subject (usually the user's ID)
   exp: usize,  // Expiration time (Unix timestamp)
@@ -38,6 +40,7 @@ pub fn username_exists(other_username: &str, conn: &mut PgConnection) -> bool {
   }
 }
 
+// Function to generate the jwt
 pub fn generate_jwt(user_id: i32, other_username: &str, other_email: &str) -> Result<String, jsonwebtoken::errors::Error> {
   let config = Config::init();
     
@@ -68,3 +71,24 @@ pub fn generate_jwt(user_id: i32, other_username: &str, other_email: &str) -> Re
 
   Ok(token)
 }
+
+
+// Function to verify the JWT token
+fn verify_token(token: &str) -> Result<()> {
+  let secret = "your_secret_key"; // Replace with your JWT secret key
+  let decoding_key = DecodingKey::from_secret(secret.as_ref());
+    
+  let validation = Validation {
+    validate_exp: true, // Validate token expiration
+    validate_nbf: true, // Validate "not before" time
+    ..Default::default()
+  };
+    
+  match decode::<Claims>(token, &decoding_key, &validation) {
+    Ok(_) => Ok(()), // Token is valid
+    Err(e) => Err(e.into()), // Token is invalid
+  }
+}
+
+
+

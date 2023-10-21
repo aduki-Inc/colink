@@ -1,5 +1,5 @@
 use actix_web::{web, HttpResponse, Responder};
-use crate::db::schema::users::dsl::*;
+// use crate::db::schema::users::dsl::*;
 use diesel::prelude::*;
 use bcrypt::{hash, verify};
 use crate::db::connection::establish_connection;
