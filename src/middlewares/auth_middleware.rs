@@ -75,7 +75,7 @@ pub fn generate_jwt(user_id: i32, other_username: &str, other_email: &str) -> Re
 
 // Function to verify the JWT token
 fn verify_token(token: &str) -> Result<()> {
-  let secret = "your_secret_key"; // Replace with your JWT secret key
+  let secret = "your_secret_key"; 
   let decoding_key = DecodingKey::from_secret(secret.as_ref());
     
   let validation = Validation {
