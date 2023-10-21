@@ -19,7 +19,7 @@ diesel::table! {
         #[max_length = 500]
         logo -> Nullable<Varchar>,
         contact -> Nullable<Json>,
-        in_type -> Nullable<InstitutionType>,
+        in_type -> InstitutionType,
         active -> Nullable<Bool>,
         #[max_length = 500]
         location -> Nullable<Varchar>,

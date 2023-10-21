@@ -18,7 +18,7 @@ create table institutions (
   name varchar(500) not null,
   logo varchar(500),
   contact json,
-  in_type institution_type,
+  in_type institution_type not null,
   active boolean default true,
   location varchar(500),
   about text,
