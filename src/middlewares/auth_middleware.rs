@@ -131,6 +131,14 @@ impl FromRequest for JwtMiddleware {
 
     let config = Config::init();
     let decoding_key = DecodingKey::from_secret(config.jwt_secret.as_ref());
+
+    // let validation = Validation {
+    //   validate_exp: true, // Validate token expiration
+    //   validate_nbf: true, // Validate "not before" time
+    //   algorithms: vec![Algorithm::HS256], // Specify the algorithm you're using
+    //   // ..Default::default()
+    // };
+    
   
     if let Some(token) = token {
 
@@ -139,9 +147,8 @@ impl FromRequest for JwtMiddleware {
           ready(Ok(JwtMiddleware {claims: c.claims}))
         }
         Err(_) => {
-          println!("Invalid token");
+          // println!("Invalid token");
           // In case of an error, create and return the error response
-          // let error_response = create_error_response("Invalid token");
           let json_error = ErrorResponse::new ("Invalid token");
           return ready(Err(ErrorUnauthorized(json_error)));
         }
