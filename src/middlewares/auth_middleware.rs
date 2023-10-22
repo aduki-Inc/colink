@@ -1,5 +1,4 @@
 use core::fmt;
-use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, Result, dev::Payload, FromRequest};
 use std::future::{ready, Ready};
 use crate::db::schema::users::dsl::*;

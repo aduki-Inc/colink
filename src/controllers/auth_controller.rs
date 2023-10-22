@@ -160,7 +160,7 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
 
 pub async fn check_user(req: HttpRequest, _: JwtMiddleware) -> impl Responder {
   let ext = req.extensions();
-  let claims = ext.get::<Claims>().unwrap();
+  let claims = ext.get::<Claims>();
   let user_info = &claims.user;
     
   return HttpResponse::Ok().json(json!({
