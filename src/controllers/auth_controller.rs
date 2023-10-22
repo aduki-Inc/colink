@@ -160,11 +160,23 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
 
 pub async fn check_user(req: HttpRequest, _: JwtMiddleware) -> impl Responder {
   let ext = req.extensions();
-  let claims = ext.get::<Claims>();
-  let user_info = &claims.user;
+
+  // Use the 'get' method to retrieve the 'Claims' value from extensions
+  if let Some(claims) = ext.get::<Claims>() {
+    // Access 'user' from 'Claims'
+    let user_info = &claims.user;
+
+    return HttpResponse::Ok().json(json!({
+      "success": true,
+      "user": user_info
+    }));
+
+  }
+  else {
     
-  return HttpResponse::Ok().json(json!({
-    "success": true,
-    "user": user_info
-  }));
+    return HttpResponse::Ok().json(json!({
+      "success": false,
+      "user": "An error has occured"
+    }));
+  }
 }

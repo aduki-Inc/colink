@@ -11,9 +11,9 @@ use crate::configs::config::Config;
 use std::time::{SystemTime, UNIX_EPOCH};
 use jsonwebtoken::{encode, decode, DecodingKey, Validation, Header, Algorithm, EncodingKey};
 use actix_web::error::ErrorUnauthorized;
-use actix_web::{Error as ActixWebError, HttpResponse};
+use actix_web::{Error as ActixWebError, HttpResponse, HttpMessage};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserClaims {
   pub user_id: i32,
   pub username: String,
@@ -25,6 +25,17 @@ pub struct Claims {
   pub sub: String, // Subject (usually the user's ID)
   pub exp: usize,  // Expiration time (Unix timestamp)
   pub user: UserClaims,
+}
+
+impl Clone for Claims {
+  fn clone(&self) -> Self {
+    // Implement the cloning logic for Claims here
+    Claims {
+      sub: self.sub.clone(),
+      exp: self.exp,
+      user: self.user.clone(),
+    }
+  }
 }
 
 
@@ -107,7 +118,6 @@ pub struct JwtMiddleware {
 impl FromRequest for JwtMiddleware {
   type Error = ActixWebError;
   type Future = Ready<Result<Self, Self::Error>>;
-
   fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
     let token = req
       .cookie("x-access-token")
@@ -131,31 +141,19 @@ impl FromRequest for JwtMiddleware {
     let config = Config::init();
     let decoding_key = DecodingKey::from_secret(config.jwt_secret.as_ref());
 
-    // let validation = Validation {
-    //   validate_exp: true, // Validate token expiration
-    //   validate_nbf: true, // Validate "not before" time
-    //   algorithms: vec![Algorithm::HS256], // Specify the algorithm you're using
-    //   // ..Default::default()
-    // };
-    
-  
-    if let Some(token) = token {
-
-      match decode::<Claims>(&token,  &decoding_key, &Validation::default()) {
-        Ok(c) => {
-          ready(Ok(JwtMiddleware {claims: c.claims}))
-        }
-        Err(_) => {
-          // println!("Invalid token");
-          // In case of an error, create and return the error response
-          let json_error = ErrorResponse::new ("Invalid token");
-          return ready(Err(ErrorUnauthorized(json_error)));
-        }
+    let claims = match decode::<Claims>(&token.unwrap(), &decoding_key, &Validation::default(),) {
+      Ok(c) => c.claims,
+      Err(_) => {
+        let json_error = ErrorResponse::new("Invalid token" );
+        return ready(Err(ErrorUnauthorized(json_error)));
       }
-    }
-    else {
-      let json_error = ErrorResponse::new("You are not logged in, please provide a token");
-      ready(Err(ErrorUnauthorized(json_error)))
-    }
+    };
+
+
+    req.extensions_mut()
+      .insert::<Claims>(claims.to_owned());
+    
+      ready(Ok(JwtMiddleware { claims }))
+
   }
 }
