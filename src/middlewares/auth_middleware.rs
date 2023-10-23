@@ -1,5 +1,6 @@
 use core::fmt;
-use actix_web::{HttpRequest, Result, dev::Payload, FromRequest};
+use actix_web::http::StatusCode;
+use actix_web::{HttpRequest, Result, dev::Payload, FromRequest, HttpResponse, HttpMessage, ResponseError};
 use std::future::{ready, Ready};
 use crate::db::schema::users::dsl::*;
 use crate::models::users::User;
@@ -10,8 +11,6 @@ use serde::{Serialize, Deserialize};
 use crate::configs::config::Config;
 use std::time::{SystemTime, UNIX_EPOCH};
 use jsonwebtoken::{encode, decode, DecodingKey, Validation, Header, Algorithm, EncodingKey};
-use actix_web::error::ErrorUnauthorized;
-use actix_web::{Error as ActixWebError, HttpResponse, HttpMessage};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserClaims {
@@ -89,7 +88,7 @@ pub fn generate_jwt(user_id: i32, other_username: &str, other_email: &str) -> Re
 
 
 #[derive(Debug, Serialize, Deserialize)]
-struct ErrorResponse {
+pub struct ErrorResponse {
   success: bool,
   message: String,
 }
@@ -103,6 +102,16 @@ impl ErrorResponse {
   }
 }
 
+impl ResponseError for ErrorResponse {
+  fn status_code(&self) -> StatusCode {
+    StatusCode::UNAUTHORIZED
+  }
+
+  fn error_response(&self) -> HttpResponse {
+    HttpResponse::build(self.status_code())
+      .json(self)
+  }
+}
 
 impl fmt::Display for ErrorResponse {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -116,7 +125,7 @@ pub struct JwtMiddleware {
 }
 
 impl FromRequest for JwtMiddleware {
-  type Error = ActixWebError;
+  type Error = ErrorResponse;
   type Future = Ready<Result<Self, Self::Error>>;
   fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
     let token = req
@@ -131,11 +140,7 @@ impl FromRequest for JwtMiddleware {
 
 
     if token.is_none() {
-      let json_error = ErrorResponse {
-        success: false,
-        message: "You are not logged in, please provide token".to_string(),
-      };
-      return ready(Err(ErrorUnauthorized(json_error)));
+      return ready(Err(ErrorResponse::new("You are not logged in, please provide token")));
     }
 
     let config = Config::init();
@@ -144,8 +149,8 @@ impl FromRequest for JwtMiddleware {
     let claims = match decode::<Claims>(&token.unwrap(), &decoding_key, &Validation::default(),) {
       Ok(c) => c.claims,
       Err(_) => {
-        let json_error = ErrorResponse::new("Invalid token" );
-        return ready(Err(ErrorUnauthorized(json_error)));
+        // let json_error = ErrorResponse::new("Invalid token" );
+        return ready(Err(ErrorResponse::new("Invalid token")))
       }
     };
 
