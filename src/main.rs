@@ -1,13 +1,15 @@
+mod routes;
+mod db;
+mod handlers;
+mod middlewares;
+mod configs;
+mod models;
+
 use actix_web::{App, HttpServer, http::header};
 use actix_web::middleware::Logger;
 use actix_cors::Cors;
 extern crate diesel_derive_enum;
-mod routes;
-mod db;
-mod controllers;
-mod middlewares;
-mod configs;
-mod models;
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

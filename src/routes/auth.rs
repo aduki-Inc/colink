@@ -1,5 +1,5 @@
 use actix_web::{web, Scope, HttpResponse};
-use crate::controllers::auth_controller::{register_user, login_user, check_user};
+use crate::handlers::auth_handlers::{register_user, login_user, check_user};
 
 pub fn user() -> Scope {
   web::scope("/user")
