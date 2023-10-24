@@ -28,6 +28,34 @@ diesel::table! {
         #[max_length = 500]
         picture -> Nullable<Varchar>,
         created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
+    }
+}
+
+diesel::table! {
+    projects (id) {
+        id -> Int4,
+        author -> Int4,
+        template -> Int4,
+        #[max_length = 500]
+        title -> Varchar,
+        #[max_length = 500]
+        field -> Varchar,
+        public -> Nullable<Bool>,
+        active -> Nullable<Bool>,
+        summery -> Nullable<Text>,
+        created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
+    }
+}
+
+diesel::table! {
+    templates (id) {
+        id -> Int4,
+        #[max_length = 500]
+        name -> Varchar,
+        description -> Text,
+        layout -> Nullable<Json>,
     }
 }
 
@@ -51,7 +79,12 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(projects -> templates (template));
+diesel::joinable!(projects -> users (author));
+
 diesel::allow_tables_to_appear_in_same_query!(
     institutions,
+    projects,
+    templates,
     users,
 );

@@ -22,17 +22,8 @@ create table projects (
   updated_at timestamp with time zone default current_timestamp
 );
 
--- Create a function to update updated_at column
-create function update_updated_at()
-returns trigger as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$ language plpgsql;
-
 -- Create a trigger to run everytime field is updated
-create trigger projects_update_updated_at
+create or replace trigger projects_update_updated_at
 after update on projects
 for each row
 execute procedure update_updated_at();

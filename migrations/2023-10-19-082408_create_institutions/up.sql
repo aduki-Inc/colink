@@ -17,6 +17,7 @@ begin
   end if;
 end $$;
 
+
 -- Create institutions table
 create table if not exists institutions (
   id serial primary key,
@@ -34,17 +35,10 @@ create table if not exists institutions (
   updated_at timestamp with time zone default current_timestamp
 );
 
--- Create a function to update updated_at column
-create function update_updated_at()
-returns trigger as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$ language plpgsql;
 
 -- Create a trigger to run everytime field is updated
-create trigger institutions_update_updated_at
+create or replace trigger institutions_update_updated_at
 after update on institutions
 for each row
 execute procedure update_updated_at();
+

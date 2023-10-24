@@ -14,7 +14,7 @@ create table if not exists users (
 );
 
 -- Create a function to update updated_at column
-create function update_updated_at()
+create or replace function update_updated_at()
 returns trigger as $$
 begin
   new.updated_at = now();
@@ -22,8 +22,10 @@ begin
 end;
 $$ language plpgsql;
 
+
 -- Create a trigger to run everytime field is updated
 create trigger users_update_updated_at
 after update on users
 for each row
 execute procedure update_updated_at();
+
