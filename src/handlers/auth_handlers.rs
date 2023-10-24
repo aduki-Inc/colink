@@ -19,21 +19,21 @@ pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
   // Check if the email already exists
   if email_exists(&registration_data.email, &mut conn) {
     return HttpResponse::Conflict().json(
-        json!({
-            "success": false,
-            "message": "Email already exists"
-        })
+      json!({
+        "success": false,
+        "message": "Email already exists"
+      })
     );
   }
 
   // Check if the username already exists
   if username_exists(&registration_data.username, &mut conn) {
-      return HttpResponse::Conflict().json(
-          json!({
-              "success": false,
-              "message": "Username already exists"
-          })
-      );
+    return HttpResponse::Conflict().json(
+      json!({
+        "success": false,
+        "message": "Username already exists"
+      })
+    );
   }
 
 
@@ -76,7 +76,7 @@ pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
         json!({
           "success": false,
           "error": format!("Failed to register user: {}", err.to_string())
-          })
+        })
       )
     }
   }
@@ -104,10 +104,10 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
     .first::<LoggedUser>(&mut conn) {
         Ok(user) => user,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(json!({
-                "success": false,
-                "message": "Error retrieving user data"
-            }));
+          return HttpResponse::InternalServerError().json(json!({
+            "success": false,
+            "message": "Error retrieving user data"
+          }));
         }
     };
 
