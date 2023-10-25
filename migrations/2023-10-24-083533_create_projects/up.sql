@@ -11,7 +11,7 @@ create table if not exists templates (
 -- Check if the enum type exists
 do $$ 
 begin
-  if not exists (select 1 from pg_type where typname = 'institution_type') then
+  if not exists (select 1 from pg_type where typname = 'proposal_type') then
     -- Create the enum type
     create type proposal_type as enum (
       'approval',
@@ -37,9 +37,15 @@ create table if not exists projects (
   active boolean default true,
   owned boolean not null default false,
   institution integer references institutions(id),
-  summery text,
+  description text,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
+);
+
+create table if not exists proposals(
+  id serial primary key,
+  project integer unique references projects(id) not null,
+  summery text not null
 );
 
 -- Create a trigger to run everytime field is updated
