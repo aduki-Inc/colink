@@ -8,6 +8,23 @@ create table if not exists templates (
   layout json
 );
 
+-- Check if the enum type exists
+do $$ 
+begin
+  if not exists (select 1 from pg_type where typname = 'institution_type') then
+    -- Create the enum type
+    create type proposal_type as enum (
+      'approval',
+      'revised',
+      'supplemental',
+      'continuation',
+      'notice',
+      'tsolicited',
+      'other'
+    );
+  end if;
+end $$;
+
 -- Create projects table
 create table if not exists projects (
   id serial primary key,
@@ -15,8 +32,11 @@ create table if not exists projects (
   template integer references templates(id) not null,
   title varchar(500) not null,
   field varchar(500) not null,
+  type proposal_type not null,
   public boolean default true,
   active boolean default true,
+  owned boolean not null default false,
+  institution integer references institutions(id),
   summery text,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
