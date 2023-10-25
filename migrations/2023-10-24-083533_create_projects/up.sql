@@ -1,7 +1,7 @@
 -- Your SQL goes here
 
 -- Create templates table
-create table templates (
+create table if not exists templates (
   id serial primary key,
   name varchar(500) not null,
   description text not null,
@@ -9,7 +9,7 @@ create table templates (
 );
 
 -- Create projects table
-create table projects (
+create table if not exists projects (
   id serial primary key,
   author integer references users(id) not null,
   template integer references templates(id) not null,

@@ -76,6 +76,7 @@ diesel::table! {
         #[max_length = 500]
         picture -> Nullable<Varchar>,
         created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
     }
 }
 

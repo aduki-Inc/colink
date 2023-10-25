@@ -18,6 +18,7 @@ pub struct User {
   pub dob: Option<NaiveDateTime>,
   pub picture: Option<String>,
   pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>,
 }
 
 
