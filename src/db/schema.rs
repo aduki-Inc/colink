@@ -4,6 +4,10 @@ pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "institution_type"))]
     pub struct InstitutionType;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "proposal_type"))]
+    pub struct ProposalType;
 }
 
 diesel::table! {
@@ -33,6 +37,9 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::ProposalType;
+
     projects (id) {
         id -> Int4,
         author -> Int4,
@@ -41,11 +48,23 @@ diesel::table! {
         title -> Varchar,
         #[max_length = 500]
         field -> Varchar,
+        #[sql_name = "type"]
+        type_ -> ProposalType,
         public -> Nullable<Bool>,
         active -> Nullable<Bool>,
-        summery -> Nullable<Text>,
+        owned -> Bool,
+        institution -> Nullable<Int4>,
+        description -> Nullable<Text>,
         created_at -> Nullable<Timestamptz>,
         updated_at -> Nullable<Timestamptz>,
+    }
+}
+
+diesel::table! {
+    proposals (id) {
+        id -> Int4,
+        project -> Int4,
+        summery -> Text,
     }
 }
 
@@ -80,12 +99,15 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(projects -> institutions (institution));
 diesel::joinable!(projects -> templates (template));
 diesel::joinable!(projects -> users (author));
+diesel::joinable!(proposals -> projects (project));
 
 diesel::allow_tables_to_appear_in_same_query!(
     institutions,
     projects,
+    proposals,
     templates,
     users,
 );

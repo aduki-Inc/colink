@@ -5,7 +5,9 @@ create table if not exists templates (
   id serial primary key,
   name varchar(500) not null,
   description text not null,
-  layout json
+  layout json,
+  created_at timestamp with time zone default current_timestamp,
+  updated_at timestamp with time zone default current_timestamp
 );
 
 -- Check if the enum type exists
@@ -51,5 +53,10 @@ create table if not exists proposals(
 -- Create a trigger to run everytime field is updated
 create or replace trigger projects_update_updated_at
 after update on projects
+for each row
+execute procedure update_updated_at();
+
+create or replace trigger templates_update_updated_at
+after update on templates
 for each row
 execute procedure update_updated_at();

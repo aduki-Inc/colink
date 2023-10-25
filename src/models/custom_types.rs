@@ -12,3 +12,16 @@ pub enum InstitutionType {
   Technical,
   Other,
 }
+
+#[derive(Serialize, Deserialize)]
+#[derive(Debug, DbEnum)]
+#[ExistingTypePath = "crate::db::schema::sql_types::ProposalType"]
+pub enum ProposalType {
+  Proposal,
+  Revised,
+  Supplemental,
+  Continuation,
+  Notice,
+  Solicited,
+  Other
+}
