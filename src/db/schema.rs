@@ -11,8 +11,8 @@ pub mod sql_types {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::InstitutionType;
+  use diesel::sql_types::*;
+  use super::sql_types::InstitutionType;
 
     institutions (id) {
         id -> Int4,
