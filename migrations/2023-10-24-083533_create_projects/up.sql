@@ -50,7 +50,10 @@ create table if not exists proposals(
   summery text not null
 );
 
+
+
 -- Create a trigger to run everytime field is updated
+
 create or replace trigger projects_update_updated_at
 after update on projects
 for each row
