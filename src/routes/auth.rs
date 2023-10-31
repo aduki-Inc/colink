@@ -3,7 +3,6 @@ use crate::handlers::auth_handlers::{register_user, login_user, check_user};
 
 pub fn user() -> Scope {
   web::scope("/user")
-    .route("/get_all", web::get().to(|| async { HttpResponse::Ok().body("Get all users") }))
     .route("/get_by_id/:id", web::get().to(|| async { HttpResponse::Ok().body("Get user by ID") }))
 }
 
