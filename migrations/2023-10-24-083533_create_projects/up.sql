@@ -51,7 +51,6 @@ create table if not exists proposals(
 );
 
 
-
 -- Create a trigger to run everytime field is updated
 
 create or replace trigger projects_update_updated_at
