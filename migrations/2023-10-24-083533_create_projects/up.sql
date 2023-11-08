@@ -21,7 +21,7 @@ begin
       'supplemental',
       'continuation',
       'notice',
-      'tsolicited',
+      'solicited',
       'other'
     );
   end if;
