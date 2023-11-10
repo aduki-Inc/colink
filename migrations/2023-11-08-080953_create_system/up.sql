@@ -1,10 +1,10 @@
 -- Your SQL goes here
 
--- Check if the enum type(section_type) exists, if not create it
+-- Check if the enum type(role_type) exists, if not create it
 do $$ 
 begin
   if not exists (select 1 from pg_type where typname = 'role_type') then
-    -- Create the enum type(section_type)
+    -- Create the enum type(role_type)
     create type role_type as enum (
       'dev',
       'super',
