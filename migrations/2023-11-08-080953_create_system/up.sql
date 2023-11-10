@@ -3,9 +3,9 @@
 -- Check if the enum type(section_type) exists, if not create it
 do $$ 
 begin
-  if not exists (select 1 from pg_type where typname = 'section_type') then
+  if not exists (select 1 from pg_type where typname = 'role_type') then
     -- Create the enum type(section_type)
-    create type section_type as enum (
+    create type role_type as enum (
       'dev',
       'super',
       'user'
@@ -27,7 +27,6 @@ create table if not exists co_link (
 create table if not exists sections (
   id serial primary key,
   name varchar(500) not null,
-  type section_type not null,
   target_id integer not null,
   target_name varchar(500) not null,
   created_at timestamp with time zone default current_timestamp,
@@ -38,6 +37,7 @@ create table if not exists sections (
 create table if not exists roles (
   id serial primary key,
   section integer references sections(id),
+  type role_type not null,
   author integer references users(id) not null,
   name varchar(500),
   privileges json,

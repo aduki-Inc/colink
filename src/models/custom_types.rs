@@ -25,3 +25,12 @@ pub enum ProposalType {
   Solicited,
   Other
 }
+
+#[derive(Serialize, Deserialize)]
+#[derive(Debug, DbEnum)]
+#[ExistingTypePath = "crate::db::schema::sql_types::RoleType"]
+pub enum RoleType {
+  Dev,
+  Super,
+  User
+}
