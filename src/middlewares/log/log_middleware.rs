@@ -22,6 +22,8 @@ pub async fn create_log(log_data: &InsertableLog, conn: &mut PgConnection) {
 //   };
 // }
 
+
+// Function to create new log
 pub async fn new_section_log(
   author: i32,
   target: i32,
