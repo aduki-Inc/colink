@@ -17,13 +17,29 @@ pub struct Colink {
   pub updated_at: Option<NaiveDateTime>
 }
 
-#[derive(Quarable, Selectable)]
+#[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::sections)]
-#[disel(check_for_backend(diesel::pg::Pg))]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct Section {
   pub id: i32,
   pub name: String,
   pub target_id: i32,
-  target_name: String
+  pub target_name: String,
+  pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>
+}
+
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::db::schema::roles)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Serialize, Deserialize)]
+pub struct Role {
+  pub id: i32,
+  pub section: Option<i32>,
+  pub type_: RoleType,
+  pub privileges: Option<Json>,
+  pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>
 }

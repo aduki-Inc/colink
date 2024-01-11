@@ -24,7 +24,7 @@ async fn main() -> std::io::Result<()> {
       ])
       .supports_credentials();
     App::new()
-			.service(routes::auth::user())
+//			.service(routes::auth::user())
 			.service(routes::auth::auth())
       .wrap(cors)
       .wrap(Logger::default())

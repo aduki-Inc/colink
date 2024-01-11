@@ -10,8 +10,8 @@ pub mod sql_types {
     pub struct ProposalType;
 
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "section_type"))]
-    pub struct SectionType;
+    #[diesel(postgres_type(name = "role_type"))]
+    pub struct RoleType;
 }
 
 diesel::table! {
@@ -86,9 +86,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::RoleType;
+
     roles (id) {
         id -> Int4,
         section -> Nullable<Int4>,
+        #[sql_name = "type"]
+        type_ -> RoleType,
         author -> Int4,
         #[max_length = 500]
         name -> Nullable<Varchar>,
@@ -99,18 +104,15 @@ diesel::table! {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::SectionType;
-
     sections (id) {
         id -> Int4,
         #[max_length = 500]
         name -> Varchar,
-        #[sql_name = "type"]
-        type_ -> SectionType,
         target_id -> Int4,
         #[max_length = 500]
         target_name -> Varchar,
+        created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
     }
 }
 
