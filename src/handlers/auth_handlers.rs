@@ -9,12 +9,25 @@ use serde_json::json;
 use crate::middlewares::auth_middleware::{email_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
 
 
-// Define an Actix route for user registration with JSON data.
+// Define handler for user registration with JSON data.
 pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
 
   let mut conn = establish_connection().await;
 
-  let registration_data = data.into_inner();
+//  let registration_data = data.into_inner();
+
+// Collect Registration data from the body
+	let registration_data = match data.into_inner().validate() {
+		Ok(data) => data,
+		Err(error) => {
+			return HttpResponse::BadRequest().json(
+				json!({
+					"success": false,
+          "error": format!("Validation error: {}", error)
+				})
+      );
+		}
+	};
 
   // Check if the email already exists
   if email_exists(&registration_data.email, &mut conn) {
@@ -83,7 +96,7 @@ pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
 }
 
 
-// Define an Actix route for user login 
+// Define handler for user login
 pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
   let mut conn = establish_connection().await;
 

@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use chrono::{NaiveDateTime, NaiveDate};
+use chrono::{NaiveDateTime};
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
 use crate::models::custom_types::RoleType;

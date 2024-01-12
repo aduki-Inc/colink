@@ -22,6 +22,7 @@ pub struct User {
 }
 
 
+
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -47,6 +48,32 @@ pub struct NewUser {
   pub picture: Option<String>,
   pub created_at: Option<NaiveDateTime>,
 }
+
+// Validate NewUser
+impl NewUser {
+	pub fn validate(&self) -> Result<NewUser, String> {
+		// Check if required fields are present
+		if self.username.is_empty() {
+			return Err("Username is required".to_string());
+		}
+
+		if self.email.is_empty() {
+			return Err("Email is required".to_string());
+		}
+
+		if self.password.is_empty() {
+			return Err("Password is required".to_string());
+		}
+
+		if self.name.is_empty() {
+			return Err("Password is required".to_string());
+		}
+
+		// If all checks pass, return the validated NewUser
+		Ok(self.clone())
+	}
+}
+
 
 #[derive(Serialize, Deserialize)]
 pub struct LoginData {
