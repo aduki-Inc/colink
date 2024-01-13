@@ -2,6 +2,8 @@ use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use crate::db::schema::users;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use actix_web::{ HttpResponse };
 
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::users)]
@@ -48,6 +50,23 @@ pub struct NewUser {
   pub picture: Option<String>,
   pub created_at: Option<NaiveDateTime>,
 }
+
+
+// Implement custom deserialization logic
+//impl NewUser {
+//	pub fn from_json(json: &str) -> Result<NewUser, HttpResponse> {
+//		match serde_json::from_str::<NewUser>(json) {
+//			Ok(user) => Ok(user),
+//			Err(_) => {
+//				let error_message = format!("Failed to deserialize JSON: {:?}", json);
+//				Err(HttpResponse::BadRequest().json(json!({
+//                    "success": false,
+//                    "error": error_message,
+//                })))
+//			}
+//		}
+//	}
+//}
 
 // Validate NewUser
 impl NewUser {
