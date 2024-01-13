@@ -2,8 +2,6 @@ use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use crate::db::schema::users;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
-use actix_web::{ HttpResponse };
 
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::users)]
@@ -24,7 +22,6 @@ pub struct User {
 }
 
 
-
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -38,7 +35,7 @@ pub struct LoggedUser {
 }
 
 #[derive(Insertable, Clone, Serialize, Deserialize)]
-#[table_name = "users"]
+#[diesel(table_name = crate::db::schema::users)]
 pub struct NewUser {
   pub username: String,
   pub password: String,
@@ -52,40 +49,17 @@ pub struct NewUser {
 }
 
 
-// Implement custom deserialization logic
-//impl NewUser {
-//	pub fn from_json(json: &str) -> Result<NewUser, HttpResponse> {
-//		match serde_json::from_str::<NewUser>(json) {
-//			Ok(user) => Ok(user),
-//			Err(_) => {
-//				let error_message = format!("Failed to deserialize JSON: {:?}", json);
-//				Err(HttpResponse::BadRequest().json(json!({
-//                    "success": false,
-//                    "error": error_message,
-//                })))
-//			}
-//		}
-//	}
-//}
 
 // Validate NewUser
 impl NewUser {
 	pub fn validate(&self) -> Result<NewUser, String> {
 		// Check if required fields are present
-		if self.username.is_empty() {
-			return Err("Username is required".to_string());
+		if self.username.len() < 5 {
+			return Err("Username must be 5 chars or more!".to_string());
 		}
 
-		if self.email.is_empty() {
-			return Err("Email is required".to_string());
-		}
-
-		if self.password.is_empty() {
-			return Err("Password is required".to_string());
-		}
-
-		if self.name.is_empty() {
-			return Err("Password is required".to_string());
+		if self.password.len() < 6 {
+			return Err("Password must be 6 chars or more!".to_string());
 		}
 
 		// If all checks pass, return the validated NewUser

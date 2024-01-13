@@ -42,7 +42,11 @@ async fn main() -> std::io::Result<()> {
 				.limit(4096)
 				.error_handler(|err, _req| {
 					// create custom error response
-					error::InternalError::from_response(err, HttpResponse::BadRequest().finish()).into()
+					error::InternalError::from_response(err, HttpResponse::BadRequest().json(json!({
+						"success": false,
+						"error_type": "deserialization",
+						"error": "The payload data could not be validated!",
+					}))).into()
 				}),
 			)
 			.service(routes::auth::auth_config())
