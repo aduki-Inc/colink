@@ -1,9 +1,11 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
+use crate::db::schema::users::dsl::*;
+use diesel::result::Error;
 use bcrypt::{hash, verify};
 use crate::db::connection::establish_connection;
 use crate::db::schema::users;
-use crate::models::users::{LoggedUser, NewUser, LoginData};
+use crate::models::users::{User, LoggedUser, NewUser, LoginData, Username};
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth_middleware::{email_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
@@ -11,8 +13,8 @@ use crate::middlewares::auth_middleware::{email_exists, username_exists, generat
 
 // Define handler for user registration with JSON data.
 pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUser>) -> impl Responder {
-	let mut counter = app_data.counter.lock().unwrap();
-	*counter += 1; // <- Access counters inside MutexGuard
+	// let mut counter = app_data.counter.lock().unwrap();
+	// *counter += 1; // <- Access counters inside MutexGuard
 
 	let mut conn = establish_connection(&app_data.config.database_url).await;
 
@@ -102,8 +104,8 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 // Define handler for user login
 pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData>) -> impl Responder {
 	// let mut conn = establish_connection().await;
-	let mut counter = app_data.counter.lock().unwrap();
-	*counter += 1; // <- Access counters inside MutexGuard
+	// let mut counter = app_data.counter.lock().unwrap();
+	// *counter += 1; // <- Access counters inside MutexGuard
 
 	let mut conn = establish_connection(&app_data.config.database_url).await;
 
@@ -177,6 +179,36 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 		}
 }
 
+
+// Check if username already exists
+pub async fn check_username(app_data: web::Data<AppState>, data: web::Json<Username>) -> impl Responder {
+	let mut conn = establish_connection(&app_data.config.database_url).await;
+
+	let username_data = data.into_inner();
+	
+	match users.filter(username.eq(username_data.username)).first::<User>(&mut conn) {
+    Ok(_) => {
+			return HttpResponse::Ok().json(json!({
+				"success": true,
+				"user_exists": true,
+				"message": "User with that username already exists"
+			}));
+		},
+    Err(Error::NotFound) => {
+			return HttpResponse::Ok().json(json!({
+				"success": true,
+				"user_exists": false,
+				"message": "User with that username does not exists"
+			}));
+		},
+    Err(_) => {
+			return HttpResponse::InternalServerError().json(json!({
+				"success": false,
+				"message": "Internal server error occurred!"
+			}));
+		},
+  }
+}
 
 pub async fn check_user(req: HttpRequest, _: JwtMiddleware) -> impl Responder {
 	let ext = req.extensions();
