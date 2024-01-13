@@ -1,6 +1,4 @@
-use actix_web::{error, web, HttpResponse, Responder, HttpRequest, HttpMessage};
-// use crate::db::schema::users::dsl::*;
-use serde::Deserialize;
+use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
 use bcrypt::{hash, verify};
 use crate::db::connection::establish_connection;
@@ -14,8 +12,6 @@ use crate::middlewares::auth_middleware::{email_exists, username_exists, generat
 pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
 
 	let mut conn = establish_connection().await;
-
-//  let registration_data = data.into_inner();
 
 	// Collect Registration data from the body
 	match data.validate() {
@@ -52,8 +48,20 @@ pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
 				),
 			};
 
+			let new_user = NewUser {
+				username: registration_data.username,
+				email: registration_data.email,
+				password: hashed_password,
+				name: registration_data.name,
+				active: None,
+				bio: None,
+				dob: None,
+				picture: None,
+				created_at: None
+			};
+
 			match diesel::insert_into(users::table)
-			.values(&registration_data)
+			.values(&new_user)
 			.execute(&mut conn)
 			{
 				Ok(_) => return HttpResponse::Ok().json(
@@ -78,7 +86,7 @@ pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
 			return HttpResponse::BadRequest().json(
 				json!({
 					"success": false,
-					"error": format!("Failed to register user: {}", err.to_string())
+					"error": err.to_string()
 				})
 			)
 		}
@@ -111,7 +119,7 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
 				Err(_) => {
 					return HttpResponse::InternalServerError().json(json!({
 						"success": false,
-						"message": "Error retrieving user data"
+						"message": "Error, User not found!"
 					}));
 				}
 		};
@@ -140,7 +148,7 @@ pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
 					Err(_) => {
 						HttpResponse::Unauthorized().json(json!({
 							"success": false,
-							"message": "JWT generation failed"
+							"message": "Failed, error occurred while generating auth token"
 						}))
 					}
 				}

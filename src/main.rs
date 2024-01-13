@@ -9,21 +9,10 @@ use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{error, http::header, web, App, HttpResponse, HttpServer};
 use serde_json::json;
-use std::sync::Arc;
 extern crate diesel_derive_enum;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-	let json_config = web::JsonConfig::default()
-		.limit(4096)
-		.error_handler(|err, _req| {
-			// create custom error response
-			error::InternalError::from_response(err, HttpResponse::BadRequest().json(json!({
-				"success": false,
-				"error_type": "deserialization",
-				"error": "The payload data cannot be validated!",
-			}))).into()
-		});
 
 	HttpServer::new(move || {
 		let cors = Cors::default()

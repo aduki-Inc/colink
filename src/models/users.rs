@@ -4,7 +4,7 @@ use crate::db::schema::users;
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::users)]
+#[diesel(table_name = users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct User {
@@ -23,7 +23,7 @@ pub struct User {
 
 
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::users)]
+#[diesel(table_name = users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct LoggedUser {
@@ -35,7 +35,7 @@ pub struct LoggedUser {
 }
 
 #[derive(Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::users)]
+#[diesel(table_name = users)]
 pub struct NewUser {
   pub username: String,
   pub password: String,

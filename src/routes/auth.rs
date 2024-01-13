@@ -1,4 +1,4 @@
-use actix_web::{web, Scope, HttpResponse};
+use actix_web::{web, Scope};
 use crate::handlers::auth_handlers::{register_user, login_user, check_user};
 
 pub fn auth_config() -> Scope {
