@@ -4,14 +4,17 @@ use bcrypt::{hash, verify};
 use crate::db::connection::establish_connection;
 use crate::db::schema::users;
 use crate::models::users::{LoggedUser, NewUser, LoginData};
+use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth_middleware::{email_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
 
 
 // Define handler for user registration with JSON data.
-pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
+pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUser>) -> impl Responder {
+	let mut counter = app_data.counter.lock().unwrap();
+	*counter += 1; // <- Access counters inside MutexGuard
 
-	let mut conn = establish_connection().await;
+	let mut conn = establish_connection(&app_data.config.database_url).await;
 
 	// Collect Registration data from the body
 	match data.validate() {
@@ -97,8 +100,12 @@ pub async fn register_user(data: web::Json<NewUser>) -> impl Responder {
 
 
 // Define handler for user login
-pub async fn login_user(data: web::Json<LoginData>) -> impl Responder {
-	let mut conn = establish_connection().await;
+pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData>) -> impl Responder {
+	// let mut conn = establish_connection().await;
+	let mut counter = app_data.counter.lock().unwrap();
+	*counter += 1; // <- Access counters inside MutexGuard
+
+	let mut conn = establish_connection(&app_data.config.database_url).await;
 
 	let login_data = data.into_inner();
 

@@ -1,4 +1,4 @@
-use actix_web::{error, HttpResponse, http::StatusCode};
+use actix_web::{error, HttpResponse};
 use serde_json::json;
 
 pub fn json_cfg(err: actix_web::error::JsonPayloadError) -> actix_web::Error {

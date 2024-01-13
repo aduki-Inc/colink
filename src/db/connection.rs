@@ -3,9 +3,8 @@ use diesel::prelude::*;
 use crate::configs::config::Config;
 
 // Establish database connection
-pub async fn establish_connection() -> PgConnection{
-  let config = Config::init();
+pub async fn establish_connection(database_url: &String) -> PgConnection{
 
-  PgConnection::establish(&config.database_url)
-    .unwrap_or_else(|_| panic!("Error connecting to {}", config.database_url))
+  PgConnection::establish(database_url)
+    .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }

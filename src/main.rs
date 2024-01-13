@@ -5,14 +5,22 @@ mod middlewares;
 mod models;
 mod routes;
 
+use std::sync::Mutex;
+
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
-use actix_web::{error, http::header, web, App, HttpResponse, HttpServer};
-use serde_json::json;
+use actix_web::{http::header, web, App, HttpServer};
 extern crate diesel_derive_enum;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
+	let app_data = web::Data::new(
+		configs::state::AppState { 
+			counter: Mutex::new(0),
+			config: configs::config::Config::init() 
+		}
+	);
 
 	HttpServer::new(move || {
 		let cors = Cors::default()
@@ -27,6 +35,7 @@ async fn main() -> std::io::Result<()> {
 			.supports_credentials();
 
 		App::new()
+			.app_data(app_data.clone())
 			.app_data(web::JsonConfig::default()
 				.limit(4096)
 				.error_handler(|err, _req| handlers::error_handlers::json_cfg(err)),
