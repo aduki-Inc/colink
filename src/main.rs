@@ -29,14 +29,7 @@ async fn main() -> std::io::Result<()> {
 		App::new()
 			.app_data(web::JsonConfig::default()
 				.limit(4096)
-				.error_handler(|err, _req| {
-					// create custom error response
-					error::InternalError::from_response(err, HttpResponse::BadRequest().json(json!({
-						"success": false,
-						"error_type": "deserialization",
-						"error": "The payload data could not be validated!",
-					}))).into()
-				}),
+				.error_handler(|err, _req| handlers::error_handlers::json_cfg(err)),
 			)
 			.service(routes::auth::auth_config())
 			//			.wrap(handlers::error_handlers::MyErrorHandler)
