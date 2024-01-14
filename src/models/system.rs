@@ -39,10 +39,6 @@ impl Section {
 			return Err("Username must be 3 chars or more!".to_string());
 		}
 
-		if self.password.len() < 6 {
-			return Err("Password must be 6 chars or more!".to_string());
-		}
-
 		// If all checks pass, return the validated NewUser
 		Ok(self.clone())
 	}
