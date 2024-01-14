@@ -136,7 +136,7 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 
 
 // Handler for updating existing section
-pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<NewSection>) -> impl Responder {
+pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<NewSection>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
