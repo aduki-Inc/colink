@@ -141,7 +141,6 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
 
-
   // Use the 'get' method to retrieve the 'Claims' value from extensions
 	if let Some(claims) = ext.get::<Claims>() {
 		// Access 'user' from 'Claims'
