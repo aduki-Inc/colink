@@ -169,8 +169,6 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
       }
     }
 
-
-
 	}
 	else {
 		return HttpResponse::BadRequest().json(
