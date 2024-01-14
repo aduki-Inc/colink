@@ -14,7 +14,7 @@ use jsonwebtoken::{encode, decode, DecodingKey, Validation, Header, Algorithm, E
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserClaims {
-  pub user_id: i32,
+  pub id: i32,
   pub username: String,
   pub email: String,
 }
@@ -66,9 +66,9 @@ pub fn generate_jwt(user_id: i32, other_username: &str, other_email: &str) -> Re
 
   // Create a UserClaims instance with user-specific data
   let user_claims = UserClaims {
-    user_id,
+    id: user_id,
     username: other_username.to_string(),
-    email: other_email.to_string(),
+    email: other_email.to_string()
   };
 
   // Create the claims for the JWT
