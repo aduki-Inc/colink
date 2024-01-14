@@ -13,6 +13,16 @@ pub fn section_exists(other_name: &str, conn: &mut PgConnection) -> bool {
   }
 }
 
+pub fn section_created(other_id: &i32, section: &Section, conn: &mut PgConnection) -> Result<Section, Error> {
+  match diesel::insert_into(sections::table)
+  .values(section)
+  .get_result::<Section>(conn)
+  {
+    Ok(returned_section) => retuned_section,
+    Err(err) => Err(err)
+  }
+}
+
 pub fn section_deleted(other_id: &i32, other_name: &str, conn: &mut PgConnection) -> Result<bool, Error> {
 
   match diesel::delete(sections.filter(id.eq(other_id).and(name.eq(other_name)))).execute(conn) {
