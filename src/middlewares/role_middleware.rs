@@ -1,5 +1,5 @@
 use crate::db::schema::sections::dsl::*;
-use crate::models::system::Section;
+use crate::models::system::{Section, NewSection};
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
@@ -20,5 +20,19 @@ pub fn section_deleted(other_id: &i32, other_name: &str, conn: &mut PgConnection
     Ok(0) => Ok(false),
     Err(err) => Err(err),
     Ok(_) => Ok(false)
+  }
+}
+
+pub fn section_updated(other_id: &i32, section_data: NewSection, conn: &mut PgConnection) -> Result<Section, Error> {
+
+  match diesel::update(sections.filter(id.eq(other_id)))
+  .set((
+    name.eq(section_data.name),
+    target_id.eq(section_data.target_id),
+    target_name.eq(section_data.target_name)
+  ))
+  .get_result(conn) {
+    Ok(section) => Ok(section),
+    Err(err) => Err(err)
   }
 }

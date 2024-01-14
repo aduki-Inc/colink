@@ -79,7 +79,7 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 }
 
 
-// Handler for deleting existing
+// Handler for deleting existing section
 pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<SectionIdentity>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
@@ -116,6 +116,54 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
           json!({
             "success": false,
             "message": "Internal server error has occurred!"
+          })
+        )
+      }
+    }
+
+
+
+	}
+	else {
+		return HttpResponse::BadRequest().json(
+      json!({
+        "success": false,
+        "error": "Authorization failure!"
+      })
+    )
+	}
+}
+
+
+// Handler for updating existing section
+pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<NewSection>) -> impl Responder {
+  //  Get extensions
+  let ext = req.extensions();
+  let mut conn = establish_connection(&app_data.config.database_url).await;
+
+
+  // Use the 'get' method to retrieve the 'Claims' value from extensions
+	if let Some(claims) = ext.get::<Claims>() {
+		// Access 'user' from 'Claims'
+		let _user = &claims.user;
+
+    // Check if the section already exists
+    match section_updated(&section_data.id, &section_data, &mut conn) {
+      Ok(updated_section) => {
+        return HttpResponse::Ok().json(
+          json!({
+            "success": true,
+            "section": updated_section,
+            "message": format!("Section: {} is updated successfully!", &section_data.name)
+          })
+        )
+      }
+
+      Err(_) => {
+        return HttpResponse::InternalServerError().json(
+          json!({
+            "success": false,
+            "message": format!("Internal server error has occurred while updating section: {}!", &section_data.name)
           })
         )
       }
