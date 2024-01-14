@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use chrono::{NaiveDateTime};
+use chrono::NaiveDateTime;
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
 use crate::models::custom_types::RoleType;
@@ -28,6 +28,24 @@ pub struct Section {
   pub target_name: String,
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>
+}
+
+
+// Validate Section Data
+impl Section {
+	pub fn validate(&self) -> Result<Section, String> {
+		// Check if required fields are present
+		if self.name.len() < 3 {
+			return Err("Username must be 3 chars or more!".to_string());
+		}
+
+		if self.password.len() < 6 {
+			return Err("Password must be 6 chars or more!".to_string());
+		}
+
+		// If all checks pass, return the validated NewUser
+		Ok(self.clone())
+	}
 }
 
 

@@ -62,7 +62,8 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 				bio: None,
 				dob: None,
 				picture: None,
-				created_at: None
+				created_at: None,
+				updated_at: None
 			};
 
 			match diesel::insert_into(users::table)
