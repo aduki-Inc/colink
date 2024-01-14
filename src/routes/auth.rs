@@ -9,7 +9,7 @@ pub fn auth_config() -> Scope {
     .route("/auth/check", web::post().to(check_user))
 
     // Sections
-    .route("/section/add", web::post().to(create_section))
+    .route("/section/add", web::put().to(create_section))
     .route("/section/remove", web::delete().to(delete_section))
-    .route("/section/edit", web::put().to(update_section))
+    .route("/section/edit", web::patch().to(update_section))
 }

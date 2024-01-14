@@ -23,13 +23,13 @@ pub fn section_deleted(other_id: &i32, other_name: &str, conn: &mut PgConnection
   }
 }
 
-pub fn section_updated(other_id: &i32, new_data: NewSection, conn: &mut PgConnection) -> Result<Section, Error> {
+pub fn section_updated(other_id: &i32, new_data: &Section, conn: &mut PgConnection) -> Result<Section, Error> {
 
   match diesel::update(sections.filter(id.eq(other_id)))
   .set((
-    name.eq(new_data.name),
-    target_id.eq(new_data.target_id),
-    target_name.eq(new_data.target_name)
+    name.eq(&new_data.name),
+    target_id.eq(&new_data.target_id),
+    target_name.eq(&new_data.target_name)
   ))
   .get_result(conn) {
     Ok(section) => Ok(section),

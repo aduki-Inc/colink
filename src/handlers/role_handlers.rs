@@ -37,11 +37,12 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 
         match diesel::insert_into(sections::table)
         .values(&section)
-        .execute(&mut conn)
+        .get_result::<Section>(&mut conn)
         {
-          Ok(_) => return HttpResponse::Ok().json(
+          Ok(section) => return HttpResponse::Ok().json(
             json!({
               "success": true,
+              "section": section,
               "message": "Section added successfully"
             })
           ),
@@ -136,7 +137,7 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 
 
 // Handler for updating existing section
-pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<NewSection>) -> impl Responder {
+pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<Section>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -146,14 +147,16 @@ pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 		// Access 'user' from 'Claims'
 		let _user = &claims.user;
 
+    let section = section_data.into_inner();
+
     // Check if the section already exists
-    match section_updated(&section_data.id, &section_data, &mut conn) {
+    match section_updated(&section.id, &section, &mut conn) {
       Ok(updated_section) => {
         return HttpResponse::Ok().json(
           json!({
             "success": true,
             "section": updated_section,
-            "message": format!("Section: {} is updated successfully!", &section_data.name)
+            "message": format!("Section: {} is updated successfully!", &section.name)
           })
         )
       }
@@ -162,7 +165,7 @@ pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
         return HttpResponse::InternalServerError().json(
           json!({
             "success": false,
-            "message": format!("Internal server error has occurred while updating section: {}!", &section_data.name)
+            "message": format!("Internal server error has occurred while updating section: {}!", &section.name)
           })
         )
       }
