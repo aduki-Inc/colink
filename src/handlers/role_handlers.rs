@@ -1,13 +1,13 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
-use crate::db::schema::users::dsl::*;
-use diesel::result::Error;
+// use crate::db::schema::users::dsl::*;
+// use diesel::result::Error;
 use crate::db::connection::establish_connection;
 use crate::db::schema::{users, roles, sections};
 use crate::models::{system::{Colink, Section, NewSection, Role}, users::User};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth_middleware::{JwtMiddleware, Claims};
+use crate::middlewares::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::section_exists };
 
 
 // Define handler for user registration with JSON data.
@@ -20,11 +20,21 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
   // Use the 'get' method to retrieve the 'Claims' value from extensions
 	if let Some(claims) = ext.get::<Claims>() {
 		// Access 'user' from 'Claims'
-		let user_info = &claims.user;
+		let _user = &claims.user;
 
     // Collect Registration data from the body
     match section_data.validate() {
       Ok(section) => {
+        // Check if the section already exists
+        if section_exists(&section.name, &mut conn) {
+          return HttpResponse::Conflict().json(
+            json!({
+              "success": false,
+              "message": "Section already exists"
+            })
+          );
+        }
+
         match diesel::insert_into(sections::table)
         .values(&section)
         .execute(&mut conn)
