@@ -1,4 +1,5 @@
 use crate::db::schema::sections::dsl::*;
+use crate::db::schema::sections;
 use crate::models::system::{Section, NewSection};
 use diesel::prelude::*;
 use diesel::result::Error;
@@ -10,16 +11,6 @@ pub fn section_exists(other_name: &str, conn: &mut PgConnection) -> bool {
     Ok(_) => true,
     Err(Error::NotFound) => false,
     Err(_) => false,
-  }
-}
-
-pub fn section_created(other_id: &i32, section: &Section, conn: &mut PgConnection) -> Result<Section, Error> {
-  match diesel::insert_into(sections::table)
-  .values(section)
-  .get_result::<Section>(conn)
-  {
-    Ok(returned_section) => retuned_section,
-    Err(err) => Err(err)
   }
 }
 
