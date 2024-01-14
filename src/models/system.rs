@@ -17,10 +17,10 @@ pub struct Colink {
   pub updated_at: Option<NaiveDateTime>
 }
 
+#[derive(Insertable, Clone, Serialize, Deserialize)]
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
 pub struct Section {
   pub id: i32,
   pub name: String,
@@ -39,7 +39,7 @@ impl Section {
 			return Err("Username must be 3 chars or more!".to_string());
 		}
 
-		// If all checks pass, return the validated NewUser
+		// If all checks pass, return the validated Section
 		Ok(self.clone())
 	}
 }
