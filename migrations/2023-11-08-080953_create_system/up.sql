@@ -26,7 +26,7 @@ create table if not exists co_link (
 -- Create sections table
 create table if not exists sections (
   id serial primary key,
-  name varchar(500) not null,
+  name varchar(500) unique not null,
   target_id integer not null,
   target_name varchar(500) not null,
   created_at timestamp with time zone default current_timestamp,

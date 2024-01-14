@@ -31,15 +31,26 @@ pub struct Section {
 }
 
 
+#[derive(Insertable, Clone, Serialize, Deserialize)]
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::db::schema::sections)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct NewSection {
+  pub name: String,
+  pub target_id: i32,
+  pub target_name: String
+}
+
+
 // Validate Section Data
-impl Section {
-	pub fn validate(&self) -> Result<Section, String> {
+impl NewSection {
+	pub fn validate(&self) -> Result<NewSection, String> {
 		// Check if required fields are present
 		if self.name.len() < 3 {
-			return Err("Username must be 3 chars or more!".to_string());
+			return Err("Section name must be 3 chars or more!".to_string());
 		}
 
-		// If all checks pass, return the validated Section
+		// If all checks pass, return the validated NewSection
 		Ok(self.clone())
 	}
 }

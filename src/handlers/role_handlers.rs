@@ -4,14 +4,14 @@ use crate::db::schema::users::dsl::*;
 use diesel::result::Error;
 use crate::db::connection::establish_connection;
 use crate::db::schema::{users, roles, sections};
-use crate::models::{system::{Colink, Section, Role},users::{User, LoggedUser, NewUser, LoginData, Username}};
+use crate::models::{system::{Colink, Section, NewSection, Role}, users::User};
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth_middleware::{JwtMiddleware, Claims};
 
 
 // Define handler for user registration with JSON data.
-pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<Section>) -> impl Responder {
+pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<NewSection>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -25,18 +25,8 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
     // Collect Registration data from the body
     match section_data.validate() {
       Ok(section) => {
-        // Check if the email already exists
-        let new_section = Section {
-          id: section.id,
-          name: section.name,
-          target_id: section.target_id,
-          target_name: section.target_name,
-          created_at: None,
-          updated_at: None
-        };
-
         match diesel::insert_into(sections::table)
-        .values(&new_section)
+        .values(&section)
         .execute(&mut conn)
         {
           Ok(_) => return HttpResponse::Ok().json(
