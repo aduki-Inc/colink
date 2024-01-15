@@ -2,6 +2,7 @@ use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
+// use crate::db::schema::RoleType;
 use crate::models::custom_types::RoleType;
 
 #[derive(Queryable, Selectable)]
@@ -71,8 +72,8 @@ pub struct Role {
   pub id: i32,
   pub section: i32,
   pub base: RoleType,
-  pub name: String,
   pub author: i32,
+  pub name: String,
   pub privileges: Option<Json>,
   pub expiry: Option<NaiveDateTime>,
   pub created_at: Option<NaiveDateTime>,
@@ -83,8 +84,8 @@ pub struct Role {
 pub struct NewRole {
   pub section: i32,
   pub base: RoleType,
-  pub name: String,
   pub author: i32,
+  pub name: String,
   pub privileges: Option<Json>,
   pub expiry: Option<i32>,
 }
@@ -109,15 +110,14 @@ impl NewRole {
 }
 
 
-#[derive(Queryable, Selectable, Insertable)]
+#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::roles)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
 pub struct InsertableRole {
   pub section: i32,
   pub base: RoleType,
-  pub name: String,
   pub author: i32,
+  pub name: String,
   pub privileges: Option<Json>,
   pub expiry: Option<NaiveDateTime>,
 }

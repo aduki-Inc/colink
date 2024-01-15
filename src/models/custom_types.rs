@@ -1,3 +1,11 @@
+// use diesel::backend::Backend;
+// use diesel::expression::AsExpression;
+// use diesel::deserialize::{self, FromSql};
+// use diesel::pg::Pg;
+// use std::io::Write;
+// use diesel::serialize::{self, Output, ToSql};
+// use diesel::sql_types::Text;
+// use diesel::FromSqlRow;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
 
@@ -26,8 +34,7 @@ pub enum ProposalType {
   Other
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-#[derive(Debug, DbEnum)]
+#[derive(Clone, Serialize, Deserialize, Debug, DbEnum)]
 #[ExistingTypePath = "crate::db::schema::sql_types::RoleType"]
 pub enum RoleType {
   Owner,
