@@ -1,5 +1,5 @@
 use actix_web::{web, Scope};
-use crate::handlers::{ auth_handlers::* , section_handlers::* };
+use crate::handlers::auth::{ auth_handlers::* , section_handlers::* };
 
 pub fn auth_config() -> Scope {
   web::scope("/api/v1")

@@ -8,7 +8,7 @@ use crate::db::schema::users;
 use crate::models::users::{User, LoggedUser, NewUser, LoginData, Username};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth_middleware::{email_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
+use crate::middlewares::auth::auth_middleware::{email_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
 
 
 // Define handler for user registration with JSON data.
