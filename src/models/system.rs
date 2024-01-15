@@ -76,6 +76,7 @@ pub struct Role {
   pub name: String,
   pub author: i32,
   pub privileges: Option<Json>,
+  pub expiry: NaiveDateTime,
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>
 }
@@ -89,5 +90,6 @@ pub struct NewRole {
   pub type_: RoleType,
   pub name: String,
   pub author: i32,
-  pub privileges: Option<Json>
+  pub privileges: Option<Json>,
+  pub expiry: i32,
 }

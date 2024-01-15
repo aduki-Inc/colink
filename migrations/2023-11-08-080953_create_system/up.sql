@@ -6,8 +6,9 @@ begin
   if not exists (select 1 from pg_type where typname = 'role_type') then
     -- Create the enum type(role_type)
     create type role_type as enum (
-      'dev',
-      'super',
+      'owner',
+      'admin',
+      'period',
       'user'
     );
   end if;
@@ -41,7 +42,7 @@ create table if not exists roles (
   author integer references users(id) not null,
   name varchar(500),
   privileges json,
-  expiry timestamp with time zone not null,
+  expiry timestamp with time zone,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );
@@ -52,4 +53,3 @@ select diesel_manage_updated_at('co_link');
 select diesel_manage_updated_at('sections');
 
 select diesel_manage_updated_at('roles');
-
