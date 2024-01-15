@@ -37,8 +37,5 @@ create table if not exists institutions (
 
 
 -- Create a trigger to run everytime field is updated
-create or replace trigger institutions_update_updated_at
-after update on institutions
-for each row
-execute procedure update_updated_at();
+select diesel_manage_updated_at('institutions');
 

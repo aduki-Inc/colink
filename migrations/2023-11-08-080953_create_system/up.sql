@@ -46,17 +46,9 @@ create table if not exists roles (
 );
 
 -- Create a trigger to run everytime field is updated
-create or replace trigger co_link_update_updated_at
-after update on co_link
-for each row
-execute procedure update_updated_at();
+select diesel_manage_updated_at('co_link');
 
-create or replace trigger sections_update_updated_at
-after update on sections
-for each row
-execute procedure update_updated_at();
+select diesel_manage_updated_at('sections');
 
-create or replace trigger roles_update_updated_at
-after update on roles
-for each row
-execute procedure update_updated_at();
+select diesel_manage_updated_at('roles');
+

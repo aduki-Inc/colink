@@ -52,13 +52,5 @@ create table if not exists proposals(
 
 
 -- Create a trigger to run everytime field is updated
-
-create or replace trigger projects_update_updated_at
-after update on projects
-for each row
-execute procedure update_updated_at();
-
-create or replace trigger templates_update_updated_at
-after update on templates
-for each row
-execute procedure update_updated_at();
+select diesel_manage_updated_at('projects');
+select diesel_manage_updated_at('templates');
