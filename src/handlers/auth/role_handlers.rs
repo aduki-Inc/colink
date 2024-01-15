@@ -4,13 +4,13 @@ use diesel::prelude::*;
 // use diesel::result::Error;
 use crate::db::connection::establish_connection;
 use crate::db::schema::{users, roles, sections};
-use crate::models::{system::{Role, NewRole}, users::User};
+use crate::models::{system::{Role, NewRole, InsertableRole, RoleId}, users::User};
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::* };
 
 
-// Handler for creating new section
+// Handler for creating new Role
 pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<NewRole>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
@@ -22,28 +22,37 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 		// Access 'user' from 'Claims'
 		let _user = &claims.user;
 
-    // Collect Registration data from the body
+    // Collect Role data from the body
     match role_data.validate() {
       Ok(role) => {
-        // Check if the section already exists
+        // Check if the Role already exists
         if role_exists(&role.name, &role.section, &role.author, &mut conn) {
           return HttpResponse::Conflict().json(
             json!({
               "success": false,
-              "message": "Section already exists"
+              "message": "Same role already exists!"
             })
           );
         }
 
-        match diesel::insert_into(sections::table)
-        .values(&section)
-        .get_result::<Section>(&mut conn)
+        let new_role = InsertableRole {
+          section: &role.section,
+          type_: &role.type_,
+          name: &role.name,
+          author: &role.author,
+          privileges: &role.privileges,
+          expiry: None,
+        };
+
+        match diesel::insert_into(roles::table)
+        .values(&new_role)
+        .get_result::<Role>(&mut conn)
         {
-          Ok(section) => return HttpResponse::Ok().json(
+          Ok(role) => return HttpResponse::Ok().json(
             json!({
               "success": true,
-              "section": section,
-              "message": "Section added successfully"
+              "role": role,
+              "message": format!("Role - ({}) - was created successfully", &role.name)
             })
           ),
           Err(err) => {
@@ -51,7 +60,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
             return	HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": format!("Failed to add section: {}", err.to_string())
+                "message": format!("Failed to create the role: {}", err.to_string())
               })
             )
           }
@@ -80,8 +89,8 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 }
 
 
-// Handler for deleting existing section
-pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<SectionIdentity>) -> impl Responder {
+// Handler for deleting existing role
+pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<RoleId>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -92,13 +101,13 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 		// Access 'user' from 'Claims'
 		let _user = &claims.user;
 
-    // Check if the section already exists
-    match section_deleted(&section_data.id, &section_data.name, &mut conn) {
+    // Attempt to delete the role
+    match role_deleted(&role_data.id, &mut conn) {
       Ok(true) => {
         return HttpResponse::Ok().json(
           json!({
             "success": true,
-            "message": format!("Section: {} is deleted successfully!", &section_data.name)
+            "message": format!("Role - {} - is deleted successfully!", &role_data.name)
           })
         )
       }
@@ -107,7 +116,7 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
         return HttpResponse::NotFound().json(
           json!({
             "success": false,
-            "message": format!("Section: {} does not exists!", &section_data.name)
+            "message": "Role does not exists!"
           })
         )
       }
@@ -122,8 +131,6 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
       }
     }
 
-
-
 	}
 	else {
 		return HttpResponse::BadRequest().json(
@@ -136,7 +143,7 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 }
 
 
-// Handler for updating existing section
+// Handler for updating existing role
 pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<Section>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();

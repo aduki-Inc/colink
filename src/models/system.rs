@@ -103,7 +103,7 @@ impl NewRole {
 		}
 
     if self.expiry {
-      if self.expiry <=0 && self.expiry > 180 {
+      if self.expiry <= Some(0) || self.expiry > Some(180) {
         return Err("Duration must be between 1 and 180 days!".to_string())
       }
     }
@@ -111,4 +111,28 @@ impl NewRole {
 		// If all checks pass, return the validated NewSection
 		Ok(self.clone())
 	}
+}
+
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::db::schema::roles)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Serialize, Deserialize)]
+pub struct InsertableRole {
+  pub section: i32,
+  pub type_: RoleType,
+  pub name: String,
+  pub author: i32,
+  pub privileges: Option<Json>,
+  pub expiry: Option<NaiveDateTime>,
+}
+
+
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::db::schema::roles)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Serialize, Deserialize)]
+pub struct RoleId {
+  pub id: i32
 }

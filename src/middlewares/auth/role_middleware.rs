@@ -6,8 +6,8 @@ use diesel::result::Error;
 use diesel::pg::PgConnection;
 
 
-pub fn role_exists(other_name: &str, section_id: &i32, user_id: i32, conn: &mut PgConnection) -> Result<bool, Error> {
-  match roles.filter(name.eq(other_name).and(section.eq(section_id)).and(author.eq(user_id))).first::<Role>(conn) {
+pub fn role_exists(other_type: &str, section_id: &i32, user_id: i32, conn: &mut PgConnection) -> Result<bool, Error> {
+  match roles.filter(type_.eq(other_type).and(section.eq(section_id)).and(author.eq(user_id))).first::<Role>(conn) {
     Ok(_) => Ok(true),
     Err(Error::NotFound) => Ok(false),
     Err(_) => Err(_),
