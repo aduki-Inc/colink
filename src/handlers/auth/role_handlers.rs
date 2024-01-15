@@ -3,8 +3,8 @@ use diesel::prelude::*;
 // use crate::db::schema::users::dsl::*;
 // use diesel::result::Error;
 use crate::db::connection::establish_connection;
-use crate::db::schema::{users, roles, sections};
-use crate::models::{system::{Role, NewRole, InsertableRole, RoleId}, users::User};
+use crate::db::schema::roles;
+use crate::models::system::{Role, NewRole, InsertableRole, RoleId};
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::* };
@@ -26,41 +26,54 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
     match role_data.validate() {
       Ok(role) => {
         // Check if the Role already exists
-        if role_exists(&role.name, &role.section, &role.author, &mut conn) {
-          return HttpResponse::Conflict().json(
-            json!({
-              "success": false,
-              "message": "Same role already exists!"
-            })
-          );
-        }
+        match role_exists(&role.name, &role.section, &role.author, &mut conn) {
+          Ok(true) => {
+              return HttpResponse::Conflict().json(
+                json!({
+                  "success": false,
+                  "message": "Same role already exists!"
+                })
+              );
+            }
+          Ok(false) => {
+            // No existing role - creating one
+            let new_role = InsertableRole {
+              section: role.section,
+              type_: role.type_,
+              name: role.name,
+              author: role.author,
+              privileges: role.privileges,
+              expiry: None,
+            };
+    
+            match diesel::insert_into(roles::table)
+            .values(&new_role)
+            .get_result::<Role>(&mut conn)
+            {
+              Ok(role) => return HttpResponse::Ok().json(
+                json!({
+                  "success": true,
+                  "role": role,
+                  "message": format!("Role - ({}) - was created successfully", &role.name)
+                })
+              ),
+              Err(err) => {
+                // Handle the database error and return an error response
+                return	HttpResponse::InternalServerError().json(
+                  json!({
+                    "success": false,
+                    "message": format!("Failed to create the role: {}", err.to_string())
+                  })
+                )
+              }
+            }
 
-        let new_role = InsertableRole {
-          section: &role.section,
-          type_: &role.type_,
-          name: &role.name,
-          author: &role.author,
-          privileges: &role.privileges,
-          expiry: None,
-        };
-
-        match diesel::insert_into(roles::table)
-        .values(&new_role)
-        .get_result::<Role>(&mut conn)
-        {
-          Ok(role) => return HttpResponse::Ok().json(
-            json!({
-              "success": true,
-              "role": role,
-              "message": format!("Role - ({}) - was created successfully", &role.name)
-            })
-          ),
-          Err(err) => {
-            // Handle the database error and return an error response
-            return	HttpResponse::InternalServerError().json(
+          },
+          Err(_) => {
+            return HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": format!("Failed to create the role: {}", err.to_string())
+                "message": "Internal server error has ocurred!"
               })
             )
           }
@@ -107,7 +120,7 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
         return HttpResponse::Ok().json(
           json!({
             "success": true,
-            "message": format!("Role - {} - is deleted successfully!", &role_data.name)
+            "message": "Role is deleted successfully!"
           })
         )
       }

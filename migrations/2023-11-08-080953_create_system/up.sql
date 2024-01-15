@@ -37,10 +37,10 @@ create table if not exists sections (
 -- Create roles table
 create table if not exists roles (
   id serial primary key,
-  section integer references sections(id),
-  type role_type not null,
+  section integer references sections(id) not null,
+  base role_type not null,
   author integer references users(id) not null,
-  name varchar(500),
+  name varchar(500) not null,
   privileges json,
   expiry timestamp with time zone,
   created_at timestamp with time zone default current_timestamp,

@@ -91,12 +91,11 @@ diesel::table! {
 
     roles (id) {
         id -> Int4,
-        section -> Nullable<Int4>,
-        #[sql_name = "type"]
-        type_ -> RoleType,
+        section -> Int4,
+        base -> RoleType,
         author -> Int4,
         #[max_length = 500]
-        name -> Nullable<Varchar>,
+        name -> Varchar,
         privileges -> Nullable<Json>,
         expiry -> Nullable<Timestamptz>,
         created_at -> Nullable<Timestamptz>,

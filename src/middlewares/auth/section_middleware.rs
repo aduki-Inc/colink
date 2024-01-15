@@ -1,6 +1,6 @@
 use crate::db::schema::sections::dsl::*;
-use crate::db::schema::sections;
-use crate::models::system::{Section, NewSection};
+// use crate::db::schema::sections;
+use crate::models::system::Section;
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;

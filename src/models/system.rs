@@ -72,7 +72,7 @@ pub struct SectionIdentity {
 pub struct Role {
   pub id: i32,
   pub section: i32,
-  pub type_: RoleType,
+  pub base: RoleType,
   pub name: String,
   pub author: i32,
   pub privileges: Option<Json>,
@@ -81,13 +81,10 @@ pub struct Role {
   pub updated_at: Option<NaiveDateTime>
 }
 
-#[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::roles)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct NewRole {
   pub section: i32,
-  pub type_: RoleType,
+  pub base: RoleType,
   pub name: String,
   pub author: i32,
   pub privileges: Option<Json>,
@@ -102,7 +99,7 @@ impl NewRole {
 			return Err("Role name must be 3 chars or more!".to_string());
 		}
 
-    if self.expiry {
+    if self.expiry.is_some() {
       if self.expiry <= Some(0) || self.expiry > Some(180) {
         return Err("Duration must be between 1 and 180 days!".to_string())
       }
@@ -114,13 +111,13 @@ impl NewRole {
 }
 
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::db::schema::roles)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct InsertableRole {
   pub section: i32,
-  pub type_: RoleType,
+  pub base: RoleType,
   pub name: String,
   pub author: i32,
   pub privileges: Option<Json>,
