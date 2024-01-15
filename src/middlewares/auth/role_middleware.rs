@@ -1,22 +1,22 @@
 use crate::db::schema::sections::dsl::*;
-use crate::db::schema::sections;
+use crate::db::schema::roles;
 use crate::models::system::{Section, Role, NewRole};
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
 
 
-pub fn role_exists(other_name: &str, conn: &mut PgConnection) -> bool {
-  match sections.filter(name.eq(other_name)).first::<Section>(conn) {
-    Ok(_) => true,
-    Err(Error::NotFound) => false,
-    Err(_) => false,
+pub fn role_exists(other_name: &str, section_id: &i32, user_id: i32, conn: &mut PgConnection) -> Result<bool, Error> {
+  match roles.filter(name.eq(other_name).and(section.eq(section_id)).and(author.eq(user_id))).first::<Role>(conn) {
+    Ok(_) => Ok(true),
+    Err(Error::NotFound) => Ok(false),
+    Err(_) => Err(_),
   }
 }
 
-pub fn section_deleted(other_id: &i32, other_name: &str, conn: &mut PgConnection) -> Result<bool, Error> {
+pub fn role_deleted(other_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
 
-  match diesel::delete(sections.filter(id.eq(other_id).and(name.eq(other_name)))).execute(conn) {
+  match diesel::delete(roles.filter(id.eq(other_id))).execute(conn) {
     Ok(1) => Ok(true),
     Ok(0) => Ok(false),
     Err(err) => Err(err),
@@ -24,16 +24,16 @@ pub fn section_deleted(other_id: &i32, other_name: &str, conn: &mut PgConnection
   }
 }
 
-pub fn section_updated(other_id: &i32, new_data: &Section, conn: &mut PgConnection) -> Result<Section, Error> {
+pub fn role_updated(other_id: &i32, new_data: &Role, conn: &mut PgConnection) -> Result<Role, Error> {
 
-  match diesel::update(sections.filter(id.eq(other_id)))
+  match diesel::update(role.filter(id.eq(other_id)))
   .set((
     name.eq(&new_data.name),
-    target_id.eq(&new_data.target_id),
-    target_name.eq(&new_data.target_name)
+    type_.eq(&new_data.type_),
+    privileges.eq(&new_data.privileges)
   ))
   .get_result(conn) {
-    Ok(section) => Ok(section),
+    Ok(role) => Ok(role),
     Err(err) => Err(err)
   }
 }

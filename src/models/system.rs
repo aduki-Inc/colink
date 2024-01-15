@@ -71,7 +71,7 @@ pub struct SectionIdentity {
 #[derive(Serialize, Deserialize)]
 pub struct Role {
   pub id: i32,
-  pub section: Option<i32>,
+  pub section: i32,
   pub type_: RoleType,
   pub name: String,
   pub author: i32,
@@ -86,7 +86,7 @@ pub struct Role {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct NewRole {
-  pub section: Option<i32>,
+  pub section: i32,
   pub type_: RoleType,
   pub name: String,
   pub author: i32,

@@ -98,7 +98,7 @@ diesel::table! {
         #[max_length = 500]
         name -> Nullable<Varchar>,
         privileges -> Nullable<Json>,
-        expiry -> Timestamptz,
+        expiry -> Nullable<Timestamptz>,
         created_at -> Nullable<Timestamptz>,
         updated_at -> Nullable<Timestamptz>,
     }
