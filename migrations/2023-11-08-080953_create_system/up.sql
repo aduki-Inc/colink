@@ -8,8 +8,8 @@ begin
     create type role_type as enum (
       'owner',
       'admin',
-      'period',
-      'user'
+      'staff',
+      'period'
     );
   end if;
 end $$;
