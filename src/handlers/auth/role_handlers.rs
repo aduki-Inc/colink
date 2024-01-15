@@ -37,7 +37,9 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
               );
             }
           Ok(false) => {
-            let mut expiry_date: Option<NaiveDateTime> = if role.expiry.is_some() {
+
+            // If expiry days are supplied convert to future date from today
+            let expiry_date: Option<NaiveDateTime> = if role.expiry.is_some() {
               let days_to_be_added: i64 = role.expiry.unwrap_or(0);
               let initial_date = Utc::now();
 
