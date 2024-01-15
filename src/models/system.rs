@@ -93,3 +93,22 @@ pub struct NewRole {
   pub privileges: Option<Json>,
   pub expiry: Option<i32>,
 }
+
+// Validate Section Data
+impl NewRole {
+	pub fn validate(&self) -> Result<NewRole, String> {
+		// Check if required fields are present
+		if self.name.len() < 3 {
+			return Err("Role name must be 3 chars or more!".to_string());
+		}
+
+    if self.expiry {
+      if self.expiry <=0 && self.expiry > 180 {
+        return Err("Duration must be between 1 and 180 days!".to_string())
+      }
+    }
+
+		// If all checks pass, return the validated NewSection
+		Ok(self.clone())
+	}
+}
