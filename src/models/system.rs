@@ -87,7 +87,7 @@ pub struct NewRole {
   pub author: i32,
   pub name: String,
   pub privileges: Option<Json>,
-  pub expiry: Option<i32>,
+  pub expiry: Option<i64>,
 }
 
 // Validate Section Data

@@ -2,6 +2,7 @@ use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
 // use crate::db::schema::users::dsl::*;
 // use diesel::result::Error;
+use chrono::{Utc, Duration, NaiveDateTime};
 use crate::db::connection::establish_connection;
 use crate::db::schema::roles;
 use crate::models::system::{Role, NewRole, InsertableRole, RoleId};
@@ -36,6 +37,18 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
               );
             }
           Ok(false) => {
+            let mut expiry_date: Option<NaiveDateTime> = if role.expiry.is_some() {
+              let days_to_be_added: i64 = role.expiry.unwrap_or(0);
+              let initial_date = Utc::now();
+
+              let future_date = initial_date + Duration::days(days_to_be_added);
+
+              Some(future_date.naive_utc())
+            } else {
+              None
+            };
+
+
             // No existing role - creating one
             let new_role = InsertableRole {
               section: role.section,
@@ -43,7 +56,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
               name: role.name,
               author: role.author,
               privileges: role.privileges,
-              expiry: None,
+              expiry: expiry_date,
             };
     
             match diesel::insert_into(roles::table)
