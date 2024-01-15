@@ -51,7 +51,7 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
             return	HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "error": format!("Failed to add section: {}", err.to_string())
+                "message": format!("Failed to add section: {}", err.to_string())
               })
             )
           }
@@ -62,7 +62,7 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
         return HttpResponse::BadRequest().json(
           json!({
             "success": false,
-            "error": err.to_string()
+            "message": err.to_string()
           })
         )
       }
@@ -73,7 +73,7 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 		return HttpResponse::BadRequest().json(
       json!({
         "success": false,
-        "error": "Authorization failure!"
+        "message": "Authorization failure!"
       })
     )
 	}
@@ -129,7 +129,7 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 		return HttpResponse::BadRequest().json(
       json!({
         "success": false,
-        "error": "Authorization failure!"
+        "message": "Authorization failure!"
       })
     )
 	}
@@ -176,7 +176,7 @@ pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 		return HttpResponse::BadRequest().json(
       json!({
         "success": false,
-        "error": "Authorization failure!"
+        "message": "Authorization failure!"
       })
     )
 	}

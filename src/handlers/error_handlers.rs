@@ -7,7 +7,7 @@ pub fn json_cfg(err: actix_web::error::JsonPayloadError) -> actix_web::Error {
 		HttpResponse::BadRequest().json(json!({
 		"success": false,
 		"error_type": "deserialization",
-		"error": "The payload data could not be validated!",
+		"message": "The payload data could not be validated!",
 		}))
 	).into()
 }

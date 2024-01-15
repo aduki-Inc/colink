@@ -48,7 +48,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 				Err(_) => return HttpResponse::InternalServerError().json(
 					json!({
 						"success": false,
-						"error": "Password hashing failed"
+						"message": "Password hashing failed"
 					})
 				),
 			};
@@ -81,7 +81,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 					return	HttpResponse::InternalServerError().json(
 						json!({
 							"success": false,
-							"error": format!("Failed to register user: {}", err.to_string())
+							"message": format!("Failed to register user: {}", err.to_string())
 						})
 					)
 				}
@@ -92,7 +92,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 			return HttpResponse::BadRequest().json(
 				json!({
 					"success": false,
-					"error": err.to_string()
+					"message": err.to_string()
 				})
 			)
 		}
