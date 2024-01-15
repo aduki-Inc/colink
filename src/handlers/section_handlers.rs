@@ -7,7 +7,7 @@ use crate::db::schema::{users, roles, sections};
 use crate::models::{system::{Colink, Section, NewSection, SectionIdentity, Role}, users::User};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::* };
+use crate::middlewares::{auth_middleware::{JwtMiddleware, Claims}, section_middleware::* };
 
 
 // Handler for creating new section
