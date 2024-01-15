@@ -41,6 +41,7 @@ create table if not exists roles (
   author integer references users(id) not null,
   name varchar(500),
   privileges json,
+  expiry timestamp with time zone not null,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );

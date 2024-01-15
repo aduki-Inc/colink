@@ -73,7 +73,21 @@ pub struct Role {
   pub id: i32,
   pub section: Option<i32>,
   pub type_: RoleType,
+  pub name: String,
+  pub author: i32,
   pub privileges: Option<Json>,
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>
+}
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::db::schema::roles)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Serialize, Deserialize)]
+pub struct NewRole {
+  pub section: Option<i32>,
+  pub type_: RoleType,
+  pub name: String,
+  pub author: i32,
+  pub privileges: Option<Json>
 }
