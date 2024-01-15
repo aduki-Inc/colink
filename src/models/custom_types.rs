@@ -1,8 +1,7 @@
 use diesel_derive_enum::DbEnum;
-use diesel::Selectable;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Selectable, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 #[derive(Debug, DbEnum)]
 #[ExistingTypePath = "crate::db::schema::sql_types::InstitutionType"]
 pub enum InstitutionType {
@@ -14,7 +13,7 @@ pub enum InstitutionType {
   Other,
 }
 
-#[derive(Queryable, Selectable, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 #[derive(Debug, DbEnum)]
 #[ExistingTypePath = "crate::db::schema::sql_types::ProposalType"]
 pub enum ProposalType {
@@ -27,7 +26,7 @@ pub enum ProposalType {
   Other
 }
 
-#[derive(Queryable, Selectable, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 #[derive(Debug, DbEnum)]
 #[ExistingTypePath = "crate::db::schema::sql_types::RoleType"]
 pub enum RoleType {

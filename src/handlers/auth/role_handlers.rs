@@ -26,7 +26,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
     match role_data.validate() {
       Ok(role) => {
         // Check if the Role already exists
-        match role_exists(&role.name, &role.section, &role.author, &mut conn) {
+        match role_exists(&role.author, &role.section, &mut conn) {
           Ok(true) => {
               return HttpResponse::Conflict().json(
                 json!({
@@ -39,7 +39,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
             // No existing role - creating one
             let new_role = InsertableRole {
               section: role.section,
-              type_: role.type_,
+              base: role.base,
               name: role.name,
               author: role.author,
               privileges: role.privileges,

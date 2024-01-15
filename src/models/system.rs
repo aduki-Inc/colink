@@ -17,8 +17,7 @@ pub struct Colink {
   pub updated_at: Option<NaiveDateTime>
 }
 
-#[derive(Insertable, Clone, Serialize, Deserialize)]
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Section {
@@ -65,10 +64,9 @@ pub struct SectionIdentity {
 }
 
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::roles)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
 pub struct Role {
   pub id: i32,
   pub section: i32,
