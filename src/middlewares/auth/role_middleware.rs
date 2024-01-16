@@ -28,6 +28,7 @@ pub fn privileges_updated(new_data: &RolePrivileges, conn: &mut PgConnection) ->
 
   match diesel::update(roles.filter(id.eq(new_data.id)))
   .set((
+    base.eq(&new_data.base),
     privileges.eq(&new_data.privileges)
   ))
   .get_result(conn) {
