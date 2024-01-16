@@ -1,7 +1,6 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
-// use crate::db::schema::users::dsl::*;
-use diesel::result::Error;
+use diesel::result::{Error, DatabaseErrorKind};
 use chrono::{Utc, Duration, NaiveDateTime};
 use crate::db::connection::establish_connection;
 use crate::db::schema::roles;
@@ -72,7 +71,15 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
                   "message": format!("Role - ({}) - was created successfully", &role.name)
                 })
               ),
-              Err(err) => {
+              Err(Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _)) => {
+                return HttpResponse::NotFound().json(
+                  json!({
+                    "success": false,
+                    "message": "Section or User does not exists"
+                  })
+                )
+              }
+              Err(_) => {
                 // Handle the database error and return an error response
                 return	HttpResponse::InternalServerError().json(
                   json!({
@@ -94,7 +101,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
           }
         }
       }
-      Err(err) => {
+      Err(_) => {
         // Directly return the HttpResponse
         return HttpResponse::BadRequest().json(
           json!({
@@ -184,18 +191,46 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
 
     let role_expiry = role_data.into_inner();
 
-    // Check if the section already exists
-    match expiry_updated(&role_expiry, &mut conn) {
-      Ok(updated_role) => {
-        return HttpResponse::Ok().json(
-          json!({
-            "success": true,
-            "role": updated_role,
-            "message": format!("Expiry for Role - ({}) - is updated successfully!", &updated_role.name)
-          })
-        )
-      }
+    // println!("{}", role_expiry.id);
 
+    match roles.filter(id.eq(role_expiry.id)).first::<Role>(conn) {
+      Ok(mut role) => {
+        // If expiry days exists add the supplied number/ else supplied convert to future date from today
+        if role.expiry.is_some() {
+          let date_time = role.expiry.unwrap() + duration;
+          role.expiry = Some(date_time);
+        } else {
+          let initial_date = Utc::now();
+  
+          let future_date = initial_date + duration;
+  
+          role.expiry = Some(future_date.naive_utc())
+        };
+
+
+        // Check if the section already exists
+        match expiry_updated(&role, &mut conn) {
+          Ok(updated_role) => {
+            return HttpResponse::Ok().json(
+              json!({
+                "success": true,
+                "role": updated_role,
+                "message": format!("Expiry for Role - ({}) - is updated successfully!", &updated_role.name)
+              })
+            )
+          }
+
+          Err(_) => {
+            return HttpResponse::InternalServerError().json(
+              json!({
+                "success": false,
+                "message": "Internal server error has occurred while updating role!"
+              })
+            )
+          }
+        }
+  
+      },
       Err(Error::NotFound) => {
         return HttpResponse::NotFound().json(
           json!({
@@ -204,7 +239,6 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
           })
         )
       }
-
       Err(_) => {
         return HttpResponse::InternalServerError().json(
           json!({

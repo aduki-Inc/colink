@@ -76,7 +76,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 						"message": "User registered successfully"
 					})
 				),
-				Err(err) => {
+				Err(_) => {
 					// Handle the database error and return an error response
 					return	HttpResponse::InternalServerError().json(
 						json!({
@@ -87,7 +87,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 				}
 			}
 		}
-		Err(err) => {
+		Err(_) => {
 			// Directly return the HttpResponse
 			return HttpResponse::BadRequest().json(
 				json!({

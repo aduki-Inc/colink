@@ -46,7 +46,7 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
               "message": "Section added successfully"
             })
           ),
-          Err(err) => {
+          Err(_) => {
             // Handle the database error and return an error response
             return	HttpResponse::InternalServerError().json(
               json!({
@@ -57,7 +57,7 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
           }
         }
       }
-      Err(err) => {
+      Err(_) => {
         // Directly return the HttpResponse
         return HttpResponse::BadRequest().json(
           json!({

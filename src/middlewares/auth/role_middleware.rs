@@ -40,32 +40,14 @@ pub fn privileges_updated(new_data: &RolePrivileges, conn: &mut PgConnection) ->
 }
 
 
-pub fn expiry_updated(data: &RoleExpiry, conn: &mut PgConnection) -> Result<Role, Error> {
+pub fn expiry_updated(role: &Role, conn: &mut PgConnection) -> Result<Role, Error> {
 
   let duration = Duration::days(data.expiry);
 
-  match roles.filter(id.eq(data.id)).first::<Role>(conn) {
-    Ok(mut role) => {
-      // If expiry days exists add the supplied number/ else supplied convert to future date from today
-      if role.expiry.is_some() {
-        let date_time = role.expiry.unwrap() + duration;
-        role.expiry = Some(date_time);
-      } else {
-        let initial_date = Utc::now();
-
-        let future_date = initial_date + duration;
-
-        role.expiry = Some(future_date.naive_utc())
-      };
-
-      match diesel::update(roles.filter(id.eq(role.id)))
-      .set(expiry.eq(role.expiry))
-      .get_result(conn) {
-        Ok(role) => Ok(role),
-        Err(err) => Err(err)
-      }
-    },
-    Err(Error::NotFound) => Err(Error::NotFound),
+  match diesel::update(roles.filter(id.eq(role.id)))
+  .set(expiry.eq(role.expiry))
+  .get_result(conn) {
+    Ok(role) => Ok(role),
     Err(err) => Err(err)
   }
 }
