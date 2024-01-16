@@ -1,7 +1,7 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
 // use crate::db::schema::users::dsl::*;
-// use diesel::result::Error;
+use diesel::result::Error;
 use crate::db::connection::establish_connection;
 use crate::db::schema::sections;
 use crate::models::system::{Section, NewSection, SectionIdentity};
@@ -46,28 +46,27 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
               "message": "Section added successfully"
             })
           ),
-          Err(_) => {
+          Err(err) => {
             // Handle the database error and return an error response
             return	HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": "Failed to create the section: Internal Error Occurred!"
+                "message": format!("Failed to add section: {}", err.to_string())
               })
             )
           }
         }
       }
-      Err(_) => {
+      Err(err) => {
         // Directly return the HttpResponse
-        return HttpResponse::BadRequest().json(
+        return HttpResponse::ExpectationFailed().json(
           json!({
             "success": false,
-            "message": "Failed to create the section: Internal Error Occurred!"
+            "message": err.to_string()
           })
         )
       }
     }
-
 	}
 	else {
 		return HttpResponse::BadRequest().json(
@@ -92,38 +91,49 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 		// Access 'user' from 'Claims'
 		let _user = &claims.user;
 
-    // Check if the section already exists
-    match section_deleted(&section_data.id, &section_data.name, &mut conn) {
-      Ok(true) => {
-        return HttpResponse::Ok().json(
-          json!({
-            "success": true,
-            "message": format!("Section: {} is deleted successfully!", &section_data.name)
-          })
-        )
-      }
+    match section_data.validate() {
+      Ok(validated_data) => {
+        // Check if the section already exists
+        match section_deleted(&validated_data.id, &validated_data.name, &mut conn) {
+          Ok(true) => {
+            return HttpResponse::Ok().json(
+              json!({
+                "success": true,
+                "message": format!("Section: {} is deleted successfully!", &validated_data.name)
+              })
+            )
+          }
 
-      Ok(false) => {
-        return HttpResponse::NotFound().json(
+          Ok(false) => {
+            return HttpResponse::NotFound().json(
+              json!({
+                "success": false,
+                "message": format!("Section: {} does not exists!", &validated_data.name)
+              })
+            )
+          }
+
+          Err(_) => {
+            return HttpResponse::InternalServerError().json(
+              json!({
+                "success": false,
+                "message": "An internal error occurred while deleting the section!"
+              })
+            )
+          }
+        }
+
+      },
+      Err(err) => {
+        // Directly return the HttpResponse
+        return HttpResponse::ExpectationFailed().json(
           json!({
             "success": false,
-            "message": format!("Section: {} does not exists!", &section_data.name)
-          })
-        )
-      }
-
-      Err(_) => {
-        return HttpResponse::InternalServerError().json(
-          json!({
-            "success": false,
-            "message": "Internal server error has occurred!"
+            "message": err.to_string()
           })
         )
       }
     }
-
-
-
 	}
 	else {
 		return HttpResponse::BadRequest().json(
@@ -156,7 +166,16 @@ pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
           json!({
             "success": true,
             "section": updated_section,
-            "message": format!("Section: {} is updated successfully!", &section.name)
+            "message": format!("Section - ({}) - is updated successfully!", &section.name)
+          })
+        )
+      },
+
+      Err(Error::NotFound) => {
+        HttpResponse::NotFound().json(
+          json!({
+            "success": false,
+            "message": format!("Section - ({}) - does not exists!", &section.name)
           })
         )
       }
@@ -165,7 +184,7 @@ pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
         return HttpResponse::InternalServerError().json(
           json!({
             "success": false,
-            "message": format!("Internal server error has occurred while updating section: {}!", &section.name)
+            "message": "An internal error occurred while updating the section!"
           })
         )
       }

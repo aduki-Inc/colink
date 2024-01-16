@@ -137,36 +137,49 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 		// Access 'user' from 'Claims'
 		let _user = &claims.user;
 
-    // Attempt to delete the role
-    match role_deleted(&role_data.id, &mut conn) {
-      Ok(true) => {
-        return HttpResponse::Ok().json(
-          json!({
-            "success": true,
-            "message": "Role is deleted successfully!"
-          })
-        )
-      }
+    match role_data.validate() {
+      Ok(role_id) => {
 
-      Ok(false) => {
-        return HttpResponse::NotFound().json(
+        // Attempt to delete the role
+        match role_deleted(&role_id.id, &mut conn) {
+          Ok(true) => {
+            return HttpResponse::Ok().json(
+              json!({
+                "success": true,
+                "message": "Role is deleted successfully!"
+              })
+            )
+          }
+
+          Ok(false) => {
+            return HttpResponse::NotFound().json(
+              json!({
+                "success": false,
+                "message": "Role does not exists!"
+              })
+            )
+          }
+
+          Err(_) => {
+            return HttpResponse::InternalServerError().json(
+              json!({
+                "success": false,
+                "message": "Internal server error has occurred!"
+              })
+            )
+          }
+        }
+
+      },
+      Err(err) => {
+        return HttpResponse::ExpectationFailed().json(
           json!({
             "success": false,
-            "message": "Role does not exists!"
-          })
-        )
-      }
-
-      Err(_) => {
-        return HttpResponse::InternalServerError().json(
-          json!({
-            "success": false,
-            "message": "Internal server error has occurred!"
+            "message": err.to_string()
           })
         )
       }
     }
-
 	}
 	else {
 		return HttpResponse::BadRequest().json(
@@ -177,7 +190,6 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
     )
 	}
 }
-
 
 
 // Handler for updating privileges of existing role
@@ -191,34 +203,49 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
 		// Access 'user' from 'Claims'
 		let _user = &claims.user;
 
-    let new_privileges = role_privileges.into_inner();
+    // let new_privileges = role_privileges.into_inner();
 
-    // Check if the section already exists
-    match privileges_updated(&new_privileges, &mut conn) {
-      Ok(updated_role) => {
-        return HttpResponse::Ok().json(
-          json!({
-            "success": true,
-            "role": updated_role,
-            "message": format!("Privileges for Role - ({}) - is updated successfully!", &updated_role.name)
-          })
-        )
-      }
+    match role_privileges.validate() {
+      Ok(new_privileges) => {
 
-      Err(Error::NotFound) => {
-        return HttpResponse::NotFound().json(
-          json!({
-            "success": false,
-            "message": "No such role was  found!"
-          })
-        )
-      }
+        // Check if the section already exists
+        match privileges_updated(&new_privileges, &mut conn) {
+          Ok(updated_role) => {
+            return HttpResponse::Ok().json(
+              json!({
+                "success": true,
+                "role": updated_role,
+                "message": format!("Privileges for Role - ({}) - is updated successfully!", &updated_role.name)
+              })
+            )
+          }
 
+          Err(Error::NotFound) => {
+            return HttpResponse::NotFound().json(
+              json!({
+                "success": false,
+                "message": "No such role was  found!"
+              })
+            )
+          }
+
+          Err(err) => {
+            return HttpResponse::InternalServerError().json(
+              json!({
+                "success": false,
+                "message": format!("Internal server error has occurred: {}", err)
+              })
+            )
+          }
+        }
+
+      },
+      
       Err(err) => {
-        return HttpResponse::InternalServerError().json(
+        return HttpResponse::ExpectationFailed().json(
           json!({
             "success": false,
-            "message": format!("Internal server error has occurred: {}", err)
+            "message": err.to_string()
           })
         )
       }
@@ -325,7 +352,7 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
 
       }
       Err(err) => {
-        return HttpResponse::BadRequest().json(
+        return HttpResponse::ExpectationFailed().json(
           json!({
             "success": false,
             "message": err.to_string()

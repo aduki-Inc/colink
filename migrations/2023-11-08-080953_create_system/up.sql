@@ -37,9 +37,9 @@ create table if not exists sections (
 -- Create roles table
 create table if not exists roles (
   id serial primary key,
-  section integer references sections(id) not null,
+  section integer references sections(id) on delete cascade not null,
   base role_type not null,
-  author integer references users(id) not null,
+  author integer references users(id) on delete cascade not null,
   name varchar(500) not null,
   privileges jsonb,
   expiry timestamp with time zone,
