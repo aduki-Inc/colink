@@ -46,8 +46,8 @@ pub struct NewSection {
 impl NewSection {
 	pub fn validate(&self) -> Result<NewSection, String> {
 		// Check if required fields are present
-		if self.name.len() < 3 {
-			return Err("Section name must be 3 chars or more!".to_string());
+		if self.name.len() < 2 {
+			return Err("Section name must be 2 chars or more!".to_string());
 		}
 
 		// If all checks pass, return the validated NewSection
@@ -62,6 +62,19 @@ impl NewSection {
 pub struct SectionIdentity {
   pub id: i32,
   pub name: String
+}
+
+// Validate SectionIdentity Data
+impl SectionIdentity {
+	pub fn validate(&self) -> Result<SectionIdentity, String> {
+		// Check if required fields are present
+		if self.id <= 0 {
+			return Err("Section validation error: zero(0) was encountered for value(id)".to_string());
+		}
+
+		// If all checks pass, return the validated NewSection
+		Ok(self.clone())
+	}
 }
 
 
@@ -100,7 +113,7 @@ impl NewRole {
 
     if self.expiry.is_some() {
       if self.expiry <= Some(0) || self.expiry > Some(180) {
-        return Err("Duration must be between 1 and 180 days!".to_string())
+        return Err("Duration should not be less than 1 or greater than 180!".to_string())
       }
     }
 
@@ -134,7 +147,7 @@ impl RoleId {
 	pub fn validate(&self) -> Result<RoleId, String> {
 		// Check if required fields are present
 		if self.id <= 0 {
-			return Err("Role id can not be zero(0) or less!".to_string());
+			return Err("Role validation error: zero(0) was encountered for value(id)".to_string());
 		}
 
 		// If all checks pass, return the validated NewSection
@@ -154,7 +167,7 @@ impl RolePrivileges {
 	pub fn validate(&self) -> Result<RolePrivileges, String> {
 		// Check if required fields are present
 		if self.id <= 0 {
-			return Err("Role id can not be zero(0) or less!".to_string());
+			return Err("Role validation error: zero(0) was encountered for value(id)".to_string());
 		}
 
 		// If all checks pass, return the validated NewSection
@@ -174,11 +187,11 @@ impl RoleExpiry {
 	pub fn validate(&self) -> Result<RoleExpiry, String> {
 		// Check if required fields are present
 		if self.id <= 0 {
-			return Err("Role id can not be zero(0) or less!".to_string());
+			return Err("Role validation error: zero(0) was encountered for value(id)".to_string());
 		}
 
     if self.expiry <= 0 || self.expiry > 180 {
-      return Err("Duration must be between 1 and 180 days!".to_string())
+      return Err("Duration should not be less than 1 or greater than 180!".to_string())
     }
 
 		// If all checks pass, return the validated NewSection
