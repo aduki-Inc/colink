@@ -1,11 +1,3 @@
-// use diesel::backend::Backend;
-// use diesel::expression::AsExpression;
-// use diesel::deserialize::{self, FromSql};
-// use diesel::pg::Pg;
-// use std::io::Write;
-// use diesel::serialize::{self, Output, ToSql};
-// use diesel::sql_types::Text;
-// use diesel::FromSqlRow;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
 
