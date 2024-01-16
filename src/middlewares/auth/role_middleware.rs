@@ -65,11 +65,7 @@ pub fn expiry_updated(data: &RoleExpiry, conn: &mut PgConnection) -> Result<Role
         Err(err) => Err(err)
       }
     },
-    Err(Error::NotFound) => {
-
-    },
-    Err(_) => {
-
-    },
+    Err(Error::NotFound) => Err(Error::NotFound),
+    Err(err) => Err(err)
   }
 }
