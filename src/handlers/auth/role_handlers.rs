@@ -5,7 +5,7 @@ use chrono::{Utc, Duration, NaiveDateTime};
 use crate::db::connection::establish_connection;
 use crate::db::schema::roles;
 use crate::db::schema::roles::dsl::*;
-use crate::models::system::{ Role, NewRole, InsertableRole, RoleId, RolePrivileges, RoleExpiry };
+use crate::models::system::{ Role, NewRole, InsertableRole, RoleData, RolePrivileges, RoleExpiry };
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::* };
@@ -151,7 +151,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 
 
 // Handler for deleting existing role
-pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<RoleId>) -> impl Responder {
+pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<RoleData>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -160,27 +160,50 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
   // Use the 'get' method to retrieve the 'Claims' value from extensions
 	if let Some(claims) = ext.get::<Claims>() {
 		// Access 'user' from 'Claims'
-		let _user = &claims.user;
+		let user = &claims.user;
 
     match role_data.validate() {
-      Ok(role_id) => {
+      Ok(role) => {
 
-        // Attempt to delete the role
-        match role_deleted(&role_id.id, &mut conn) {
+        match check_authority(&user.id, &role.section, &role.base, &mut conn) {
           Ok(true) => {
-            return HttpResponse::Ok().json(
-              json!({
-                "success": true,
-                "message": "Role is deleted successfully!"
-              })
-            )
+            
+            // Attempt to delete the role
+            match role_deleted(&role.id, &mut conn) {
+              Ok(true) => {
+                return HttpResponse::Ok().json(
+                  json!({
+                    "success": true,
+                    "message": "Role is deleted successfully!"
+                  })
+                )
+              }
+
+              Ok(false) => {
+                return HttpResponse::NotFound().json(
+                  json!({
+                    "success": false,
+                    "message": "Role does not exists!"
+                  })
+                )
+              }
+
+              Err(_) => {
+                return HttpResponse::InternalServerError().json(
+                  json!({
+                    "success": false,
+                    "message": "Internal server error has occurred!"
+                  })
+                )
+              }
+            }
           }
 
           Ok(false) => {
-            return HttpResponse::NotFound().json(
+            return HttpResponse::Forbidden().json(
               json!({
                 "success": false,
-                "message": "Role does not exists!"
+                "message": "You're not authorized to create the role!"
               })
             )
           }
@@ -189,12 +212,11 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
             return HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": "Internal server error has occurred!"
+                "message": "Failed to create the role: Internal Error Occurred!"
               })
             )
           }
         }
-
       },
       Err(err) => {
         return HttpResponse::ExpectationFailed().json(

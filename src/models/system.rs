@@ -138,13 +138,15 @@ pub struct InsertableRole {
 
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct RoleId {
-  pub id: i32
+pub struct RoleData {
+  pub id: i32,
+  pub section: i32,
+  pub base: RoleType
 }
 
-// Validate RoleId Data
-impl RoleId {
-	pub fn validate(&self) -> Result<RoleId, String> {
+// Validate RoleData Data
+impl RoleData {
+	pub fn validate(&self) -> Result<RoleData, String> {
 		// Check if required fields are present
 		if self.id <= 0 {
 			return Err("Role validation error: zero(0) was encountered for value(id)".to_string());
