@@ -7,43 +7,16 @@ use diesel::result::Error;
 use diesel::pg::PgConnection;
 // use chrono::{Utc, Duration};
 
-// Check the role for user attempting to create other roles
-pub fn check_authority(user_id: &i32, section_id: &i32, base_role: &RoleType, conn: &mut PgConnection) -> Result<bool, Error> {
-  match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
-    Ok(role) => {
-      match role.base {
-        base_role => Ok(true),
-        _=> Ok(false)
-      }
-    },
-    Err(Error::NotFound) => Ok(false),
-    Err(err) => Err(err),
-  }
-}
 
-// Check the if the user attempting to create roles is  owner or admin
-pub fn check_owner_or_admin(user_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
+// Check the role for user attempting to create, edit or delete other roles
+pub fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, conn: &mut PgConnection) -> Result<bool, Error> {
   match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
     Ok(role) => {
-      match role.base {
-        RoleType::Owner => Ok(true),
-        RoleType::Admin => Ok(true),
-        _=> Ok(false)
-      }
-    },
-    Err(Error::NotFound) => Ok(false),
-    Err(err) => Err(err),
-  }
-}
-
-// Check the role for user attempting to change other roles
-pub fn check_updating_role(user_id: &i32, section_id: &i32, to_be_edited: &RoleType, conn: &mut PgConnection) -> Result<bool, Error> {
-  match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
-    Ok(role) => {
+      println!("{:?}", role.base);
       match role.base {
         RoleType::Owner => Ok(true),
         RoleType::Admin => {
-          match to_be_edited {
+          match role_type {
             RoleType::Owner => Ok(false),
             RoleType::Admin => Ok(false),
             _=>Ok(true)

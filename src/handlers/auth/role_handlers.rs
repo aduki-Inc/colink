@@ -21,68 +21,82 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
   // Use the 'get' method to retrieve the 'Claims' value from extensions
 	if let Some(claims) = ext.get::<Claims>() {
 		// Access 'user' from 'Claims'
-		let _user = &claims.user;
+		let user = &claims.user;
 
     // Collect Role data from the body
     match role_data.validate() {
       Ok(role) => {
-        // Check if the Role already exists
-        match role_exists(&role.author, &role.section, &mut conn) {
+        //Check if user is authorized to create the role
+        match check_authority(&user.id, &role.section, &role.base, &mut conn) {
           Ok(true) => {
-              return HttpResponse::Conflict().json(
-                json!({
-                  "success": false,
-                  "message": "Same role already exists!"
-                })
-              );
-            }
-          Ok(false) => {
+            // Check if the Role already exists
+            match role_exists(&role.author, &role.section, &mut conn) {
+              Ok(true) => {
+                  return HttpResponse::Conflict().json(
+                    json!({
+                      "success": false,
+                      "message": "Same role already exists!"
+                    })
+                  );
+                }
+              Ok(false) => {
 
-            // If expiry days are supplied convert to future date from today
-            let expiry_date: Option<NaiveDateTime> = if role.expiry.is_some() {
-              let days_to_be_added: i64 = role.expiry.unwrap_or(0);
-              let initial_date = Utc::now();
+                // If expiry days are supplied convert to future date from today
+                let expiry_date: Option<NaiveDateTime> = if role.expiry.is_some() {
+                  let days_to_be_added: i64 = role.expiry.unwrap_or(0);
+                  let initial_date = Utc::now();
 
-              let future_date = initial_date + Duration::days(days_to_be_added);
+                  let future_date = initial_date + Duration::days(days_to_be_added);
 
-              Some(future_date.naive_utc())
-            } else {
-              None
-            };
+                  Some(future_date.naive_utc())
+                } else {
+                  None
+                };
 
 
-            // No existing role - creating one
-            let new_role = InsertableRole {
-              section: role.section,
-              base: role.base,
-              name: role.name,
-              author: role.author,
-              privileges: role.privileges,
-              expiry: expiry_date,
-            };
-    
-            match diesel::insert_into(roles::table)
-            .values(&new_role)
-            .get_result::<Role>(&mut conn)
-            {
-              Ok(role) => return HttpResponse::Ok().json(
-                json!({
-                  "success": true,
-                  "role": role,
-                  "message": format!("Role - ({}) - was created successfully", &role.name)
-                })
-              ),
-              Err(Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _)) => {
-                return HttpResponse::NotFound().json(
-                  json!({
-                    "success": false,
-                    "message": "Section or User does not exists"
-                  })
-                )
-              }
+                // No existing role - creating one
+                let new_role = InsertableRole {
+                  section: role.section,
+                  base: role.base,
+                  name: role.name,
+                  author: role.author,
+                  privileges: role.privileges,
+                  expiry: expiry_date,
+                };
+        
+                match diesel::insert_into(roles::table)
+                .values(&new_role)
+                .get_result::<Role>(&mut conn)
+                {
+                  Ok(role) => return HttpResponse::Ok().json(
+                    json!({
+                      "success": true,
+                      "role": role,
+                      "message": format!("Role - ({}) - was created successfully", &role.name)
+                    })
+                  ),
+                  Err(Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _)) => {
+                    return HttpResponse::NotFound().json(
+                      json!({
+                        "success": false,
+                        "message": "Section or User does not exists"
+                      })
+                    )
+                  }
+                  Err(_) => {
+                    // Handle the database error and return an error response
+                    return	HttpResponse::InternalServerError().json(
+                      json!({
+                        "success": false,
+                        "message": "Failed to create the role: Internal Error Occurred!"
+                      })
+                    )
+                  }
+                }
+
+              },
               Err(_) => {
-                // Handle the database error and return an error response
-                return	HttpResponse::InternalServerError().json(
+                return HttpResponse::InternalServerError().json(
                   json!({
                     "success": false,
                     "message": "Failed to create the role: Internal Error Occurred!"
@@ -92,6 +106,17 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
             }
 
           },
+
+          Ok(false) => {
+            return HttpResponse::Forbidden().json(
+              json!({
+                "success": false,
+                "message": "You're not authorized to create the role!"
+              })
+            )
+
+          }
+
           Err(_) => {
             return HttpResponse::InternalServerError().json(
               json!({
