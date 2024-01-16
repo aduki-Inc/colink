@@ -1,6 +1,6 @@
 use crate::db::schema::roles::dsl::*;
 // use crate::db::schema::roles;
-use crate::models::system:: Role;
+use crate::models::system::{Role, RolePrivileges};
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
@@ -24,12 +24,10 @@ pub fn role_deleted(other_id: &i32, conn: &mut PgConnection) -> Result<bool, Err
   }
 }
 
-pub fn role_updated(other_id: &i32, new_data: &Role, conn: &mut PgConnection) -> Result<Role, Error> {
+pub fn privileges_updated(other_id: &i32, new_data: &RolePrivileges, conn: &mut PgConnection) -> Result<Role, Error> {
 
   match diesel::update(roles.filter(id.eq(other_id)))
   .set((
-    name.eq(&new_data.name),
-    base.eq(&new_data.base),
     privileges.eq(&new_data.privileges)
   ))
   .get_result(conn) {

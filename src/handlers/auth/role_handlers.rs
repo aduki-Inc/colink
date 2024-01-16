@@ -5,7 +5,7 @@ use diesel::prelude::*;
 use chrono::{Utc, Duration, NaiveDateTime};
 use crate::db::connection::establish_connection;
 use crate::db::schema::roles;
-use crate::models::system::{Role, NewRole, InsertableRole, RoleId};
+use crate::models::system::{ Role, NewRole, InsertableRole, RoleId, RolePrivileges };
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::* };
@@ -170,5 +170,51 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 	}
 }
 
+
+// Handler for updating privileges of existing role
+pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, privileges: web::Json<RolePrivileges>) -> impl Responder {
+  //  Get extensions
+  let ext = req.extensions();
+  let mut conn = establish_connection(&app_data.config.database_url).await;
+
+  // Use the 'get' method to retrieve the 'Claims' value from extensions
+	if let Some(claims) = ext.get::<Claims>() {
+		// Access 'user' from 'Claims'
+		let _user = &claims.user;
+
+    let role_privileges = privileges.into_inner();
+
+    // Check if the section already exists
+    match privileges_updated(&section.id, &role_privileges, &mut conn) {
+      Ok(updated_role) => {
+        return HttpResponse::Ok().json(
+          json!({
+            "success": true,
+            "role": updated_role,
+            "message": format!("Role - ({}) - is updated successfully!", &role.name)
+          })
+        )
+      }
+
+      Err(_) => {
+        return HttpResponse::InternalServerError().json(
+          json!({
+            "success": false,
+            "message": "Internal server error has occurred while updating role!"
+          })
+        )
+      }
+    }
+
+	}
+	else {
+		return HttpResponse::BadRequest().json(
+      json!({
+        "success": false,
+        "message": "Authorization failure!"
+      })
+    )
+	}
+}
 
 // Handler for updating existing role

@@ -131,3 +131,8 @@ pub struct InsertableRole {
 pub struct RoleId {
   pub id: i32
 }
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct RolePrivileges {
+  pub privileges: Json
+}
