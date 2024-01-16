@@ -138,3 +138,10 @@ pub struct RolePrivileges {
   pub base: RoleType,
   pub privileges: Json
 }
+
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct RoleExpiry {
+  pub id: i32,
+  pub expiry: i64
+}
