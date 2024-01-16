@@ -159,6 +159,15 @@ pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 
     let section = section_data.into_inner();
 
+    if section.id <= 0 {
+      return HttpResponse::ExpectationFailed().json(
+        json!({
+          "success": false,
+          "message": "Section validation error: zero(0) was encountered for value(id)"
+        })
+      )
+    }
+
     // Check if the section already exists
     match section_updated(&section.id, &section, &mut conn) {
       Ok(updated_section) => {
