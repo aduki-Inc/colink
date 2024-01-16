@@ -90,7 +90,7 @@ pub struct NewRole {
   pub expiry: Option<i64>,
 }
 
-// Validate Section Data
+// Validate NewRole Data
 impl NewRole {
 	pub fn validate(&self) -> Result<NewRole, String> {
 		// Check if required fields are present
@@ -124,12 +124,22 @@ pub struct InsertableRole {
 
 
 
-#[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::roles)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct RoleId {
   pub id: i32
+}
+
+// Validate RoleId Data
+impl RoleId {
+	pub fn validate(&self) -> Result<RoleId, String> {
+		// Check if required fields are present
+		if self.id <= 0 {
+			return Err("Role id can not be zero(0) or less!".to_string());
+		}
+
+		// If all checks pass, return the validated NewSection
+		Ok(self.clone())
+	}
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -139,9 +149,39 @@ pub struct RolePrivileges {
   pub privileges: Json
 }
 
+// Validate RolePrivileges Data
+impl RolePrivileges {
+	pub fn validate(&self) -> Result<RolePrivileges, String> {
+		// Check if required fields are present
+		if self.id <= 0 {
+			return Err("Role id can not be zero(0) or less!".to_string());
+		}
+
+		// If all checks pass, return the validated NewSection
+		Ok(self.clone())
+	}
+}
+
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct RoleExpiry {
   pub id: i32,
   pub expiry: i64
+}
+
+// Validate RoleExpiry Data
+impl RoleExpiry {
+	pub fn validate(&self) -> Result<RoleExpiry, String> {
+		// Check if required fields are present
+		if self.id <= 0 {
+			return Err("Role id can not be zero(0) or less!".to_string());
+		}
+
+    if self.expiry <= 0 || self.expiry > 180 {
+      return Err("Duration must be between 1 and 180 days!".to_string())
+    }
+
+		// If all checks pass, return the validated NewSection
+		Ok(self.clone())
+	}
 }

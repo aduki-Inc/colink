@@ -4,6 +4,7 @@ use diesel::result::{Error, DatabaseErrorKind};
 use chrono::{Utc, Duration, NaiveDateTime};
 use crate::db::connection::establish_connection;
 use crate::db::schema::roles;
+use crate::db::schema::roles::dsl::*;
 use crate::models::system::{ Role, NewRole, InsertableRole, RoleId, RolePrivileges, RoleExpiry };
 use crate::configs::state::AppState;
 use serde_json::json;
@@ -246,41 +247,92 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
 		// Access 'user' from 'Claims'
 		let _user = &claims.user;
 
-    let role_expiry = role_data.into_inner();
+    // let role_expiry = role_data.into_inner();
 
-    // println!("{}", role_expiry.id);
+    match role_data.validate() {
+      Ok(role_expiry) => {
 
-    // Check if the section already exists
-    match expiry_updated(&role_expiry, &mut conn) {
-      Ok(updated_role) => {
-        return HttpResponse::Ok().json(
-          json!({
-            "success": true,
-            "role": updated_role,
-            "message": format!("Expiry for Role - ({}) - is updated successfully!", &updated_role.name)
-          })
-        )
+        match roles.filter(id.eq(role_expiry.id)).first::<Role>(&mut conn) {
+          Ok(mut role) => {
+            // If expiry days exists add the supplied number/ else supplied convert to future date from today
+            let duration = Duration::days(role_expiry.expiry);
+            if role.expiry.is_some() {
+              let today_date = Utc::now().naive_utc();
+              let date_time = role.expiry.unwrap() + duration;
+      
+              let diff_days = (date_time - today_date).num_days();
+      
+              if diff_days <= 0 || diff_days > 180 {
+                return HttpResponse::ExpectationFailed().json(
+                  json!({
+                    "success": false,
+                    "message": "Roles permissions cannot be less than 1 or exceed 180 days!"
+                  })
+                )
+              } else {
+                role.expiry = Some(date_time);
+              }
+              
+            } else {
+              let initial_date = Utc::now();
+      
+              let future_date = initial_date + duration;
+      
+              role.expiry = Some(future_date.naive_utc())
+            };
+
+            // Check if the section expiry date was updated
+            match expiry_updated(&role, &mut conn) {
+              Ok(updated_role) => {
+                return HttpResponse::Ok().json(
+                  json!({
+                    "success": true,
+                    "role": updated_role,
+                    "message": format!("Expiry for Role - ({}) - is updated successfully!", &updated_role.name)
+                  })
+                )
+              }
+
+              Err(_) => {
+                return HttpResponse::InternalServerError().json(
+                  json!({
+                    "success": false,
+                    "message": "Internal server error has occurred while updating role!"
+                  })
+                )
+              }
+            }
+
+          },
+          Err(Error::NotFound) => {
+            return HttpResponse::NotFound().json(
+              json!({
+                "success": false,
+                "message": "No such role was  found!"
+              })
+            )
+          }
+          
+          Err(_) => {
+            return HttpResponse::InternalServerError().json(
+              json!({
+                "success": false,
+                "message": "Internal server error has occurred while updating role expiry!"
+              })
+            )
+          }
+        }
+
       }
-
-      Err(Error::NotFound) => {
-        return HttpResponse::NotFound().json(
+      Err(err) => {
+        return HttpResponse::BadRequest().json(
           json!({
             "success": false,
-            "message": "No such role was  found!"
-          })
-        )
-      }
-
-      Err(_) => {
-        return HttpResponse::InternalServerError().json(
-          json!({
-            "success": false,
-            "message": "Internal server error has occurred while updating role!"
+            "message": err.to_string()
           })
         )
       }
     }
-
 	}
 	else {
 		return HttpResponse::BadRequest().json(
