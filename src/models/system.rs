@@ -160,6 +160,7 @@ impl RoleData {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct RolePrivileges {
   pub id: i32,
+  pub section: i32,
   pub base: RoleType,
   pub privileges: Json
 }
@@ -181,6 +182,8 @@ impl RolePrivileges {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct RoleExpiry {
   pub id: i32,
+  pub section: i32,
+  pub base: RoleType,
   pub expiry: i64
 }
 

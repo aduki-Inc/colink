@@ -167,7 +167,7 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 
         match check_authority(&user.id, &role.section, &role.base, &mut conn) {
           Ok(true) => {
-            
+
             // Attempt to delete the role
             match role_deleted(&role.id, &mut conn) {
               Ok(true) => {
@@ -248,39 +248,62 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
   // Use the 'get' method to retrieve the 'Claims' value from extensions
 	if let Some(claims) = ext.get::<Claims>() {
 		// Access 'user' from 'Claims'
-		let _user = &claims.user;
-
-    // let new_privileges = role_privileges.into_inner();
+		let user = &claims.user;
 
     match role_privileges.validate() {
-      Ok(new_privileges) => {
+      Ok(role) => {
 
-        // Check if the section already exists
-        match privileges_updated(&new_privileges, &mut conn) {
-          Ok(updated_role) => {
-            return HttpResponse::Ok().json(
-              json!({
-                "success": true,
-                "role": updated_role,
-                "message": format!("Privileges for Role - ({}) - is updated successfully!", &updated_role.name)
-              })
-            )
+        match check_authority(&user.id, &role.section, &role.base, &mut conn) {
+          Ok(true) => {
+
+            // Check if the section already exists
+            match privileges_updated(&role, &mut conn) {
+              Ok(updated_role) => {
+                return HttpResponse::Ok().json(
+                  json!({
+                    "success": true,
+                    "role": updated_role,
+                    "message": format!("Privileges for Role - ({}) - is updated successfully!", &updated_role.name)
+                  })
+                )
+              }
+
+              Err(Error::NotFound) => {
+                return HttpResponse::NotFound().json(
+                  json!({
+                    "success": false,
+                    "message": "No such role was  found!"
+                  })
+                )
+              }
+
+              Err(err) => {
+                return HttpResponse::InternalServerError().json(
+                  json!({
+                    "success": false,
+                    "message": format!("Internal server error has occurred: {}", err)
+                  })
+                )
+              }
+            }
+            
           }
 
-          Err(Error::NotFound) => {
-            return HttpResponse::NotFound().json(
+          Ok(false) => {
+            return HttpResponse::Forbidden().json(
               json!({
                 "success": false,
-                "message": "No such role was  found!"
+                "message": "You're not authorized to create the role!"
               })
             )
+
           }
 
-          Err(err) => {
+          Err(_) => {
             return HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": format!("Internal server error has occurred: {}", err)
+                "message": "Failed to create the role: Internal Error Occurred!"
               })
             )
           }
@@ -319,84 +342,107 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
   // Use the 'get' method to retrieve the 'Claims' value from extensions
 	if let Some(claims) = ext.get::<Claims>() {
 		// Access 'user' from 'Claims'
-		let _user = &claims.user;
+		let user = &claims.user;
 
     // let role_expiry = role_data.into_inner();
 
     match role_data.validate() {
       Ok(role_expiry) => {
 
-        match roles.filter(id.eq(role_expiry.id)).first::<Role>(&mut conn) {
-          Ok(mut role) => {
-            // If expiry days exists add the supplied number/ else supplied convert to future date from today
-            let duration = Duration::days(role_expiry.expiry);
-            if role.expiry.is_some() {
-              let today_date = Utc::now().naive_utc();
-              let date_time = role.expiry.unwrap() + duration;
-      
-              let diff_days = (date_time - today_date).num_days();
-      
-              if diff_days <= 0 || diff_days > 180 {
-                return HttpResponse::ExpectationFailed().json(
+        match check_authority(&user.id, &role_expiry.section, &role_expiry.base, &mut conn) {
+          Ok(true) => {
+
+            match roles.filter(id.eq(role_expiry.id)).first::<Role>(&mut conn) {
+              Ok(mut role) => {
+                // If expiry days exists add the supplied number/ else supplied convert to future date from today
+                let duration = Duration::days(role_expiry.expiry);
+                if role.expiry.is_some() {
+                  let today_date = Utc::now().naive_utc();
+                  let date_time = role.expiry.unwrap() + duration;
+          
+                  let diff_days = (date_time - today_date).num_days();
+          
+                  if diff_days <= 0 || diff_days > 180 {
+                    return HttpResponse::ExpectationFailed().json(
+                      json!({
+                        "success": false,
+                        "message": "Roles permissions cannot be less than 1 or exceed 180 days!"
+                      })
+                    )
+                  } else {
+                    role.expiry = Some(date_time);
+                  }
+                  
+                } else {
+                  let initial_date = Utc::now();
+          
+                  let future_date = initial_date + duration;
+          
+                  role.expiry = Some(future_date.naive_utc())
+                };
+    
+                // Check if the section expiry date was updated
+                match expiry_updated(&role, &mut conn) {
+                  Ok(updated_role) => {
+                    return HttpResponse::Ok().json(
+                      json!({
+                        "success": true,
+                        "role": updated_role,
+                        "message": format!("Expiry for Role - ({}) - is updated successfully!", &updated_role.name)
+                      })
+                    )
+                  }
+    
+                  Err(_) => {
+                    return HttpResponse::InternalServerError().json(
+                      json!({
+                        "success": false,
+                        "message": "Internal server error has occurred while updating role!"
+                      })
+                    )
+                  }
+                }
+    
+              },
+              Err(Error::NotFound) => {
+                return HttpResponse::NotFound().json(
                   json!({
                     "success": false,
-                    "message": "Roles permissions cannot be less than 1 or exceed 180 days!"
+                    "message": "No such role was  found!"
                   })
                 )
-              } else {
-                role.expiry = Some(date_time);
               }
               
-            } else {
-              let initial_date = Utc::now();
-      
-              let future_date = initial_date + duration;
-      
-              role.expiry = Some(future_date.naive_utc())
-            };
-
-            // Check if the section expiry date was updated
-            match expiry_updated(&role, &mut conn) {
-              Ok(updated_role) => {
-                return HttpResponse::Ok().json(
-                  json!({
-                    "success": true,
-                    "role": updated_role,
-                    "message": format!("Expiry for Role - ({}) - is updated successfully!", &updated_role.name)
-                  })
-                )
-              }
-
               Err(_) => {
                 return HttpResponse::InternalServerError().json(
                   json!({
                     "success": false,
-                    "message": "Internal server error has occurred while updating role!"
+                    "message": "Internal server error has occurred while updating role expiry!"
                   })
                 )
               }
-            }
+            }  
+          }
 
-          },
-          Err(Error::NotFound) => {
-            return HttpResponse::NotFound().json(
+          Ok(false) => {
+            return HttpResponse::Forbidden().json(
               json!({
                 "success": false,
-                "message": "No such role was  found!"
+                "message": "You're not authorized to create the role!"
               })
             )
+
           }
-          
+
           Err(_) => {
             return HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": "Internal server error has occurred while updating role expiry!"
+                "message": "Failed to create the role: Internal Error Occurred!"
               })
             )
           }
         }
-
       }
       Err(err) => {
         return HttpResponse::ExpectationFailed().json(
