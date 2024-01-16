@@ -40,10 +40,9 @@ async fn main() -> std::io::Result<()> {
 				.limit(4096)
 				.error_handler(|err, _req| handlers::error_handlers::json_cfg(err)),
 			)
-			.service(routes::auth::auth_config())
-			//			.wrap(handlers::error_handlers::MyErrorHandler)
 			.wrap(cors)
 			.wrap(Logger::default())
+			.service(routes::auth::auth_config())
 	})
 	.bind(("127.0.0.1", 8080))?
 	.run()

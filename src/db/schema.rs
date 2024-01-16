@@ -96,7 +96,7 @@ diesel::table! {
         author -> Int4,
         #[max_length = 500]
         name -> Varchar,
-        privileges -> Nullable<Json>,
+        privileges -> Nullable<Jsonb>,
         expiry -> Nullable<Timestamptz>,
         created_at -> Nullable<Timestamptz>,
         updated_at -> Nullable<Timestamptz>,

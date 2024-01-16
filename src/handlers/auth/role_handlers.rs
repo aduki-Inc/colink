@@ -178,8 +178,9 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 }
 
 
-// Handler for updating expiry date
-pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<RoleExpiry>) -> impl Responder {
+
+// Handler for updating privileges of existing role
+pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_privileges: web::Json<RolePrivileges>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -189,48 +190,20 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
 		// Access 'user' from 'Claims'
 		let _user = &claims.user;
 
-    let role_expiry = role_data.into_inner();
+    let new_privileges = role_privileges.into_inner();
 
-    // println!("{}", role_expiry.id);
+    // Check if the section already exists
+    match privileges_updated(&new_privileges, &mut conn) {
+      Ok(updated_role) => {
+        return HttpResponse::Ok().json(
+          json!({
+            "success": true,
+            "role": updated_role,
+            "message": format!("Privileges for Role - ({}) - is updated successfully!", &updated_role.name)
+          })
+        )
+      }
 
-    match roles.filter(id.eq(role_expiry.id)).first::<Role>(conn) {
-      Ok(mut role) => {
-        // If expiry days exists add the supplied number/ else supplied convert to future date from today
-        if role.expiry.is_some() {
-          let date_time = role.expiry.unwrap() + duration;
-          role.expiry = Some(date_time);
-        } else {
-          let initial_date = Utc::now();
-  
-          let future_date = initial_date + duration;
-  
-          role.expiry = Some(future_date.naive_utc())
-        };
-
-
-        // Check if the section already exists
-        match expiry_updated(&role, &mut conn) {
-          Ok(updated_role) => {
-            return HttpResponse::Ok().json(
-              json!({
-                "success": true,
-                "role": updated_role,
-                "message": format!("Expiry for Role - ({}) - is updated successfully!", &updated_role.name)
-              })
-            )
-          }
-
-          Err(_) => {
-            return HttpResponse::InternalServerError().json(
-              json!({
-                "success": false,
-                "message": "Internal server error has occurred while updating role!"
-              })
-            )
-          }
-        }
-  
-      },
       Err(Error::NotFound) => {
         return HttpResponse::NotFound().json(
           json!({
@@ -239,11 +212,12 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
           })
         )
       }
-      Err(_) => {
+
+      Err(err) => {
         return HttpResponse::InternalServerError().json(
           json!({
             "success": false,
-            "message": "Internal server error has occurred while updating role!"
+            "message": format!("Internal server error has occurred: {}", err)
           })
         )
       }
@@ -261,8 +235,8 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
 }
 
 
-// Handler for updating privileges of existing role
-pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, privileges: web::Json<RolePrivileges>) -> impl Responder {
+// Handler for updating expiry date
+pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<RoleExpiry>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -272,16 +246,18 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
 		// Access 'user' from 'Claims'
 		let _user = &claims.user;
 
-    let role_privileges = privileges.into_inner();
+    let role_expiry = role_data.into_inner();
+
+    // println!("{}", role_expiry.id);
 
     // Check if the section already exists
-    match privileges_updated(&role_privileges, &mut conn) {
+    match expiry_updated(&role_expiry, &mut conn) {
       Ok(updated_role) => {
         return HttpResponse::Ok().json(
           json!({
             "success": true,
             "role": updated_role,
-            "message": format!("Privileges for Role - ({}) - is updated successfully!", &updated_role.name)
+            "message": format!("Expiry for Role - ({}) - is updated successfully!", &updated_role.name)
           })
         )
       }
