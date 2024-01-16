@@ -51,7 +51,7 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
             return	HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": format!("Failed to add section: {}", err.to_string())
+                "message": "Failed to create the section: Internal Error Occurred!"
               })
             )
           }
@@ -62,7 +62,7 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
         return HttpResponse::BadRequest().json(
           json!({
             "success": false,
-            "message": err.to_string()
+            "message": "Failed to create the section: Internal Error Occurred!"
           })
         )
       }

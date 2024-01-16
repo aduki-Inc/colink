@@ -81,7 +81,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 					return	HttpResponse::InternalServerError().json(
 						json!({
 							"success": false,
-							"message": format!("Failed to register user: {}", err.to_string())
+							"message": "Failed to register user: Internal Error occurred!"
 						})
 					)
 				}
@@ -92,7 +92,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 			return HttpResponse::BadRequest().json(
 				json!({
 					"success": false,
-					"message": err.to_string()
+					"message": "Failed to register user: Internal Error occurred!"
 				})
 			)
 		}

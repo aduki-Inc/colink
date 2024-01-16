@@ -77,7 +77,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
                 return	HttpResponse::InternalServerError().json(
                   json!({
                     "success": false,
-                    "message": format!("Failed to create the role: {}", err.to_string())
+                    "message": "Failed to create the role: Internal Error Occurred!"
                   })
                 )
               }
@@ -88,7 +88,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
             return HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": "Internal server error has ocurred!"
+                "message": "Failed to create the role: Internal Error Occurred!"
               })
             )
           }
@@ -99,7 +99,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
         return HttpResponse::BadRequest().json(
           json!({
             "success": false,
-            "message": err.to_string()
+            "message": "Failed to create the role: Internal Error Occurred!"
           })
         )
       }
