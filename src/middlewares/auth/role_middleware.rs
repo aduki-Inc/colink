@@ -12,7 +12,6 @@ use diesel::pg::PgConnection;
 pub fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, conn: &mut PgConnection) -> Result<bool, Error> {
   match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
     Ok(role) => {
-      println!("{:?}", role.base);
       match role.base {
         RoleType::Owner => Ok(true),
         RoleType::Admin => {
