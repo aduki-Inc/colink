@@ -34,6 +34,7 @@ pub fn privileges_updated(new_data: &RolePrivileges, conn: &mut PgConnection) ->
   ))
   .get_result(conn) {
     Ok(role) => Ok(role),
+    Err(Error::NotFound) => Err(Error::NotFound),
     Err(err) => Err(err)
   }
 }

@@ -172,7 +172,7 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 
 
 // Handler for updating expiry date
-pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<RoleExpiry>) -> impl Responder {
+pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<RoleExpiry>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -191,7 +191,7 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
           json!({
             "success": true,
             "role": updated_role,
-            "message": format!("Role - ({}) - is updated successfully!", &role.name)
+            "message": format!("Expiry for Role - ({}) - is updated successfully!", &role.name)
           })
         )
       }
@@ -247,7 +247,16 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
           json!({
             "success": true,
             "role": updated_role,
-            "message": format!("Role - ({}) - is updated successfully!", &role.name)
+            "message": format!("Privileges for Role - ({}) - is updated successfully!", &role.name)
+          })
+        )
+      }
+
+      Err(Error::NotFound) => {
+        return HttpResponse::NotFound().json(
+          json!({
+            "success": false,
+            "message": "No such role was  found!"
           })
         )
       }

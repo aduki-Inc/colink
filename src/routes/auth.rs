@@ -16,4 +16,6 @@ pub fn auth_config() -> Scope {
     //Roles
     .route("/role/add", web::put().to(create_role))
     .route("/role/remove", web::delete().to(delete_role))
+    .route("/role/edit/privileges", web::patch().to(update_privileges))
+    .route("/role/edit/expiry", web::patch().to(update_expiry))
 }
