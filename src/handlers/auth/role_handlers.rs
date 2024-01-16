@@ -185,7 +185,7 @@ pub async fn update_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
     let role_privileges = privileges.into_inner();
 
     // Check if the section already exists
-    match privileges_updated(&section.id, &role_privileges, &mut conn) {
+    match privileges_updated(&role_privileges, &mut conn) {
       Ok(updated_role) => {
         return HttpResponse::Ok().json(
           json!({

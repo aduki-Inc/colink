@@ -134,5 +134,6 @@ pub struct RoleId {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct RolePrivileges {
+  pub id: i32,
   pub privileges: Json
 }

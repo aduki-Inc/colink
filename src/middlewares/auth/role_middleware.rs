@@ -24,9 +24,9 @@ pub fn role_deleted(other_id: &i32, conn: &mut PgConnection) -> Result<bool, Err
   }
 }
 
-pub fn privileges_updated(other_id: &i32, new_data: &RolePrivileges, conn: &mut PgConnection) -> Result<Role, Error> {
+pub fn privileges_updated(new_data: &RolePrivileges, conn: &mut PgConnection) -> Result<Role, Error> {
 
-  match diesel::update(roles.filter(id.eq(other_id)))
+  match diesel::update(roles.filter(id.eq(new_data.id)))
   .set((
     privileges.eq(&new_data.privileges)
   ))
