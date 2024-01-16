@@ -4,7 +4,7 @@ use crate::models::system::{Role, RolePrivileges, RoleExpiry };
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
-use chrono::{Utc, Duration, NaiveDateTime};
+use chrono::{Utc, Duration};
 
 
 pub fn role_exists(user_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
@@ -45,22 +45,21 @@ pub fn expiry_updated(data: &RoleExpiry, conn: &mut PgConnection) -> Result<Role
   let duration = Duration::days(data.expiry);
 
   match roles.filter(id.eq(data.id)).first::<Role>(conn) {
-    Ok(role) => {
+    Ok(mut role) => {
       // If expiry days exists add the supplied number/ else supplied convert to future date from today
-      let expiry_date: NaiveDateTime = if role.expiry.is_some() {
-        return role.expiry += duration;
+      if role.expiry.is_some() {
+        let date_time = role.expiry.unwrap() + duration;
+        role.expiry = Some(date_time);
       } else {
         let initial_date = Utc::now();
 
         let future_date = initial_date + duration;
 
-        return future_date.naive_utc()
+        role.expiry = Some(future_date.naive_utc())
       };
 
-      match diesel::update(roles.filter(id.eq(data.id)))
-      .set((
-        expiry.eq(expiry_date)
-      ))
+      match diesel::update(roles.filter(id.eq(role.id)))
+      .set(expiry.eq(role.expiry))
       .get_result(conn) {
         Ok(role) => Ok(role),
         Err(err) => Err(err)

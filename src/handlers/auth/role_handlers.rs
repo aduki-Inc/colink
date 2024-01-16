@@ -1,11 +1,11 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
 // use crate::db::schema::users::dsl::*;
-// use diesel::result::Error;
+use diesel::result::Error;
 use chrono::{Utc, Duration, NaiveDateTime};
 use crate::db::connection::establish_connection;
 use crate::db::schema::roles;
-use crate::models::system::{ Role, NewRole, InsertableRole, RoleId, RolePrivileges };
+use crate::models::system::{ Role, NewRole, InsertableRole, RoleId, RolePrivileges, RoleExpiry };
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::* };
@@ -191,7 +191,7 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
           json!({
             "success": true,
             "role": updated_role,
-            "message": format!("Expiry for Role - ({}) - is updated successfully!", &role.name)
+            "message": format!("Expiry for Role - ({}) - is updated successfully!", &updated_role.name)
           })
         )
       }
@@ -247,7 +247,7 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
           json!({
             "success": true,
             "role": updated_role,
-            "message": format!("Privileges for Role - ({}) - is updated successfully!", &role.name)
+            "message": format!("Privileges for Role - ({}) - is updated successfully!", &updated_role.name)
           })
         )
       }
