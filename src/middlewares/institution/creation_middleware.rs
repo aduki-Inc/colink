@@ -14,7 +14,7 @@ use diesel::pg::PgConnection;
 // use chrono::{Utc, Duration};
 
 //Creating the institution
-pub fn create_institution(user_id: &i32, &new_institution: Institution, conn: &mut PgConnection) -> Result<Institution, Error> {
+pub fn institution_created(user_id: &i32, &new_institution: Institution, conn: &mut PgConnection) -> Result<Institution, Error> {
   conn.transaction(|conn| {
     match diesel::insert_into(institutions::table).values(new_institution)
     .get_result::<Institution>(conn) {
