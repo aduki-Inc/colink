@@ -47,9 +47,18 @@ create table if not exists roles (
   updated_at timestamp with time zone default current_timestamp
 );
 
+
+-- Create approvals table
+create table if not exists approvals (
+  id serial primary key,
+  target integer not null,
+  name varchar(250) unique not null,
+  description text;
+  created_at timestamp with time zone default current_timestamp,
+  updated_at timestamp with time zone default current_timestamp
+);
+
 -- Create a trigger to run everytime field is updated
 select diesel_manage_updated_at('co_link');
-
 select diesel_manage_updated_at('sections');
-
 select diesel_manage_updated_at('roles');
