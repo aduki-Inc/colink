@@ -25,9 +25,7 @@ pub struct Institution {
   pub updated_at: Option<NaiveDateTime>
 }
 
-#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::institutions)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct NewInstitution {
   pub short_name: String,
   pub name: String,

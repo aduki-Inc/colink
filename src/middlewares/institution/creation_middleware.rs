@@ -5,7 +5,7 @@ use crate::db::schema::belongs::dsl::*;
 use crate::db::schema::sections::dsl::*;
 use crate::models::system::Approval;
 // use crate::db::schema::roles;
-use crate::models::{institutions::{Institution, Belong}, system::{InsertableRole, NewSection, Section, InsertableApproval}};
+use crate::models::{institutions::{Institution, Belong, InsertableInstitution}, system::{InsertableRole, NewSection, Section, InsertableApproval}};
 use crate::models::custom_types::RoleType;
 use diesel::associations::HasTable;
 use diesel::prelude::*;
@@ -13,8 +13,16 @@ use diesel::result::Error;
 use diesel::pg::PgConnection;
 // use chrono::{Utc, Duration};
 
+pub fn institution_exists(unique_name: &str, inst_name: &str, conn: &mut PgConnection) -> Result<bool, Error> {
+  match institutions.filter(short_name.eq(unique_name).or(name.eq(inst_name))).first::<Institution>(conn) {
+    Ok(_) => Ok(true),
+    Err(Error::NotFound) => Ok(false),
+    Err(err) => Err(err),
+  }
+}
+
 //Creating the institution
-pub fn institution_created(user_id: &i32, &new_institution: Institution, conn: &mut PgConnection) -> Result<Institution, Error> {
+pub fn institution_created(user_id: &i32, &new_institution: InsertableInstitution, conn: &mut PgConnection) -> Result<Institution, Error> {
   conn.transaction(|conn| {
     match diesel::insert_into(institutions::table).values(new_institution)
     .get_result::<Institution>(conn) {

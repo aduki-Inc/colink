@@ -1,18 +1,19 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
 use diesel::result::{Error, DatabaseErrorKind};
-use chrono::{Utc, Duration, NaiveDateTime};
+use chrono::{Utc, Duration, NaiveDateTime, NaiveDate};
 use crate::db::connection::establish_connection;
 use crate::db::schema::roles;
 use crate::db::schema::roles::dsl::*;
-use crate::models::institutions::{ Institution, NewInstitution };
+use crate::models::institutions::{ Institution, NewInstitution, InsertableInstitution };
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::* };
+use crate::middlewares::auth::auth_middleware::{JwtMiddleware, Claims};
+use crate::middlewares::institution::creation_middleware::*;
 
 
 // Handler for creating new institution
-pub async fn create_institution(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, req_data: web::Json<NewInstitution>) -> impl Responder {
+pub async fn create_institution(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, institution_data: web::Json<NewInstitution>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -23,57 +24,60 @@ pub async fn create_institution(req: HttpRequest, _: JwtMiddleware, app_data: we
 		// Access 'user' from 'Claims'
 		let user = &claims.user;
 
-    match role_data.validate() {
-      Ok(role) => {
+    match institution_data.validate() {
+      Ok(new_institution) => {
 
-        match check_authority(&user.id, &role.section, &role.base, &mut conn) {
+        let established_date = match Some(NaiveDate::parse_from_str(&new_institution.established, "%Y-%m-%d")){
+          Some(created_date) => created_date,
+          None => None,
+          Err(_) => None
+        };
+
+        let institution = InsertableInstitution {
+          short_name: &new_institution.short_name,
+          in_type: &new_institution.in_type,
+          name: &new_institution.name,
+          active: &new_institution.active,
+          established: &established_date
+        };
+
+        match institution_exists(&institution.short_name, &institution.name, &mut conn) {
           Ok(true) => {
+            return HttpResponse::Conflict().json(
+              json!({
+                "success": false,
+                "message": "Similar Institution already exists!"
+              })
+            )
+          }
 
-            // Attempt to delete the role
-            match role_deleted(&role.id, &mut conn) {
-              Ok(true) => {
+          Ok(false) => {
+            match institution_created(&user.id, &institution, &mut conn) {
+              Ok(created_institution) => {
                 return HttpResponse::Ok().json(
                   json!({
                     "success": true,
-                    "message": "Role is deleted successfully!"
+                    "institution": created_institution,
+                    "message": format!("Institution: {} created successfully!", &created_institution.name)
                   })
                 )
               }
-
-              Ok(false) => {
-                return HttpResponse::NotFound().json(
-                  json!({
-                    "success": false,
-                    "message": "Role does not exists!"
-                  })
-                )
-              }
-
               Err(_) => {
-                return HttpResponse::InternalServerError().json(
+                return  HttpResponse::InternalServerError().json(
                   json!({
                     "success": false,
-                    "message": "Internal server error has occurred!"
+                    "message": "Could not create the institution: An error occurred during the process!"
                   })
                 )
               }
             }
           }
 
-          Ok(false) => {
-            return HttpResponse::Forbidden().json(
-              json!({
-                "success": false,
-                "message": "You're not authorized to create the role!"
-              })
-            )
-          }
-
           Err(_) => {
             return HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": "Failed to create the role: Internal Error Occurred!"
+                "message": "Could not create the Institution: An internal has occurred!"
               })
             )
           }
