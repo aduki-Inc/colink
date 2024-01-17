@@ -1,14 +1,5 @@
 -- Your SQL goes here
 
--- Create templates table
-create table if not exists templates (
-  id serial primary key,
-  name varchar(500) not null,
-  description text not null,
-  layout json,
-  created_at timestamp with time zone default current_timestamp,
-  updated_at timestamp with time zone default current_timestamp
-);
 
 -- Check if the enum type exists
 do $$ 
@@ -27,16 +18,27 @@ begin
   end if;
 end $$;
 
+-- Create templates table
+create table if not exists templates (
+  id serial primary key,
+  name varchar(500) not null,
+  description text not null,
+  layout jsonb,
+  created_at timestamp with time zone default current_timestamp,
+  updated_at timestamp with time zone default current_timestamp
+);
+
+
 -- Create projects table
 create table if not exists projects (
   id serial primary key,
-  author integer references users(id) not null,
-  template integer references templates(id) not null,
+  author integer references users(id) on delete cascade not null,
+  template integer references templates(id) on delete cascade not null,
   title varchar(500) not null,
   field varchar(500) not null,
   type proposal_type not null,
-  public boolean default true,
-  active boolean default true,
+  public boolean not null default true,
+  active boolean not null default true,
   owned boolean not null default false,
   institution integer references institutions(id),
   description text,
@@ -46,7 +48,7 @@ create table if not exists projects (
 
 create table if not exists proposals(
   id serial primary key,
-  project integer unique references projects(id) not null,
+  project integer unique references projects(id) on delete cascade not null,
   summery text not null
 );
 
