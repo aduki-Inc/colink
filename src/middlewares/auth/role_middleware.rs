@@ -1,11 +1,8 @@
-// use core::fmt;
 use crate::db::schema::roles::dsl::*;
-// use crate::db::schema::roles;
 use crate::models::{system::{Role, RolePrivileges}, custom_types::RoleType};
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
-// use chrono::{Utc, Duration};
 
 
 // Check the role for user attempting to create, edit or delete other roles

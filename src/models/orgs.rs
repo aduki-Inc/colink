@@ -4,18 +4,17 @@ use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
 use crate::models::custom_types::{InstitutionType, OrgType};
 
-#[derive(Debug, Clone, Queryable, Selectable)]
+#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::orgs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
 pub struct Organization {
   pub id: i32,
   pub short_name: String,
   pub name: String,
-  pub base: OrgType,
-  pub in_type: InstitutionType,
   pub logo: Option<String>,
   pub contact: Option<Json>,
+  pub base: OrgType,
+  pub in_type: InstitutionType,
   pub active: Option<bool>,
   pub location: Option<String>,
   pub about: Option<String>,
