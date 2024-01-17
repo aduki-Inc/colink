@@ -13,9 +13,8 @@ use diesel::result::Error;
 use diesel::pg::PgConnection;
 // use chrono::{Utc, Duration};
 
-
-
-pub fn create_institution(user_id: &i32, &new_institution: Institution, conn: &mut PgConnection) => Result<Institution, Error> {
+//Creating the institution
+pub fn create_institution(user_id: &i32, &new_institution: Institution, conn: &mut PgConnection) -> Result<Institution, Error> {
   conn.transaction(|conn| {
     match diesel::insert_into(institutions::table).values(new_institution)
     .get_result::<Institution>(conn) {
@@ -33,7 +32,9 @@ pub fn create_institution(user_id: &i32, &new_institution: Institution, conn: &m
                   section: &section.id,
                   base: RoleType::Owner,
                   author: user_id,
-                  name: "Creator"
+                  name: "Creator".to_str(),
+                  privileges: None,
+                  expiry: None
                 };
 
                 match diesel::insert_into(roles::table).values(&new_role)
@@ -42,8 +43,8 @@ pub fn create_institution(user_id: &i32, &new_institution: Institution, conn: &m
                     let new_approval = InsertableApproval {
                       target: &institution.id,
                       name: &institution.name,
-                      approved: false,
-                      description: format!("Request to create an institution: {}", &institution.name)
+                      approved: Some(false),
+                      description: Some(format!("Request to create an institution: {}", &institution.name))
                     };
 
                     match diesel::insert_into(approvals::table).values(&new_approval)
