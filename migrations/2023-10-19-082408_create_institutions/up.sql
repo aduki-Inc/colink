@@ -26,7 +26,7 @@ create table if not exists institutions (
   logo varchar(500),
   contact jsonb,
   in_type institution_type not null,
-  active boolean default true,
+  active boolean default false,
   location varchar(500),
   about text,
   established date,
