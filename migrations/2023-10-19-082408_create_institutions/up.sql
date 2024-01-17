@@ -42,6 +42,7 @@ create table if not exists belongs (
   author integer references users(id) on delete cascade not null,
   institution integer references institution(id) on delete cascade not null;
   name varchar(500) not null;
+  identity varchar(500) not null,
   title varchar(500) not null;
   staff boolean default false;
   created_at timestamp with time zone default current_timestamp,
