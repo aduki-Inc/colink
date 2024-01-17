@@ -15,6 +15,19 @@ pub mod sql_types {
 }
 
 diesel::table! {
+    approvals (id) {
+        id -> Int4,
+        target -> Int4,
+        #[max_length = 250]
+        name -> Varchar,
+        approved -> Nullable<Bool>,
+        description -> Nullable<Text>,
+        created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
+    }
+}
+
+diesel::table! {
     belongs (id) {
         id -> Int4,
         author -> Int4,
@@ -176,6 +189,7 @@ diesel::joinable!(roles -> sections (section));
 diesel::joinable!(roles -> users (author));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    approvals,
     belongs,
     co_link,
     institutions,
