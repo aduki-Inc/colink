@@ -52,8 +52,9 @@ create table if not exists roles (
 create table if not exists approvals (
   id serial primary key,
   target integer not null,
-  name varchar(250) unique not null,
-  description text;
+  name varchar(250) not null,
+  approved boolean default false,
+  description text,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );
@@ -62,3 +63,4 @@ create table if not exists approvals (
 select diesel_manage_updated_at('co_link');
 select diesel_manage_updated_at('sections');
 select diesel_manage_updated_at('roles');
+select diesel_manage_updated_at('approvals');
