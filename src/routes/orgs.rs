@@ -5,5 +5,5 @@ pub fn org_config() -> Scope {
   web::scope("/api/v1/org")
   
     // Institution/Organization routes
-    .route("/create", web::put().to(create_institution))
+    .route("/create", web::put().to(create_org))
 }

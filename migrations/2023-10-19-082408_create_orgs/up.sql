@@ -7,8 +7,8 @@ begin
   if not exists (select 1 from pg_type where typname = 'org_type') then
     -- Create the enum type
     create type org_type as enum (
-      'organization',
-      'institution'
+      'org',
+      'ist'
     );
   end if;
 end $$;

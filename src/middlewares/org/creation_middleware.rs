@@ -1,33 +1,33 @@
-use crate::db::schema::institutions::dsl::*;
+use crate::db::schema::orgs::dsl::*;
 use crate::db::schema::roles::dsl::roles;
 use crate::db::schema::approvals::dsl::approvals;
 use crate::db::schema::sections::dsl::sections;
-use crate::models::{orgs::{Institution, InsertableInstitution}, system::{InsertableRole, NewSection, Section, InsertableApproval}};
-use crate::models::custom_types::RoleType;
+use crate::models::{orgs::{Organization, InsertableOrganization}, system::{InsertableRole, NewSection, Section, InsertableApproval}};
+use crate::models::custom_types::{RoleType, OrgType};
 use diesel::associations::HasTable;
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
 // use chrono::{Utc, Duration};
 
-pub fn institution_exists(unique_name: &str, inst_name: &str, conn: &mut PgConnection) -> Result<bool, Error> {
-  match institutions.filter(short_name.eq(unique_name).and(name.eq(inst_name))).first::<Institution>(conn) {
+pub fn org_exists(unique_name: &str, inst_name: &str, conn: &mut PgConnection) -> Result<bool, Error> {
+  match orgs.filter(short_name.eq(unique_name).and(name.eq(inst_name))).first::<Organization>(conn) {
     Ok(_) => Ok(true),
     Err(Error::NotFound) => Ok(false),
     Err(err) => Err(err),
   }
 }
 
-//Creating the institution
-pub fn institution_created(user_id: &i32, new_institution: &InsertableInstitution, conn: &mut PgConnection) -> Result<Institution, Error> {
+//Creating the Organization
+pub fn org_created(user_id: &i32, new_org: &InsertableOrganization, conn: &mut PgConnection) -> Result<Organization, Error> {
   conn.transaction(|conn| {
-    match diesel::insert_into(institutions::table()).values(new_institution)
-    .get_result::<Institution>(conn) {
-        Ok(institution) => {
+    match diesel::insert_into(orgs::table()).values(new_org)
+    .get_result::<Organization>(conn) {
+        Ok(org) => {
           let new_section = NewSection {
-            name: institution.short_name.clone(),
-            target_id: institution.id.clone(),
-            target_name: institution.name.clone()
+            name: org.short_name.clone(),
+            target_id: org.id.clone(),
+            target_name: org.name.clone()
           };
 
           match diesel::insert_into(sections::table()).values(&new_section)
@@ -45,16 +45,21 @@ pub fn institution_created(user_id: &i32, new_institution: &InsertableInstitutio
                 match diesel::insert_into(roles::table()).values(&new_role)
                 .execute(conn) {
                   Ok(_) => {
+                    let org_name: String = match org.base {
+                      OrgType::Ist => "Institution".to_owned(),
+                      OrgType::Org => "Organization".to_owned(),
+                      _=> "Organization".to_owned()
+                    };
                     let new_approval = InsertableApproval {
-                      target: institution.id,
-                      name: "institution".to_owned(),
+                      target: org.id,
+                      name: "org".to_owned(),
                       approved: Some(false),
-                      description: Some(format!("Request to create an institution: {}", &institution.name))
+                      description: Some(format!("Request to create an {}: {}", &org_name, &org.name))
                     };
 
                     match diesel::insert_into(approvals::table()).values(&new_approval)
                     .execute(conn) {
-                      Ok(_) => Ok(institution),
+                      Ok(_) => Ok(org),
                       Err(err) => Err(err)
                     }
                   }
