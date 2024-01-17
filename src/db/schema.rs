@@ -15,6 +15,23 @@ pub mod sql_types {
 }
 
 diesel::table! {
+    belongs (id) {
+        id -> Int4,
+        author -> Int4,
+        institution -> Int4,
+        #[max_length = 500]
+        name -> Varchar,
+        #[max_length = 500]
+        identity -> Varchar,
+        #[max_length = 500]
+        title -> Varchar,
+        staff -> Nullable<Bool>,
+        created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
+    }
+}
+
+diesel::table! {
     co_link (id) {
         id -> Int4,
         #[max_length = 500]
@@ -39,7 +56,7 @@ diesel::table! {
         name -> Varchar,
         #[max_length = 500]
         logo -> Nullable<Varchar>,
-        contact -> Nullable<Json>,
+        contact -> Nullable<Jsonb>,
         in_type -> InstitutionType,
         active -> Nullable<Bool>,
         #[max_length = 500]
@@ -67,8 +84,8 @@ diesel::table! {
         field -> Varchar,
         #[sql_name = "type"]
         type_ -> ProposalType,
-        public -> Nullable<Bool>,
-        active -> Nullable<Bool>,
+        public -> Bool,
+        active -> Bool,
         owned -> Bool,
         institution -> Nullable<Int4>,
         description -> Nullable<Text>,
@@ -122,7 +139,7 @@ diesel::table! {
         #[max_length = 500]
         name -> Varchar,
         description -> Text,
-        layout -> Nullable<Json>,
+        layout -> Nullable<Jsonb>,
         created_at -> Nullable<Timestamptz>,
         updated_at -> Nullable<Timestamptz>,
     }
@@ -149,6 +166,8 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(belongs -> institutions (institution));
+diesel::joinable!(belongs -> users (author));
 diesel::joinable!(projects -> institutions (institution));
 diesel::joinable!(projects -> templates (template));
 diesel::joinable!(projects -> users (author));
@@ -157,6 +176,7 @@ diesel::joinable!(roles -> sections (section));
 diesel::joinable!(roles -> users (author));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    belongs,
     co_link,
     institutions,
     projects,

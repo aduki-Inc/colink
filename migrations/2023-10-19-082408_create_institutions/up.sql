@@ -40,11 +40,11 @@ create table if not exists institutions (
 create table if not exists belongs (
   id serial primary key,
   author integer references users(id) on delete cascade not null,
-  institution integer references institution(id) on delete cascade not null;
-  name varchar(500) not null;
+  institution integer references institutions(id) on delete cascade not null,
+  name varchar(500) not null,
   identity varchar(500) not null,
-  title varchar(500) not null;
-  staff boolean default false;
+  title varchar(500) not null,
+  staff boolean default false,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );
