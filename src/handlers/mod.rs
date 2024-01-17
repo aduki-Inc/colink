@@ -1,3 +1,3 @@
 pub mod auth;
 pub mod error_handlers;
-pub mod institution;
+pub mod org;

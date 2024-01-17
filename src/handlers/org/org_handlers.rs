@@ -1,15 +1,15 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
-use diesel::prelude::*;
-use diesel::result::{Error, DatabaseErrorKind};
-use chrono::{Utc, Duration, NaiveDateTime, NaiveDate};
+// use diesel::prelude::*;
+// use diesel::result::{Error, DatabaseErrorKind};
+use chrono::NaiveDate;
 use crate::db::connection::establish_connection;
-use crate::db::schema::roles;
-use crate::db::schema::roles::dsl::*;
-use crate::models::institutions::{ Institution, NewInstitution, InsertableInstitution };
+// use crate::db::schema::institutions;
+// use crate::db::schema::institutions::dsl::*;
+use crate::models::orgs::{NewInstitution, InsertableInstitution };
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::auth_middleware::{JwtMiddleware, Claims};
-use crate::middlewares::institution::creation_middleware::*;
+use crate::middlewares::org::creation_middleware::*;
 
 
 // Handler for creating new institution
@@ -27,18 +27,19 @@ pub async fn create_institution(req: HttpRequest, _: JwtMiddleware, app_data: we
     match institution_data.validate() {
       Ok(new_institution) => {
 
-        let established_date = match Some(NaiveDate::parse_from_str(&new_institution.established, "%Y-%m-%d")){
-          Some(created_date) => created_date,
-          None => None,
-          Err(_) => None
+        let established_str = new_institution.established.unwrap();
+
+        let established_date: Option<NaiveDate> = match NaiveDate::parse_from_str(&established_str, "%Y-%m-%d"){
+          Ok(created_date) => Some(created_date),
+          Err(_) => None,
         };
 
         let institution = InsertableInstitution {
-          short_name: &new_institution.short_name,
-          in_type: &new_institution.in_type,
-          name: &new_institution.name,
-          active: &new_institution.active,
-          established: &established_date
+          short_name: new_institution.short_name,
+          in_type: new_institution.in_type,
+          name: new_institution.name,
+          active: new_institution.active,
+          established: established_date
         };
 
         match institution_exists(&institution.short_name, &institution.name, &mut conn) {

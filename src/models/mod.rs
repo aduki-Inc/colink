@@ -1,4 +1,4 @@
 pub mod users;
-pub mod institutions;
+pub mod orgs;
 pub mod  custom_types;
 pub mod system;

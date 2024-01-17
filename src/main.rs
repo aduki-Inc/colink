@@ -43,6 +43,7 @@ async fn main() -> std::io::Result<()> {
 			.wrap(cors)
 			.wrap(Logger::default())
 			.service(routes::auth::auth_config())
+			.service(routes::orgs::orgs_config())
 	})
 	.bind(("127.0.0.1", 8080))?
 	.run()

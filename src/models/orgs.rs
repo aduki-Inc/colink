@@ -1,11 +1,10 @@
 use diesel::prelude::*;
-use chrono::{NaiveDateTime, NaiveDate};
+use chrono::{NaiveDateTime, NaiveDate, Local};
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
 use crate::models::custom_types::InstitutionType;
-use chrono::{NaiveDate, Local};
 
-#[derive(Queryable, Selectable)]
+#[derive(Debug, Clone, Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::institutions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
@@ -47,17 +46,18 @@ impl NewInstitution {
 		}
 
     if self.established.is_some() {
-      match NaiveDate::parse_from_str(self.established, "%Y-%m-%d"){
-        Ok(parse_date) => {
-          let today_date = Local::today().naive_utc();
-          if today_date < parse_date || today_date == parse_date {
-            return Err("Establishment date cannot be today or in the future!".to_string())
-          }
-        },
-        Err(_) => Err("Error converting the date!".to_string())
-      }
-    }
+      let parse_date = NaiveDate::parse_from_str(&self.established.clone().unwrap(), "%Y-%m-%d");
 
+      if parse_date.is_err() {
+        return  Err("Error converting the date!".to_string());
+      } else {
+        let today_date = Local::now().naive_utc().date();
+        if today_date < parse_date.unwrap() || today_date == parse_date.unwrap() {
+          return Err("Establishment date cannot be today or in the future!".to_string());
+        }
+      }
+  
+    }
 		// If all checks pass, return the validated NewSection
 		Ok(self.clone())
 	}
