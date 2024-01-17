@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 // use crate::db::schema::RoleType;
 use crate::models::custom_types::RoleType;
 
+
+
+// - Colink
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::co_link)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -18,6 +21,9 @@ pub struct Colink {
   pub updated_at: Option<NaiveDateTime>
 }
 
+
+
+// - Section
 #[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -78,6 +84,8 @@ impl SectionIdentity {
 }
 
 
+
+// - Roles
 #[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::roles)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -178,7 +186,6 @@ impl RolePrivileges {
 	}
 }
 
-
 #[derive(Clone, Serialize, Deserialize)]
 pub struct RoleExpiry {
   pub id: i32,
@@ -202,4 +209,20 @@ impl RoleExpiry {
 		// If all checks pass, return the validated NewSection
 		Ok(self.clone())
 	}
+}
+
+
+// - Approvals 
+
+#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
+#[diesel(table_name = crate::db::schema::approvals)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Section {
+  pub id: i32,
+  pub target: i32,
+  pub name: String,
+  pub approved: Option<bool>,
+  pub description: Option<String>,
+  pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>
 }

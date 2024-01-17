@@ -21,4 +21,22 @@ pub struct Institution {
   pub established: Option<NaiveDate>,
   pub picture: Option<String>,
   pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>
+}
+
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::db::schema::belongs)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Serialize, Deserialize)]
+pub struct Belong {
+  pub id: i32,
+  pub author: i32,
+  pub institution: i32,
+  pub name: String,
+  pub identity: String,
+  pub title: String,
+  pub staff: Option<bool>,
+  pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>
 }
