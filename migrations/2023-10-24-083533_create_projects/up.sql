@@ -49,10 +49,13 @@ create table if not exists projects (
 create table if not exists proposals(
   id serial primary key,
   project integer unique references projects(id) on delete cascade not null,
-  summery text not null
+  summery text not null,
+  created_at timestamp with time zone default current_timestamp,
+  updated_at timestamp with time zone default current_timestamp
 );
 
 
 -- Create a trigger to run everytime field is updated
 select diesel_manage_updated_at('projects');
 select diesel_manage_updated_at('templates');
+select diesel_manage_updated_at('proposals');

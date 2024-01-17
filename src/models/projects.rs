@@ -26,6 +26,18 @@ pub struct Project {
 
 
 #[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::db::schema::proposals)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Serialize, Deserialize)]
+pub struct Project {
+  pub id: i32,
+  pub project: i32,
+  pub summery: String,
+  pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>
+}
+
+#[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::db::schema::templates)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
