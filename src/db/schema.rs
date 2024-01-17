@@ -6,6 +6,10 @@ pub mod sql_types {
     pub struct InstitutionType;
 
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "org_type"))]
+    pub struct OrgType;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "proposal_type"))]
     pub struct ProposalType;
 
@@ -31,7 +35,7 @@ diesel::table! {
     belongs (id) {
         id -> Int4,
         author -> Int4,
-        institution -> Int4,
+        org -> Int4,
         #[max_length = 500]
         name -> Varchar,
         #[max_length = 500]
@@ -59,9 +63,10 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
+    use super::sql_types::OrgType;
     use super::sql_types::InstitutionType;
 
-    institutions (id) {
+    orgs (id) {
         id -> Int4,
         #[max_length = 250]
         short_name -> Varchar,
@@ -70,6 +75,7 @@ diesel::table! {
         #[max_length = 500]
         logo -> Nullable<Varchar>,
         contact -> Nullable<Jsonb>,
+        base -> OrgType,
         in_type -> InstitutionType,
         active -> Nullable<Bool>,
         #[max_length = 500]
@@ -100,7 +106,7 @@ diesel::table! {
         public -> Bool,
         active -> Bool,
         owned -> Bool,
-        institution -> Nullable<Int4>,
+        org -> Nullable<Int4>,
         description -> Nullable<Text>,
         created_at -> Nullable<Timestamptz>,
         updated_at -> Nullable<Timestamptz>,
@@ -181,9 +187,9 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(belongs -> institutions (institution));
+diesel::joinable!(belongs -> orgs (org));
 diesel::joinable!(belongs -> users (author));
-diesel::joinable!(projects -> institutions (institution));
+diesel::joinable!(projects -> orgs (org));
 diesel::joinable!(projects -> templates (template));
 diesel::joinable!(projects -> users (author));
 diesel::joinable!(proposals -> projects (project));
@@ -194,7 +200,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     approvals,
     belongs,
     co_link,
-    institutions,
+    orgs,
     projects,
     proposals,
     roles,

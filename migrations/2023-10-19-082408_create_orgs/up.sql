@@ -1,5 +1,18 @@
 -- Your SQL goes here
 
+
+-- Check if the enum type exists
+do $$ 
+begin
+  if not exists (select 1 from pg_type where typname = 'org_type') then
+    -- Create the enum type
+    create type org_type as enum (
+      'organization',
+      'institution'
+    );
+  end if;
+end $$;
+
 -- Check if the enum type exists
 do $$ 
 begin
@@ -12,19 +25,21 @@ begin
       'university',
       'vocational',
       'technical',
+      'org',
       'other'
     );
   end if;
 end $$;
 
 
--- Create institutions table
-create table if not exists institutions (
+-- Create organizations table
+create table if not exists orgs (
   id serial primary key,
   short_name varchar(250) not null unique,
   name varchar(500) not null,
   logo varchar(500),
   contact jsonb,
+  base org_type not null,
   in_type institution_type not null,
   active boolean default false,
   location varchar(500),
@@ -40,7 +55,7 @@ create table if not exists institutions (
 create table if not exists belongs (
   id serial primary key,
   author integer references users(id) on delete cascade not null,
-  institution integer references institutions(id) on delete cascade not null,
+  org integer references orgs(id) on delete cascade not null,
   name varchar(500) not null,
   identity varchar(500) not null,
   title varchar(500) not null,
@@ -51,6 +66,6 @@ create table if not exists belongs (
 
 
 -- Create a trigger to run everytime field is updated
-select diesel_manage_updated_at('institutions');
+select diesel_manage_updated_at('orgs');
 select diesel_manage_updated_at('belongs');
 

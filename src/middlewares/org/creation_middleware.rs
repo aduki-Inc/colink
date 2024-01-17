@@ -47,7 +47,7 @@ pub fn institution_created(user_id: &i32, new_institution: &InsertableInstitutio
                   Ok(_) => {
                     let new_approval = InsertableApproval {
                       target: institution.id,
-                      name: institution.name.clone(),
+                      name: "institution".to_owned(),
                       approved: Some(false),
                       description: Some(format!("Request to create an institution: {}", &institution.name))
                     };

@@ -40,7 +40,7 @@ create table if not exists projects (
   public boolean not null default true,
   active boolean not null default true,
   owned boolean not null default false,
-  institution integer references institutions(id),
+  org integer references orgs(id),
   description text,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
