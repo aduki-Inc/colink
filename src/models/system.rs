@@ -47,7 +47,6 @@ pub struct NewSection {
   pub target_name: String
 }
 
-
 // Validate Section Data
 impl NewSection {
 	pub fn validate(&self) -> Result<NewSection, String> {
@@ -224,4 +223,14 @@ pub struct Approval {
   pub description: Option<String>,
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>
+}
+
+#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
+#[diesel(table_name = crate::db::schema::approvals)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertableApproval {
+  pub target: i32,
+  pub name: String,
+  pub approved: Option<bool>,
+  pub description: Option<String>,
 }

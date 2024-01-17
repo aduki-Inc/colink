@@ -2,10 +2,12 @@ use crate::db::schema::roles::dsl::*;
 use crate::db::schema::institutions::dsl::*;
 use crate::db::schema::approvals::dsl::*;
 use crate::db::schema::belongs::dsl::*;
+use crate::db::schema::sections::dsl::*;
+use crate::models::system::Approval;
 // use crate::db::schema::roles;
-use crate::models::{institutions::{Institution, Belong}, system::Approvals};
-
-use crate::models::{system::{Role, RolePrivileges}, custom_types::RoleType};
+use crate::models::{institutions::{Institution, Belong}, system::{InsertableRole, NewSection, Section, InsertableApproval}};
+use crate::models::custom_types::RoleType;
+use diesel::associations::HasTable;
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
@@ -13,30 +15,51 @@ use diesel::pg::PgConnection;
 
 
 
-pub fn create_institution(user_id: &i32, &institution: Institution, conn: &mut PgConnection) {
-  
-}
+pub fn create_institution(user_id: &i32, &new_institution: Institution, conn: &mut PgConnection) => Result<Institution, Error> {
+  conn.transaction(|conn| {
+    match diesel::insert_into(institutions::table).values(new_institution)
+    .get_result::<Institution>(conn) {
+        Ok(institution) => {
+          let new_section = NewSection {
+            name: &institution.short_name,
+            target_id: &institution.id,
+            target_name: &institution.short_name
+          };
 
+          match diesel::insert_into(sections::table).values(&new_section)
+          .get_result::<Section>(conn) {
+              Ok(section) => {
+                let new_role = InsertableRole {
+                  section: &section.id,
+                  base: RoleType::Owner,
+                  author: user_id,
+                  name: "Creator"
+                };
 
+                match diesel::insert_into(roles::table).values(&new_role)
+                .execute(conn) {
+                  Ok(_) => {
+                    let new_approval = InsertableApproval {
+                      target: &institution.id,
+                      name: &institution.name,
+                      approved: false,
+                      description: format!("Request to create an institution: {}", &institution.name)
+                    };
 
-
-// Check the role for user attempting to create, edit or delete other roles
-pub fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, conn: &mut PgConnection) -> Result<bool, Error> {
-  match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
-    Ok(role) => {
-      match role.base {
-        RoleType::Owner => Ok(true),
-        RoleType::Admin => {
-          match role_type {
-            RoleType::Owner => Ok(false),
-            RoleType::Admin => Ok(false),
-            _=>Ok(true)
+                    match diesel::insert_into(approvals::table).values(&new_approval)
+                    .execute(conn) {
+                      Ok(_) => Ok(institution),
+                      Err(err) => Err(err)
+                    }
+                  }
+                  Err(err) => Err(err)
+                }
+                
+              }
+              Err(err) => Err(err)
           }
         }
-        _=> Ok(false)
-      }
-    },
-    Err(Error::NotFound) => Ok(false),
-    Err(err) => Err(err),
-  }
+        Err(err) => Err(err)
+    }
+  })
 }
