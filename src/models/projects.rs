@@ -29,7 +29,7 @@ pub struct Project {
 #[diesel(table_name = crate::db::schema::proposals)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
-pub struct Project {
+pub struct Proposal {
   pub id: i32,
   pub project: i32,
   pub summery: String,

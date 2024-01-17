@@ -213,11 +213,10 @@ impl RoleExpiry {
 
 
 // - Approvals 
-
 #[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::approvals)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct Section {
+pub struct Approval {
   pub id: i32,
   pub target: i32,
   pub name: String,
