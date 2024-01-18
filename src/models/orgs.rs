@@ -34,7 +34,7 @@ pub struct NewOrganization {
   pub established: Option<String>
 }
 
-// Validate NewOrganization Data
+// Validate NewOrganization
 impl NewOrganization {
 	pub fn validate(&self) -> Result<NewOrganization, String> {
 		// Check if required fields are present
