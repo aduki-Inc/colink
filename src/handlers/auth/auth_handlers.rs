@@ -139,7 +139,7 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 			Ok(true) => {
 				// Password is correct
 				// Generate a JWT for the user
-				let jwt_result = generate_jwt(user.id, &user.username, &user.email);
+				let jwt_result = generate_jwt(user.id, &user.username, &user.name, &user.email);
 				match jwt_result {
 					Ok(jwt) => {
 						// Respond with a successful login message, user info, and the generated JWT

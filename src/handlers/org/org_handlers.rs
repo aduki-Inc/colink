@@ -61,7 +61,7 @@ pub async fn create_org(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<
           }
 
           Ok(false) => {
-            match org_created(&user.id, &org, &mut conn) {
+            match org_created(&user.id, &user.full_name, &org, &mut conn) {
               Ok(created_org) => {
                 return HttpResponse::Ok().json(
                   json!({
@@ -168,7 +168,7 @@ pub async fn add_org_member(req: HttpRequest, _: JwtMiddleware, app_data: web::D
                       json!({
                         "success": true,
                         "belong": created_belong,
-                        "message": format!("{} was successfully added as a {} ", &created_belong.name, &created_belong.identity)
+                        "message": format!("{} was successfully added as a {} ", &created_belong.name, &created_belong.title)
                       })
                     )
                   }

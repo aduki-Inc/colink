@@ -42,7 +42,7 @@ impl NewOrganization {
 			return Err("Short name(abbreviated name) must be between 2 and 100 chars!".to_string());
 		}
 
-    if self.name.len() < 5 || self.name.len() < 500 {
+    if self.name.len() < 5 || self.name.len() > 500 {
 			return Err("Name must be between 5 and 500 chars!".to_string());
 		}
 

@@ -34,6 +34,7 @@ diesel::table! {
 diesel::table! {
     belongs (id) {
         id -> Int4,
+        active -> Nullable<Bool>,
         author -> Int4,
         org -> Int4,
         #[max_length = 500]

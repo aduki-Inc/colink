@@ -16,6 +16,7 @@ use jsonwebtoken::{encode, decode, DecodingKey, Validation, Header, Algorithm, E
 pub struct UserClaims {
   pub id: i32,
   pub username: String,
+  pub full_name: String,
   pub email: String,
 }
 
@@ -55,7 +56,7 @@ pub fn username_exists(other_username: &str, conn: &mut PgConnection) -> bool {
 }
 
 // Function to generate the jwt
-pub fn generate_jwt(user_id: i32, other_username: &str, other_email: &str) -> Result<String, jsonwebtoken::errors::Error> {
+pub fn generate_jwt(user_id: i32, other_username: &str, full_name: &str, other_email: &str) -> Result<String, jsonwebtoken::errors::Error> {
   let config = Config::init();
     
   // Set the expiration time for the token (e.g., 1 hour from now)
@@ -68,6 +69,7 @@ pub fn generate_jwt(user_id: i32, other_username: &str, other_email: &str) -> Re
   let user_claims = UserClaims {
     id: user_id,
     username: other_username.to_string(),
+    full_name: full_name.to_string(),
     email: other_email.to_string()
   };
 
