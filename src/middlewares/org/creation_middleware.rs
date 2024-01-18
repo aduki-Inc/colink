@@ -29,9 +29,10 @@ pub fn org_created(user_id: &i32, new_org: &InsertableOrganization, conn: &mut P
     .get_result::<Organization>(conn) {
         Ok(org) => {
           let new_section = NewSection {
+            identity: org.short_name.clone(),
+            target: org.id.clone(),
             name: org.short_name.clone(),
-            target_id: org.id.clone(),
-            target_name: org.name.clone()
+            description: Some(format!("Section for {}", &org.name))
           };
 
           match diesel::insert_into(sections::table).values(&new_section)

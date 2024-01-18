@@ -30,7 +30,7 @@ pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
           return HttpResponse::Conflict().json(
             json!({
               "success": false,
-              "message": "Section already exists"
+              "message": "Similar section already exists"
             })
           );
         }
@@ -94,12 +94,12 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
     match section_data.validate() {
       Ok(validated_data) => {
         // Check if the section already exists
-        match section_deleted(&validated_data.id, &validated_data.name, &mut conn) {
+        match section_deleted(&validated_data.id, &validated_data.identity, &mut conn) {
           Ok(true) => {
             return HttpResponse::Ok().json(
               json!({
                 "success": true,
-                "message": format!("Section: {} is deleted successfully!", &validated_data.name)
+                "message": format!("Section: {} is deleted successfully!", &validated_data.identity)
               })
             )
           }
@@ -108,7 +108,7 @@ pub async fn delete_section(req: HttpRequest, _: JwtMiddleware, app_data: web::D
             return HttpResponse::NotFound().json(
               json!({
                 "success": false,
-                "message": format!("Section: {} does not exists!", &validated_data.name)
+                "message": format!("Section: {} does not exists!", &validated_data.identity)
               })
             )
           }

@@ -29,9 +29,10 @@ pub struct Colink {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Section {
   pub id: i32,
+  pub identity: String,
+  pub target: i32,
   pub name: String,
-  pub target_id: i32,
-  pub target_name: String,
+  pub description: Option<String>,
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>
 }
@@ -42,18 +43,25 @@ pub struct Section {
 #[diesel(table_name = crate::db::schema::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct NewSection {
+  pub identity: String,
+  pub target: i32,
   pub name: String,
-  pub target_id: i32,
-  pub target_name: String
+  pub description: Option<String>,
 }
 
 // Validate Section Data
 impl NewSection {
 	pub fn validate(&self) -> Result<NewSection, String> {
 		// Check if required fields are present
-		if self.name.len() < 2 {
-			return Err("Section name must be 2 chars or more!".to_string());
+		if self.identity.len() < 2 && self.identity.len() > 250 {
+			return Err("Section name must between 2 and 250 chars or more!".to_string());
 		}
+
+    if self.description.is_some() {
+      if self.description.clone().unwrap().len() < 2 && self.description.clone().unwrap().len() > 250 {
+        return Err("Section name must be between 2 and 500 chars or more!".to_string());
+      }
+    }
 
 		// If all checks pass, return the validated NewSection
 		Ok(self.clone())
@@ -66,7 +74,7 @@ impl NewSection {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct SectionIdentity {
   pub id: i32,
-  pub name: String
+  pub identity: String
 }
 
 // Validate SectionIdentity Data
