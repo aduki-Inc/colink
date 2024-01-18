@@ -53,13 +53,13 @@ pub struct NewSection {
 impl NewSection {
 	pub fn validate(&self) -> Result<NewSection, String> {
 		// Check if required fields are present
-		if self.identity.len() < 2 && self.identity.len() > 250 {
-			return Err("Section name must between 2 and 250 chars or more!".to_string());
+		if self.identity.len() < 2 || self.identity.len() > 250 {
+			return Err("Section name must between 2 and 250 chars!".to_string());
 		}
 
     if self.description.is_some() {
-      if self.description.clone().unwrap().len() < 2 && self.description.clone().unwrap().len() > 250 {
-        return Err("Section name must be between 2 and 500 chars or more!".to_string());
+      if self.description.clone().unwrap().len() < 2 || self.description.clone().unwrap().len() > 250 {
+        return Err("Section name must be between 2 and 500 chars!".to_string());
       }
     }
 
@@ -122,8 +122,8 @@ pub struct NewRole {
 impl NewRole {
 	pub fn validate(&self) -> Result<NewRole, String> {
 		// Check if required fields are present
-		if self.name.len() < 3 {
-			return Err("Role name must be 3 chars or more!".to_string());
+		if self.name.len() < 3 || self.name.len() > 500 {
+			return Err("Role name must be between 3 and 500 chars!".to_string());
 		}
 
     if self.expiry.is_some() {

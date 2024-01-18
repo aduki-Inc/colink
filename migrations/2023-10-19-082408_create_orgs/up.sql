@@ -54,6 +54,7 @@ create table if not exists orgs (
 --Create belongs table 
 create table if not exists belongs (
   id serial primary key,
+  active boolean default true,
   author integer references users(id) on delete cascade not null,
   org integer references orgs(id) on delete cascade not null,
   name varchar(500) not null,

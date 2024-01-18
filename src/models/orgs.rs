@@ -38,12 +38,12 @@ pub struct NewOrganization {
 impl NewOrganization {
 	pub fn validate(&self) -> Result<NewOrganization, String> {
 		// Check if required fields are present
-		if self.short_name.len() < 2 {
-			return Err("Short name(abbreviated name) must be 2 chars or more!".to_string());
+		if self.short_name.len() < 2 || self.short_name.len() > 100 {
+			return Err("Short name(abbreviated name) must be between 2 and 100 chars!".to_string());
 		}
 
-    if self.name.len() < 5 {
-			return Err("Name must be 5 chars or more!".to_string());
+    if self.name.len() < 5 || self.name.len() < 500 {
+			return Err("Name must be between 5 and 500 chars!".to_string());
 		}
 
     if self.established.is_some() {
@@ -65,7 +65,7 @@ impl NewOrganization {
 }
 
 
-#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
+#[derive(Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::orgs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct InsertableOrganization{
@@ -78,12 +78,12 @@ pub struct InsertableOrganization{
 }
 
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::belongs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
 pub struct Belong {
   pub id: i32,
+  pub active: Option<bool>,
   pub author: i32,
   pub org: i32,
   pub name: String,
@@ -92,4 +92,76 @@ pub struct Belong {
   pub staff: Option<bool>,
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>
+}
+
+
+#[derive(Insertable, Clone, Serialize, Deserialize)]
+#[diesel(table_name = crate::db::schema::belongs)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertableBelong {
+  pub author: i32,
+  pub org: i32,
+  pub name: String,
+  pub identity: String,
+  pub title: String,
+  pub staff: Option<bool>
+}
+
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct BelongIntermediate {
+  pub user: i32,
+  pub section: i32,
+  pub date: Option<String>
+}
+
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct NewBelong {
+  pub author: i32,
+  pub org: i32,
+  pub section: i32,
+  pub name: String,
+  pub identity: String,
+  pub title: String,
+  pub date: Option<String>,
+  pub staff: Option<bool>
+}
+
+
+// Validate NewBelong
+impl NewBelong {
+	pub fn validate(&self) -> Result<NewBelong, String> {
+		// Check if required fields are present
+		if self.name.len() < 5 || self.name.len() > 500 {
+			return Err("Member name must be between 5 and 500 chars!".to_string());
+		}
+
+    if self.identity.len() < 2 || self.identity.len() > 100 {
+			return Err("Identity Role must be between 5 and 100 chars!".to_string());
+		}
+
+    if self.date.is_some() {
+      let parse_date = NaiveDate::parse_from_str(&self.date.clone().unwrap(), "%Y-%m-%d");
+
+      if parse_date.is_err() {
+        return  Err("Error converting the date!".to_string());
+      } else {
+        let today_date = Local::now().naive_utc().date();
+        if today_date > parse_date.unwrap() || today_date == parse_date.unwrap() {
+          return Err("Member Expiry date cannot be today or in the past!".to_string());
+        }
+      }
+  
+    }
+		// If all checks pass, return the validated NewSection
+		Ok(self.clone())
+	}
+}
+
+#[derive(Debug,Serialize, Deserialize, Clone)]
+pub enum BelongReturn {
+  UnAuthorized,
+  AlreadyExists,
+  SomeError
 }
