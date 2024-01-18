@@ -52,7 +52,7 @@ pub async fn create_org(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<
             return HttpResponse::Conflict().json(
               json!({
                 "success": false,
-                "message": format!("Similar {} already exists!", &org_name)
+                "message": format!("Similar {} with similar name or short_name(abbr) already exists!", &org_name)
               })
             )
           }
