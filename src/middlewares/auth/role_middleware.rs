@@ -32,9 +32,9 @@ pub fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, co
 pub fn check_member_authority(user_id: &i32, section_id: &i32, permission: &OrgPermission, conn: &mut PgConnection) -> Result<bool, Error> {
   match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
     Ok(role) => {
-      match role.privileges.get(permission.title) {
+      match role.privileges.get(&permission.title) {
        Some(members) => {
-        match members.as_array().and_then(|arr| arr.iter().find(|&v|v == permission.name)){
+        match members.as_array().and_then(|arr| arr.iter().find(|&v|v == &permission.name)){
           Some(delete_permission) => Ok(true),
           None => Ok(false)
         }
