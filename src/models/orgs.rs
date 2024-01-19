@@ -86,6 +86,7 @@ pub struct Belong {
   pub active: Option<bool>,
   pub author: i32,
   pub org: i32,
+  pub section: i32,
   pub name: String,
   pub identity: String,
   pub title: String,
@@ -101,6 +102,7 @@ pub struct Belong {
 pub struct InsertableBelong {
   pub author: i32,
   pub org: i32,
+  pub section: i32,
   pub name: String,
   pub identity: String,
   pub title: String,
@@ -164,7 +166,6 @@ pub struct EditBelong {
   pub id: i32,
   pub section: i32,
   pub author: i32,
-  pub org: i32,
   pub name: String,
   pub identity: String,
   pub title: String,

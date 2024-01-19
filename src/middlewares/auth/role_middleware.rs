@@ -45,6 +45,17 @@ pub fn role_deleted(other_id: &i32, conn: &mut PgConnection) -> Result<bool, Err
   }
 }
 
+
+pub fn role_belong_deleted(role_author: &i32, role_section: &i32, conn: &mut PgConnection) -> Result(bool, Error) {
+  match diesel::delete(roles.filter(author.eq(role_author).and(section.eq(role_section))))
+  .execute(conn) {
+    Ok(1) => Ok(true),
+    Ok(0) => Ok(false),
+    Err(err) => Err(err),
+    Ok(_) => Ok(false)
+  }s
+}
+
 pub fn privileges_updated(new_data: &RolePrivileges, conn: &mut PgConnection) -> Result<Role, Error> {
   match diesel::update(roles.filter(id.eq(new_data.id)))
   .set((

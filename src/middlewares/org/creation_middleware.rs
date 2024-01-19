@@ -45,6 +45,7 @@ pub fn org_created(user_id: &i32, user_name: &str, new_org: &InsertableOrganizat
                 let new_belong = InsertableBelong {
                   author: *user_id,
                   org: org.id.clone(),
+                  section: inserted_section.id,
                   name: (*user_name).to_string(),
                   identity: "Creator".to_owned(),
                   title: "Creator".to_owned(),

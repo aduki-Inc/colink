@@ -156,6 +156,7 @@ pub async fn add_org_member(req: HttpRequest, _: JwtMiddleware, app_data: web::D
                 let belong = InsertableBelong {
                   author: belong_data.author,
                   org: belong_data.org,
+                  section: belong_data.section,
                   name: belong_data.name,
                   identity: belong_data.identity,
                   title: belong_data.title,
