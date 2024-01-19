@@ -55,14 +55,22 @@ pub fn org_created(user_id: &i32, user_name: &str, new_org: &InsertableOrganizat
                 match diesel::insert_into(belongs::table).values(&new_belong)
                 .execute(conn) {
                   Ok(_) => {
+                    let roles_json = json!({
+                      "project": ["create", "read", "update", "delete"],
+                      "members": ["create", "read", "update", "delete"],
+                      "staff": ["create", "read", "update", "delete"]
+                    });
+            
                     let new_role = InsertableRole {
                       section: inserted_section.id,
                       base: RoleType::Owner,
                       author: *user_id,
                       name: "Creator".to_owned(),
-                      privileges: None,
+                      privileges: Some(roles_json),
                       expiry: None
                     };
+
+                    // print!("{:?}", new_role);
 
                     match diesel::insert_into(roles::table).values(&new_role)
                     .execute(conn) {
@@ -129,10 +137,10 @@ pub fn belongs_created(inter_m: &BelongIntermediate, data: &InsertableBelong, co
     .get_result::<Belong>(conn) {
       Ok(belong) => {
         let roles_json = json!({
-          "project": ["create", "read", "update", "delete"],
-          "members": ["create", "read", "update", "delete"],
-          "staff": ["create", "read", "update", "delete"]
+          "project": ["create", "read", "update", "delete"]
         });
+
+        // print!("{}", roles_json);
         
         let new_role = InsertableRole {
           section: inter_m.section,
@@ -142,6 +150,7 @@ pub fn belongs_created(inter_m: &BelongIntermediate, data: &InsertableBelong, co
           privileges: Some(roles_json),
           expiry: expiry_date
         };
+
         //Create Role
         match diesel::insert_into(roles::table).values(&new_role)
         .execute(conn) {

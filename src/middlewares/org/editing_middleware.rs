@@ -1,24 +1,24 @@
 use crate::db::schema::belongs::dsl::*;
-use crate::db::schema::belongs;
-use crate::models:: {Belong, EditBelong};
-use crate::models::custom_types::{RoleType, OrgType};
+// use crate::db::schema::belongs;
+use crate::models::orgs::{Belong, EditBelong};
+// use crate::models::custom_types::{RoleType, OrgType};
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
-use chrono::{NaiveDateTime, NaiveDate, NaiveTime};
-use crate::middlewares::auth::role_middleware::role_belong_created;
-use serde_json::json;
+// use chrono::{NaiveDateTime, NaiveDate, NaiveTime};
+use crate::middlewares::auth::role_middleware::role_belong_deleted;
+// use serde_json::json;
 
 // Updating the Org member/Belong
-pub fn belong_edited(user_id: &i32, belong_data: &EditBelong, conn: &mut PgConnection) -> Result<Belong, Error> {
+pub fn belong_edited(belong_data: &EditBelong, conn: &mut PgConnection) -> Result<Belong, Error> {
   match diesel::update(belongs.filter(id.eq(belong_data.id)))
   .set((
-    identity.eq(belong_data.identity),
-    name.eq(belong_data.name),
-    title.eq(belong_data.title)
+    identity.eq(&belong_data.identity),
+    name.eq(&belong_data.name),
+    title.eq(&belong_data.title)
   ))
-  .get_result::<Role>(conn) {
-    Ok(role) => Ok(role),
+  .get_result::<Belong>(conn) {
+    Ok(belong) => Ok(belong),
     Err(Error::NotFound) => Err(Error::NotFound),
     Err(err) => Err(err)
   }
@@ -26,8 +26,8 @@ pub fn belong_edited(user_id: &i32, belong_data: &EditBelong, conn: &mut PgConne
 
 
 // Updating the Org member/Belong - Staff status
-pub fn belong_staff_edited(user_id: &i32, staff_status: &bool, conn: &mut PgConnection) -> Result<Belong, Error> {
-  match diesel::update(belongs.filter(id.eq(belong_data.id)))
+pub fn belong_staff_edited(belong_id: &i32, staff_status: &bool, conn: &mut PgConnection) -> Result<Belong, Error> {
+  match diesel::update(belongs.filter(id.eq(belong_id)))
   .set(staff.eq(staff_status))
   .get_result::<Belong>(conn) {
     Ok(belong) => Ok(belong),
@@ -37,13 +37,13 @@ pub fn belong_staff_edited(user_id: &i32, staff_status: &bool, conn: &mut PgConn
 }
 
 // Updating the Org member/Belong - Remove member
-pub fn member_removed(role_author: &i32, role_section: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
+pub fn member_removed(role_author: &i32, role_section: &i32, belong_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
   conn.transaction(|conn| {
 
     // First delete role associated with the member
-    match role_belong_created(role_author, role_section, conn){
+    match role_belong_deleted(role_author, role_section, conn){
       Ok(true) => {
-        match diesel::update(belongs.filter(id.eq(belong_data.id)))
+        match diesel::update(belongs.filter(id.eq(belong_id)))
         .set(active.eq(false))
         .execute(conn) {
           Ok(_) => Ok(true),

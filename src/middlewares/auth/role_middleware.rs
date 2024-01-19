@@ -32,10 +32,11 @@ pub fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, co
 pub fn check_member_authority(user_id: &i32, section_id: &i32, permission: &OrgPermission, conn: &mut PgConnection) -> Result<bool, Error> {
   match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
     Ok(role) => {
-      match role.privileges.get(&permission.title) {
+      // println!("{:?}", &role);
+      match role.privileges.expect("REASON").get(&permission.title) {
        Some(members) => {
         match members.as_array().and_then(|arr| arr.iter().find(|&v|v == &permission.name)){
-          Some(delete_permission) => Ok(true),
+          Some(_delete_permission) => Ok(true),
           None => Ok(false)
         }
        }
@@ -67,14 +68,14 @@ pub fn role_deleted(other_id: &i32, conn: &mut PgConnection) -> Result<bool, Err
 }
 
 
-pub fn role_belong_deleted(role_author: &i32, role_section: &i32, conn: &mut PgConnection) -> Result(bool, Error) {
+pub fn role_belong_deleted(role_author: &i32, role_section: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
   match diesel::delete(roles.filter(author.eq(role_author).and(section.eq(role_section))))
   .execute(conn) {
     Ok(1) => Ok(true),
     Ok(0) => Ok(false),
     Err(err) => Err(err),
     Ok(_) => Ok(false)
-  }s
+  }
 }
 
 pub fn privileges_updated(new_data: &RolePrivileges, conn: &mut PgConnection) -> Result<Role, Error> {

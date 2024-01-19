@@ -93,7 +93,7 @@ impl SectionIdentity {
 
 
 // - Roles
-#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
+#[derive(Debug, Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::roles)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Role {
@@ -138,7 +138,7 @@ impl NewRole {
 }
 
 
-#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
+#[derive(Debug, Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::roles)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct InsertableRole {

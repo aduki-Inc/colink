@@ -194,7 +194,7 @@ impl EditBelong {
 }
 
 
-#[derive(Debug,Serialize, Deserialize, Clone)]
+#[derive(Debug,Copy, Serialize, Deserialize, Clone)]
 pub struct BelongStaff {
   pub id: i32,
   pub author: i32,
@@ -202,7 +202,7 @@ pub struct BelongStaff {
   pub staff: bool
 }
 
-#[derive(Debug,Serialize, Deserialize, Clone)]
+#[derive(Debug, Copy, Serialize, Deserialize, Clone)]
 pub struct BelongIdentity {
   pub id: i32,
   pub author: i32,
