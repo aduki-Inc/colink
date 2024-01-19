@@ -141,7 +141,7 @@ pub async fn add_org_member(req: HttpRequest, _: JwtMiddleware, app_data: web::D
                 return HttpResponse::Conflict().json(
                   json!({
                     "success": false,
-                    "message": "It seems the user you're trying to add already exists!"
+                    "message": "Seems like the user you're trying to add already exists!"
                   })
                 )
               }
