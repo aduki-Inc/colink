@@ -4,6 +4,7 @@ use crate::models::orgs::{
   EditBelong, BelongIdentity, OrgPermission, BelongStaff
 };
 use crate::configs::state::AppState;
+use diesel::result::Error;
 use serde_json::json;
 use crate::middlewares::auth::{
   auth_middleware::{JwtMiddleware, Claims},
@@ -47,7 +48,7 @@ pub async fn edit_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
                 return HttpResponse::NotFound().json(
                   json!({
                     "success": false,
-                    "message": "Member not found!"
+                    "message": "Member is no longer active in this organization"
                   })
                 )
               }
@@ -136,7 +137,7 @@ pub async fn edit_staff_status(req: HttpRequest, _: JwtMiddleware, app_data: web
             return HttpResponse::NotFound().json(
               json!({
                 "success": false,
-                "message": "Member not found!"
+                "message": "Member is no longer active in this organization"
               })
             )
           } 
@@ -222,7 +223,7 @@ pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
             return HttpResponse::NotFound().json(
               json!({
                 "success": false,
-                "message": "Member not found!"
+                "message": "Member is no longer active in this organization"
               })
             )
           }

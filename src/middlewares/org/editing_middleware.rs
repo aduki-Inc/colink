@@ -11,7 +11,7 @@ use crate::middlewares::auth::role_middleware::role_belong_deleted;
 
 // Updating the Org member/Belong
 pub fn belong_edited(belong_data: &EditBelong, conn: &mut PgConnection) -> Result<Belong, Error> {
-  match diesel::update(belongs.filter(id.eq(belong_data.id)))
+  match diesel::update(belongs.filter(id.eq(belong_data.id).and(active.eq(true))))
   .set((
     identity.eq(&belong_data.identity),
     name.eq(&belong_data.name),
@@ -27,7 +27,7 @@ pub fn belong_edited(belong_data: &EditBelong, conn: &mut PgConnection) -> Resul
 
 // Updating the Org member/Belong - Staff status
 pub fn belong_staff_edited(belong_id: &i32, staff_status: &bool, conn: &mut PgConnection) -> Result<Belong, Error> {
-  match diesel::update(belongs.filter(id.eq(belong_id)))
+  match diesel::update(belongs.filter(id.eq(belong_id).and(active.eq(true))))
   .set(staff.eq(staff_status))
   .get_result::<Belong>(conn) {
     Ok(belong) => Ok(belong),
