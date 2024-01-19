@@ -129,7 +129,9 @@ pub fn belongs_created(inter_m: &BelongIntermediate, data: &InsertableBelong, co
     .get_result::<Belong>(conn) {
       Ok(belong) => {
         let roles_json = json!({
-          "project": ["create", "read", "delete", "update"]
+          "project": ["create", "read", "update", "delete"],
+          "members": ["create", "read", "update", "delete"],
+          "staff": ["create", "read", "update", "delete"]
         });
         
         let new_role = InsertableRole {

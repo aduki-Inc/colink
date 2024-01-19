@@ -4,6 +4,13 @@ use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
 use crate::models::custom_types::{InstitutionType, OrgType};
 
+
+#[derive(Debug,Serialize, Deserialize, Clone)]
+pub struct OrgPermission {
+  pub title: String,
+  pub name: String
+}
+
 #[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::orgs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -140,7 +147,7 @@ impl NewBelong {
 		}
 
     if self.identity.len() < 2 || self.identity.len() > 100 {
-			return Err("Identity Role must be between 5 and 100 chars!".to_string());
+			return Err("Identity/Reg. Number must be between 5 and 100 chars!".to_string());
 		}
 
     if self.date.is_some() {
@@ -156,7 +163,6 @@ impl NewBelong {
       }
   
     }
-		// If all checks pass, return the validated NewSection
 		Ok(self.clone())
 	}
 }
@@ -171,20 +177,27 @@ pub struct EditBelong {
   pub title: String,
 }
 
+// Validate EditBelong
+impl EditBelong {
+	pub fn validate(&self) -> Result<EditBelong, String> {
+		// Check if required fields are present
+		if self.name.len() < 5 || self.name.len() > 500 {
+			return Err("Member name must be between 5 and 500 chars!".to_string());
+		}
+
+    if self.identity.len() < 2 || self.identity.len() > 100 {
+			return Err("Identity/Reg. Number must be between 5 and 100 chars!".to_string());
+		}
+
+		Ok(self.clone())
+	}
+}
+
+
 #[derive(Debug,Serialize, Deserialize, Clone)]
-pub struct EditBelongStaff {
+pub struct BelongIdentity {
   pub id: i32,
   pub author: i32,
   pub section: i32,
   pub staff: bool
-}
-
-
-
-#[derive(Debug,Serialize, Deserialize, Clone)]
-pub struct EditBelongActive {
-  pub id: i32,
-  pub author: i32,
-  pub section: i32,
-  pub active: bool
 }
