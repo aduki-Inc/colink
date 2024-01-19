@@ -57,6 +57,7 @@ create table if not exists belongs (
   active boolean default true,
   author integer references users(id) on delete cascade not null,
   org integer references orgs(id) on delete cascade not null,
+  section integer unique references sections(id) on delete cascade not null,
   name varchar(500) not null,
   identity varchar(500) not null,
   title varchar(500) not null,

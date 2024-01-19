@@ -37,6 +37,7 @@ diesel::table! {
         active -> Nullable<Bool>,
         author -> Int4,
         org -> Int4,
+        section -> Int4,
         #[max_length = 500]
         name -> Varchar,
         #[max_length = 500]
@@ -191,6 +192,7 @@ diesel::table! {
 }
 
 diesel::joinable!(belongs -> orgs (org));
+diesel::joinable!(belongs -> sections (section));
 diesel::joinable!(belongs -> users (author));
 diesel::joinable!(projects -> orgs (org));
 diesel::joinable!(projects -> templates (template));

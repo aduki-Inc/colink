@@ -7,6 +7,6 @@ pub fn org_config() -> Scope {
     // Organization routes
     .route("/create", web::put().to(create_org))
 
-    //Organization Add Member
-    .route("/add/member", web::put().to(add_org_member))
+    //Organization Members
+    .route("/member/add", web::put().to(add_org_member))
 }

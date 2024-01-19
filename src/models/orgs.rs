@@ -160,8 +160,30 @@ impl NewBelong {
 }
 
 #[derive(Debug,Serialize, Deserialize, Clone)]
-pub enum BelongReturn {
-  UnAuthorized,
-  AlreadyExists,
-  SomeError
+pub struct EditBelong {
+  pub id: i32,
+  pub section: i32,
+  pub author: i32,
+  pub org: i32,
+  pub name: String,
+  pub identity: String,
+  pub title: String,
+}
+
+#[derive(Debug,Serialize, Deserialize, Clone)]
+pub struct EditBelongStaff {
+  pub id: i32,
+  pub author: i32,
+  pub section: i32,
+  pub staff: bool
+}
+
+
+
+#[derive(Debug,Serialize, Deserialize, Clone)]
+pub struct EditBelongActive {
+  pub id: i32,
+  pub author: i32,
+  pub section: i32,
+  pub active: bool
 }
