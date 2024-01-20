@@ -51,7 +51,7 @@ pub fn check_member_authority(user_id: &i32, section_id: &i32, permission: &OrgP
 
 pub fn role_exists(user_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
   match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
-    Ok(_) => Ok(true),
+    Ok(_role) => Ok(true),
     Err(Error::NotFound) => Ok(false),
     Err(err) => Err(err),
   }

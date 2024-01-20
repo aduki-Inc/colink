@@ -43,3 +43,12 @@ pub fn member_removed(author_id: &i32, section_id: &i32, conn: &mut PgConnection
   }
 }
 
+// Check if the user is an active member of the organization
+pub fn member_is_active(user_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
+  match belongs.filter(author.eq(user_id).and(section.eq(section_id)).and(active.eq(true))).first::<Belong>(conn) {
+    Ok(_belong) => Ok(true),
+    Err(Error::NotFound) => Ok(false),
+    Err(err) => Err(err),
+  }
+}
+

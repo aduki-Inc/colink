@@ -203,24 +203,45 @@ pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
     match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
       Ok(true) => {
 
-        match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
-          Ok(role) => {
-            match member_removed(&belong_data.author, &belong_data.section, &mut conn) {
-              Ok(belong) => {
-                return HttpResponse::Ok().json(
-                  json!({
-                    "success": true,
-                    "role": role,
-                    "belong": belong,
-                    "message": "User is no longer active member in this organization!"
-                  })
-                )
+        match member_is_active(&belong_data.author, &belong_data.section, &mut conn) {
+          Ok(true) => {
+            match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
+              Ok(role) => {
+                match member_removed(&belong_data.author, &belong_data.section, &mut conn) {
+                  Ok(belong) => {
+                    return HttpResponse::Ok().json(
+                      json!({
+                        "success": true,
+                        "role": role,
+                        "belong": belong,
+                        "message": "User is no longer active member in this organization!"
+                      })
+                    )
+                  }
+                  Err(Error::NotFound) => {
+                    return HttpResponse::NotFound().json(
+                      json!({
+                        "success": false,
+                        "message": "User is not yet a member of this organization!"
+                      })
+                    )
+                  }
+                  Err(_) => {
+                    return  HttpResponse::InternalServerError().json(
+                      json!({
+                        "success": false,
+                        "message": "Could not remove user: An error occurred during the process!"
+                      })
+                    )
+                  }
+                }
+    
               }
               Err(Error::NotFound) => {
                 return HttpResponse::NotFound().json(
                   json!({
                     "success": false,
-                    "message": "User is not yet a member of this organization!"
+                    "message": "User does not have a role in this organization!"
                   })
                 )
               }
@@ -233,16 +254,16 @@ pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
                 )
               }
             }
-
           }
-          Err(Error::NotFound) => {
-            return HttpResponse::NotFound().json(
+          Ok(false) => {
+            return HttpResponse::Conflict().json(
               json!({
                 "success": false,
-                "message": "User does not have a role in this organization!"
+                "message": "User is already inactive in this organization!"
               })
             )
           }
+
           Err(_) => {
             return  HttpResponse::InternalServerError().json(
               json!({
