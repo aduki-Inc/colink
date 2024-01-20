@@ -8,7 +8,7 @@ use diesel::result::Error;
 use serde_json::json;
 use crate::middlewares::auth::{
   auth_middleware::{JwtMiddleware, Claims},
-  role_middleware::check_member_authority
+  role_middleware::{ check_member_authority, role_belong_set_expired }
 };
 use crate::middlewares::org::editing_middleware::*;
 
@@ -202,28 +202,44 @@ pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
     // Check if the user is authorized to perform this action
     match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
       Ok(true) => {
-        match member_removed(&belong_data.author, &belong_data.section, &belong_data.id, &mut conn) {
-          Ok(true) => {
-            return HttpResponse::Ok().json(
-              json!({
-                "success": true,
-                "message": "User is no longer active member in this org!"
-              })
-            )
-          }
-          Ok(false) => {
-            return HttpResponse::InternalServerError().json(
-              json!({
-                "success": false,
-                "message": "Could not remove member: An error occurred during the process!"
-              })
-            )
+
+        match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
+          Ok(role) => {
+            match member_removed(&belong_data.id, &mut conn) {
+              Ok(belong) => {
+                return HttpResponse::Ok().json(
+                  json!({
+                    "success": true,
+                    "role": role,
+                    "belong": belong,
+                    "message": "User is no longer active member in this organization!"
+                  })
+                )
+              }
+              Err(Error::NotFound) => {
+                return HttpResponse::NotFound().json(
+                  json!({
+                    "success": false,
+                    "message": "User is not yet a member of this organization!"
+                  })
+                )
+              }
+              Err(_) => {
+                return  HttpResponse::InternalServerError().json(
+                  json!({
+                    "success": false,
+                    "message": "Could not remove user: An error occurred during the process!"
+                  })
+                )
+              }
+            }
+
           }
           Err(Error::NotFound) => {
             return HttpResponse::NotFound().json(
               json!({
                 "success": false,
-                "message": "Member is no longer active in this organization"
+                "message": "User does not have a role in this organization!"
               })
             )
           }
@@ -231,7 +247,7 @@ pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
             return  HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": "Could not remove member: An error occurred during the process!"
+                "message": "Could not remove user: An error occurred during the process!"
               })
             )
           }
