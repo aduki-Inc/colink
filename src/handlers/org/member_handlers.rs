@@ -29,7 +29,7 @@ pub async fn edit_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 
         let req_permission = OrgPermission {
           title: "members".to_owned(),
-          name: "delete".to_owned()
+          name: "update".to_owned()
         };
         // Check if the user is authorized to perform this action
         match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
@@ -123,7 +123,7 @@ pub async fn edit_staff_status(req: HttpRequest, _: JwtMiddleware, app_data: web
     // Check if the user is authorized to perform this action
     match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
       Ok(true) => {
-        match belong_staff_edited(&belong_data.id, &belong_data.staff, &mut conn) {
+        match belong_staff_edited(&belong_data.author, &belong_data.section, &belong_data.staff, &mut conn) {
           Ok(belong) => {
             return HttpResponse::Ok().json(
               json!({
@@ -205,7 +205,7 @@ pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
 
         match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
           Ok(role) => {
-            match member_removed(&belong_data.id, &mut conn) {
+            match member_removed(&belong_data.author, &belong_id.section, &mut conn) {
               Ok(belong) => {
                 return HttpResponse::Ok().json(
                   json!({

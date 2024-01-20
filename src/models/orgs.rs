@@ -169,7 +169,6 @@ impl NewBelong {
 
 #[derive(Debug,Serialize, Deserialize, Clone)]
 pub struct EditBelong {
-  pub id: i32,
   pub section: i32,
   pub author: i32,
   pub name: String,
@@ -196,7 +195,6 @@ impl EditBelong {
 
 #[derive(Debug,Copy, Serialize, Deserialize, Clone)]
 pub struct BelongStaff {
-  pub id: i32,
   pub author: i32,
   pub section: i32,
   pub staff: bool
@@ -204,7 +202,6 @@ pub struct BelongStaff {
 
 #[derive(Debug, Copy, Serialize, Deserialize, Clone)]
 pub struct BelongIdentity {
-  pub id: i32,
   pub author: i32,
   pub section: i32
 }
