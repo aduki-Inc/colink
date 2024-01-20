@@ -23,7 +23,7 @@ pub fn belong_edited(belong_data: &EditBelong, conn: &mut PgConnection) -> Resul
 
 // Updating the Org member/Belong - Staff status
 pub fn belong_staff_edited(author_id: &i32, section_id: &i32, staff_status: &bool, conn: &mut PgConnection) -> Result<Belong, Error> {
-  match diesel::update(belongs.filter(author.eq(belong_id).section.eq(section_id).and(active.eq(true))))
+  match diesel::update(belongs.filter(author.eq(author_id).and(section.eq(section_id)).and(active.eq(true))))
   .set(staff.eq(staff_status))
   .get_result::<Belong>(conn) {
     Ok(belong) => Ok(belong),

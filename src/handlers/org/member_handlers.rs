@@ -205,7 +205,7 @@ pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
 
         match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
           Ok(role) => {
-            match member_removed(&belong_data.author, &belong_id.section, &mut conn) {
+            match member_removed(&belong_data.author, &belong_data.section, &mut conn) {
               Ok(belong) => {
                 return HttpResponse::Ok().json(
                   json!({
