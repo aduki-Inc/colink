@@ -13,5 +13,6 @@ pub fn org_config() -> Scope {
     .route("/member/add", web::put().to(add_member))
     .route("/member/edit", web::patch().to(edit_member))
     .route("/member/edit/status", web::patch().to(edit_staff_status))
-    .route("/member/remove", web::delete().to(remove_member))
+    .route("/member/disable", web::patch().to(disable_member))
+    .route("/member/enable", web::patch().to(enable_member))
 }

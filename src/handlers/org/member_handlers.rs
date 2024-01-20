@@ -182,7 +182,7 @@ pub async fn edit_staff_status(req: HttpRequest, _: JwtMiddleware, app_data: web
 
 
 // Handler for deactivating member 
-pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, status_data: web::Json<BelongIdentity>) -> impl Responder {
+pub async fn disable_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, status_data: web::Json<BelongIdentity>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -203,11 +203,11 @@ pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
     match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
       Ok(true) => {
 
-        match member_is_active(&belong_data.author, &belong_data.section, &mut conn) {
+        match is_member_active(&belong_data.author, &belong_data.section, &mut conn) {
           Ok(true) => {
             match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
               Ok(role) => {
-                match member_removed(&belong_data.author, &belong_data.section, &mut conn) {
+                match member_disabled(&belong_data.author, &belong_data.section, &mut conn) {
                   Ok(belong) => {
                     return HttpResponse::Ok().json(
                       json!({
@@ -262,6 +262,129 @@ pub async fn remove_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
                 "message": "User is already inactive in this organization!"
               })
             )
+          }
+
+          Err(_) => {
+            return  HttpResponse::InternalServerError().json(
+              json!({
+                "success": false,
+                "message": "Could not remove user: An error occurred during the process!"
+              })
+            )
+          }
+        }
+      }
+
+      Ok(false) => {
+        return HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "You're not authorized to perform this action!"
+          })
+        )
+      }
+      Err(_) => {
+        return  HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "Could not verify your authority: An error occurred during the process!"
+          })
+        )
+      }
+    }
+	}
+	else {
+		return HttpResponse::BadRequest().json(
+      json!({
+        "success": false,
+        "message": "Authorization failure!"
+      })
+    )
+	}
+}
+
+
+// Handler for re enabling disabled  member 
+pub async fn enable_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, status_data: web::Json<BelongIdentity>) -> impl Responder {
+  //  Get extensions
+  let ext = req.extensions();
+  let mut conn = establish_connection(&app_data.config.database_url).await;
+
+
+  // Use the 'get' method to retrieve the 'Claims' value from extensions
+	if let Some(claims) = ext.get::<Claims>() {
+		// Access 'user' from 'Claims'
+		let user = &claims.user;
+
+    let belong_data = status_data.into_inner();
+    let req_permission = OrgPermission {
+      title: "staff".to_owned(),
+      name: "delete".to_owned()
+    };
+
+    // Check if the user is authorized to perform this action
+    match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
+      Ok(true) => {
+
+        match is_member_active(&belong_data.author, &belong_data.section, &mut conn) {
+          Ok(true) => {
+            return HttpResponse::Conflict().json(
+              json!({
+                "success": false,
+                "message": "User is already active in this organization!"
+              })
+            )
+          }
+          Ok(false) => {
+            match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
+              Ok(role) => {
+                match member_enabled(&belong_data.author, &belong_data.section, &mut conn) {
+                  Ok(belong) => {
+                    return HttpResponse::Ok().json(
+                      json!({
+                        "success": true,
+                        "role": role,
+                        "belong": belong,
+                        "message": "User is now an active member in this organization!"
+                      })
+                    )
+                  }
+                  Err(Error::NotFound) => {
+                    return HttpResponse::NotFound().json(
+                      json!({
+                        "success": false,
+                        "message": "User is not yet a member of this organization!"
+                      })
+                    )
+                  }
+                  Err(_) => {
+                    return  HttpResponse::InternalServerError().json(
+                      json!({
+                        "success": false,
+                        "message": "Could not remove user: An error occurred during the process!"
+                      })
+                    )
+                  }
+                }
+    
+              }
+              Err(Error::NotFound) => {
+                return HttpResponse::NotFound().json(
+                  json!({
+                    "success": false,
+                    "message": "User does not have a role in this organization!"
+                  })
+                )
+              }
+              Err(_) => {
+                return  HttpResponse::InternalServerError().json(
+                  json!({
+                    "success": false,
+                    "message": "Could not remove user: An error occurred during the process!"
+                  })
+                )
+              }
+            }
           }
 
           Err(_) => {

@@ -33,7 +33,7 @@ pub fn belong_staff_edited(author_id: &i32, section_id: &i32, staff_status: &boo
 }
 
 // Updating the Org member/Belong - Remove member
-pub fn member_removed(author_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<Belong, Error> {
+pub fn member_disabled(author_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<Belong, Error> {
   // Update belong data to be false
   match diesel::update(belongs.filter(author.eq(author_id).and(section.eq(section_id))))
   .set(active.eq(false))
@@ -43,8 +43,20 @@ pub fn member_removed(author_id: &i32, section_id: &i32, conn: &mut PgConnection
   }
 }
 
+
+// Updating the Org member/Belong - Remove member
+pub fn member_enabled(author_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<Belong, Error> {
+  // Update belong data to be false
+  match diesel::update(belongs.filter(author.eq(author_id).and(section.eq(section_id))))
+  .set(active.eq(true))
+  .get_result::<Belong>(conn) {
+    Ok(belong) => Ok(belong),
+    Err(err) => Err(err)
+  }
+}
+
 // Check if the user is an active member of the organization
-pub fn member_is_active(user_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
+pub fn is_member_active(user_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
   match belongs.filter(author.eq(user_id).and(section.eq(section_id)).and(active.eq(true))).first::<Belong>(conn) {
     Ok(_belong) => Ok(true),
     Err(Error::NotFound) => Ok(false),
