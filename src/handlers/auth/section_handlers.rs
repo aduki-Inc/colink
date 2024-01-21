@@ -10,7 +10,7 @@ use serde_json::json;
 use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, section_middleware::* };
 
 
-// Handler for creating new section
+// Handler for creating new section/org section
 pub async fn create_section(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, section_data: web::Json<NewSection>) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
