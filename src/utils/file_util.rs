@@ -1,50 +1,50 @@
-use actix_multipart::Multipart;
-use actix_web::{Error, HttpRequest};
-use futures_util::stream::StreamExt;
-use std::fs::{self, File};
-use std::io::{copy, Cursor};
+use actix_multipart::form::{
+	tempfile::TempFile,
+	MultipartForm,
+};
+use actix_web::Error;
+// use std::fs::{self, File};
 use std::path::PathBuf;
 
+
+#[derive(MultipartForm)]
+struct UploadForm {
+  #[multipart(rename = "file")]
+  file: TempFile,
+}
+
+
 async fn upload_file(
-	req: HttpRequest,
-	mut payload: Multipart,
+	MultipartForm(form): MultipartForm<UploadForm>,
 	name: &str,
-	path_to: &str,
+	path_to: &str
 ) -> Result<String, Error> {
-	let field = match payload.next().await {
-		Some(Ok(field)) => field,
-		_ => return Err(Error::from("No file found in the payload!")),
-	};
+	let original_filename = form.file.file_name.unwrap();
+  let extension = original_filename.rsplit('.').next().unwrap();
 
-	let filename_ext = field
-		.content_disposition()
-		.get_filename()
-		.unwrap_or("unknown.ext")
-		.to_string();
-
-	// Define the new filename without changing extension
-	let new_filename = format!("{}.{}", name, filename_ext);
+  // Generate a new unique filename with the same extension
+  let new_filename = format!("{}.{}", name, extension);
 
 	// Create path to save file
-	let mut file_path = PathBuf::from(path_to);
-	file_path.push(&new_filename);
+	let mut path = PathBuf::from(path_to);
+	path.push(&new_filename);
 
-	// Create directory if it doesn't exist
-	if let Some(parent) = file_path.parent() {
-		if !parent.exists() {
-			fs::create_dir_all(parent)?;
-		}
+	// 	Create string path
+	let path_str = format!("{}/{}", path_to, new_filename);
+
+
+	if std::path::Path::exists(&path) {
+		std::fs::remove_file(&path)?;
 	}
 
-	// If file with the same name exists, remove it
-	if file_path.exists() {
-		fs::remove_file(&file_path)?;
-	}
+	// form.file.file.persist(path)?;
 
-	// Copy file data to the new location
-	let mut out_file = File::create(&file_path)?;
-	copy(&mut field.into_read(), &mut out_file)?;
+	// Save file and return path str
+	match form.file.file.persist(path_str) {
+    Ok(_persisted_file) => Ok(path.to_str().unwrap().to_string()),
+    Err(_) => Err("Error has occurred during the file upload!")
+	};
 
 	// Return uploaded file path
-	Ok(file_path.to_str().unwrap().to_string())
+	Ok(path.to_str().unwrap().to_string())
 }
