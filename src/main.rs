@@ -4,9 +4,10 @@ mod handlers;
 mod middlewares;
 mod models;
 mod routes;
+mod utils;
 
 use std::sync::Mutex;
-
+use actix_files::Files;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
@@ -42,6 +43,7 @@ async fn main() -> std::io::Result<()> {
 			)
 			.wrap(cors)
 			.wrap(Logger::default())
+			.service(Files::new("/static", "static").show_files_listing())
 			.service(routes::orgs::org_config())
 			.service(routes::auth::auth_config())
 	})
