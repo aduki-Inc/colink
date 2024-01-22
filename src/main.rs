@@ -43,7 +43,7 @@ async fn main() -> std::io::Result<()> {
 			)
 			.wrap(cors)
 			.wrap(Logger::default())
-			.service(Files::new("/static", "static").show_files_listing())
+			.service(Files::new("/static", ".").show_files_listing())
 			.service(routes::orgs::org_config())
 			.service(routes::auth::auth_config())
 	})
