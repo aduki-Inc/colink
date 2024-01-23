@@ -63,4 +63,3 @@ pub fn is_member_active(user_id: &i32, section_id: &i32, conn: &mut PgConnection
     Err(err) => Err(err),
   }
 }
-
