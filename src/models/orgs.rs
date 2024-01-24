@@ -84,7 +84,6 @@ pub struct InsertableOrganization{
   pub established: Option<NaiveDate>
 }
 
-
 #[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::belongs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]

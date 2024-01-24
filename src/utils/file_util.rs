@@ -9,8 +9,8 @@ use std::path::PathBuf;
 
 // Custom file uploading error
 #[derive(Debug)]
-struct UploadError {
-	message: String
+pub struct UploadError {
+	pub message: String
 }
 
 impl fmt::Display for UploadError {
@@ -23,13 +23,13 @@ impl std::error::Error for UploadError{}
 
 
 #[derive(Debug, MultipartForm)]
-struct UploadForm {
+pub struct UploadForm {
   #[multipart(rename = "file")]
-  file: TempFile,
+  pub file: TempFile,
 }
 
 
-async fn upload_file(
+pub async fn upload_file(
 	payload: MultipartForm<UploadForm>,
 	name: &str,
 	path_to: &str
