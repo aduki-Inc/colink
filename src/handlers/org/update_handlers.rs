@@ -18,11 +18,11 @@ pub async fn update_logo(
   req: HttpRequest, 
   _: JwtMiddleware, 
   app_data: web::Data<AppState>, 
-  path: web::Path<u32>,
-  payload: MultipartForm<Upload>) -> impl Responder {
+  path: web::Path<String>,
+  payload: MultipartForm<UploadForm>) -> impl Responder {
 
   //Extract from path
-  let org_id  = path.into_inner();
+  let org_short_name  = path.into_inner();
 
   //  Get extensions
   let ext = req.extensions();
@@ -34,24 +34,23 @@ pub async fn update_logo(
 		// Access 'user' from 'Claims'
 		let user = &claims.user;
 
-    match edit_data.validate() {
-      Ok(belong_data) => {
+    let req_permission = OrgPermission {
+      title: "staff".to_owned(),
+      name: "update".to_owned()
+    };
 
-        let req_permission = OrgPermission {
-          title: "staff".to_owned(),
-          name: "update".to_owned()
-        };
-        
-        // Check if the user is authorized to perform this action
-        match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
-          Ok(true) => {
-            match belong_edited(&belong_data, &mut conn) {
-              Ok(belong) => {
+    // Check if the user is authorized to perform this action
+    match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
+      Ok(true) => {
+        match upload_file(payload, &org_short_name, "static/orgs/logos").await {
+          Ok(file_url) => {
+            match org_logo_updated(&file_url, &org_short_name, &mut conn) {
+              Ok(org) => {
                 return HttpResponse::Ok().json(
                   json!({
                     "success": true,
-                    "belong": belong,
-                    "message": "User Details was changed successfully!"
+                    "org": org,
+                    "message": "Organization logo was uploaded successfully!"
                   })
                 )
               }
@@ -73,30 +72,31 @@ pub async fn update_logo(
               }
             }
           }
-
-          Ok(false) => {
-            return HttpResponse::Unauthorized().json(
+          Err(err) => {
+            return HttpResponse::InternalServerError().json(
               json!({
                 "success": false,
-                "message": "You're not authorized to perform this action!"
-              })
-            )
-          }
-          Err(_) => {
-            return  HttpResponse::Unauthorized().json(
-              json!({
-                "success": false,
-                "message": "Could not verify your authority: An error occurred during the process!"
+                "message": err.to_string()
               })
             )
           }
         }
-      },
-      Err(err) => {
-        return HttpResponse::ExpectationFailed().json(
+        
+      }
+
+      Ok(false) => {
+        return HttpResponse::Unauthorized().json(
           json!({
             "success": false,
-            "message": err.to_string()
+            "message": "You're not authorized to perform this action!"
+          })
+        )
+      }
+      Err(_) => {
+        return  HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "Could not verify your authority: An error occurred during the process!"
           })
         )
       }
