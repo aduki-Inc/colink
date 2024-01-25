@@ -32,7 +32,8 @@ pub struct UploadForm {
 pub async fn upload_file(
 	payload: MultipartForm<UploadForm>,
 	name: &str,
-	path_to: &str
+	static_root: &str,
+	path_to: &str,
 ) -> Result<String, UploadError> {
 
 	const MAX_FILE_SIZE: u64 = 1024 * 1024 * 10; // 10 MB
@@ -52,6 +53,9 @@ pub async fn upload_file(
 	
 
 	let temp_file_path = payload.file.file.path();
+	
+	// let dir = std::env::temp_dir();
+  // println!("Temporary directory: {:?}", payload.file);
 
 	let original_filename = payload.file.file_name.clone().unwrap();
 	
@@ -61,7 +65,8 @@ pub async fn upload_file(
   let new_filename = format!("{}.{}", name, extension);
 
 	// Create path to save file
-	let mut path = PathBuf::from(path_to);
+	let mut path = PathBuf::from(static_root);
+	path.push(path_to);
 	path.push(&new_filename);
 
 	// 	Create string path
@@ -98,9 +103,9 @@ pub async fn upload_file(
 	// Ok(path.to_str().unwrap().to_string())
 
 	match std::fs::rename(temp_file_path, path.clone()) {
-    Ok(_) => Ok("this is a string".to_string()),
-    Err(_) => Err(UploadError{
-			message: "Could not upload your file, Internal error occurred!.".to_string()
+    Ok(_) => Ok(path.to_str().unwrap().to_string()),
+    Err(err) => Err(UploadError{
+			message: format!("Could not upload your file, Internal error occurred!.:: {}", err)
 		})
 	}
 }

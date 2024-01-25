@@ -1,6 +1,6 @@
 use actix_web::{web, Scope};
 use crate::handlers::org::{
-  org_handlers::*, member_handlers::*
+  org_handlers::*, member_handlers::*, update_handlers::*
 };
 
 pub fn org_config() -> Scope {
@@ -15,4 +15,7 @@ pub fn org_config() -> Scope {
     .route("/member/edit/status", web::patch().to(edit_staff_status))
     .route("/member/disable", web::patch().to(disable_member))
     .route("/member/enable", web::patch().to(enable_member))
+
+    //Organization Media
+    .route("/{org}/{section_id}", web::patch().to(update_logo))
 }

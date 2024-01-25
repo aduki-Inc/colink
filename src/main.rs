@@ -6,6 +6,7 @@ mod models;
 mod routes;
 mod utils;
 
+// use std::path::PathBuf;
 use std::sync::Mutex;
 use actix_files::Files;
 use actix_cors::Cors;
@@ -16,9 +17,21 @@ extern crate diesel_derive_enum;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
+	// Get current directory of the app
+	let mut static_path = String::from("src/static");
+	// println!("Root Dir: {:?}", static_path);
+	match std::env::current_dir() {
+    Ok(root_path) => {
+			static_path = root_path.join("src/static").display().to_string();
+		},
+    Err(_) => todo!(),
+	}
+
+	// println!("Root Dir: {:?}", static_path);
 	let app_data = web::Data::new(
 		configs::state::AppState { 
 			counter: Mutex::new(0),
+			static_dir: static_path,
 			config: configs::config::Config::init() 
 		}
 	);

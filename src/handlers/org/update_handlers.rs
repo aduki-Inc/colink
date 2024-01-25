@@ -1,28 +1,30 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use crate::db::connection::establish_connection;
 use crate::models::orgs::OrgPermission;
-
+// use std::path::PathBuf;
 use actix_multipart::form::MultipartForm;
 use crate::configs::state::AppState;
 use diesel::result::Error;
 use serde_json::json;
-use crate::middlewares::auth::{
-  auth_middleware::{JwtMiddleware, Claims},
-  role_middleware::{ check_member_authority, role_belong_set_expired }
+use crate::middlewares::{
+  auth::{
+    auth_middleware::{JwtMiddleware, Claims},
+    role_middleware::check_member_authority
+  },
+  org::update_middleware::org_logo_updated
 };
-use crate::middlewares::org::update_middleware::*;
-use crate::utils::file_util::{ UploadError, upload_file, UploadForm };
+use crate::utils::file_util::{ upload_file, UploadForm };
 
 // Handler for updating organization logo
 pub async fn update_logo(
   req: HttpRequest, 
   _: JwtMiddleware, 
   app_data: web::Data<AppState>, 
-  path: web::Path<String>,
+  path: web::Path<(String, i32)>,
   payload: MultipartForm<UploadForm>) -> impl Responder {
 
   //Extract from path
-  let org_short_name  = path.into_inner();
+  let (org, section_id)  = path.into_inner();
 
   //  Get extensions
   let ext = req.extensions();
@@ -40,11 +42,11 @@ pub async fn update_logo(
     };
 
     // Check if the user is authorized to perform this action
-    match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
+    match check_member_authority(&user.id, &section_id, &req_permission, &mut conn) {
       Ok(true) => {
-        match upload_file(payload, &org_short_name, "static/orgs/logos").await {
+        match upload_file(payload, &org, &app_data.static_dir, "orgs/logos").await {
           Ok(file_url) => {
-            match org_logo_updated(&file_url, &org_short_name, &mut conn) {
+            match org_logo_updated(&file_url, &org, &mut conn) {
               Ok(org) => {
                 return HttpResponse::Ok().json(
                   json!({
@@ -58,15 +60,15 @@ pub async fn update_logo(
                 return HttpResponse::NotFound().json(
                   json!({
                     "success": false,
-                    "message": "Member is no longer active in this organization"
+                    "message": "The organization was not found!"
                   })
                 )
               }
-              Err(_) => {
+              Err(err) => {
                 return  HttpResponse::InternalServerError().json(
                   json!({
                     "success": false,
-                    "message": "Could change the user information: An error occurred during the process!"
+                    "message": format!("Could not update the logo: An error occurred during the process!::::{}", err.to_string())
                   })
                 )
               }
