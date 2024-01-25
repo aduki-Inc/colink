@@ -104,8 +104,8 @@ pub async fn upload_file(
 
 	match std::fs::rename(temp_file_path, path.clone()) {
     Ok(_) => Ok(path.to_str().unwrap().to_string()),
-    Err(err) => Err(UploadError{
-			message: format!("Could not upload your file, Internal error occurred!.:: {}", err)
+    Err(_) => Err(UploadError{
+			message: "Could not upload your file, Internal error occurred!.:: {}"
 		})
 	}
 }
