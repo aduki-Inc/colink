@@ -18,14 +18,14 @@ extern crate diesel_derive_enum;
 async fn main() -> std::io::Result<()> {
 
 	// Get current directory of the app
-	let mut static_path = String::from("src/static");
-	// println!("Root Dir: {:?}", static_path);
-	match std::env::current_dir() {
+	let static_path = match std::env::current_dir() {
     Ok(root_path) => {
-			static_path = root_path.join("src/static").display().to_string();
+			root_path.join("static").display().to_string()
 		},
-    Err(_) => todo!(),
-	}
+    Err(_) => {
+			String::from("static")
+		}
+	};
 
 	// println!("Root Dir: {:?}", static_path);
 	let app_data = web::Data::new(
@@ -55,10 +55,11 @@ async fn main() -> std::io::Result<()> {
 				.error_handler(|err, _req| handlers::error_handlers::json_cfg(err)),
 			)
 			.wrap(cors)
-			.wrap(Logger::default())
-			.service(Files::new("/static", ".").show_files_listing())
 			.service(routes::orgs::org_config())
 			.service(routes::auth::auth_config())
+			.service(routes::static_routes::static_config())
+			.service(Files::new("/static", "./static"))
+			.wrap(Logger::default())
 	})
 	.bind(("127.0.0.1", 8080))?
 	.run()

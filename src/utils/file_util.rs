@@ -1,3 +1,6 @@
+use actix_files as fs;
+use actix_web::http::header::{ContentDisposition, DispositionType};
+use actix_web::{Error, HttpRequest};
 use actix_multipart::form::{
 	tempfile::TempFile,
 	MultipartForm,
@@ -105,7 +108,19 @@ pub async fn upload_file(
 	match std::fs::rename(temp_file_path, path.clone()) {
     Ok(_) => Ok(path.to_str().unwrap().to_string()),
     Err(_) => Err(UploadError{
-			message: "Could not upload your file, Internal error occurred!.:: {}"
+			message: "Could not upload your file, Internal error occurred!.:: {}".to_string()
 		})
 	}
+}
+
+// Serving static file starter path
+pub async fn index(req: HttpRequest) -> Result<fs::NamedFile, Error> {
+	let path: std::path::PathBuf = req.match_info().query("filename").parse().unwrap();
+	let file = fs::NamedFile::open(path)?;
+	Ok(file
+		.use_last_modified(true)
+		.set_content_disposition(ContentDisposition {
+			disposition: DispositionType::Inline,
+			parameters: vec![],
+			}))
 }

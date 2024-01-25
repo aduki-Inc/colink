@@ -64,11 +64,11 @@ pub async fn update_logo(
                   })
                 )
               }
-              Err(err) => {
+              Err(_) => {
                 return  HttpResponse::InternalServerError().json(
                   json!({
                     "success": false,
-                    "message": format!("Could not update the logo: An error occurred during the process!::::{}", err.to_string())
+                    "message": "Could not update the logo: An error occurred during the process!"
                   })
                 )
               }
