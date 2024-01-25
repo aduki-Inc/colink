@@ -6,8 +6,6 @@ use actix_multipart::form::{
 	MultipartForm,
 };
 use std::fmt;
-// use actix_web::Error;
-// use std::fs::{self, File};
 use std::path::PathBuf;
 
 // Custom file uploading error
@@ -44,7 +42,7 @@ pub async fn upload_file(
 	// reject malformed requests - If size is zero or less
 	if payload.file.size <= 0 {
 		return Err(UploadError{
-			message: "The uploaded file size is zero bytes.".to_string()
+			message: "The uploaded file cannot be of size zero bytes.".to_string()
 		})
 	} 
 	// reject malformed requests - If size is greater  than 10Mbs
@@ -72,14 +70,14 @@ pub async fn upload_file(
 	path.push(path_to);
 	path.push(&new_filename);
 
-		// Create string path
+	// Create string path
 	let path_str = format!("{}/{}", path_to, new_filename);
 
 
 	match std::fs::rename(temp_file_path, path.clone()) {
     Ok(_) => Ok(path_str),
     Err(_) => Err(UploadError{
-			message: "Could not upload your file, Internal error occurred!.:: {}".to_string()
+			message: "Could not update the logo, Error occurred while uploading!".to_string()
 		})
 	}
 }
