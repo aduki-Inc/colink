@@ -72,41 +72,12 @@ pub async fn upload_file(
 	path.push(path_to);
 	path.push(&new_filename);
 
-	// 	Create string path
-	// let path_str = format!("{}/{}", path_to, new_filename);
+		// Create string path
+	let path_str = format!("{}/{}", path_to, new_filename);
 
-
-	// if std::path::Path::exists(&path) {
-	// 	match std::fs::remove_file(&path) {
-	// 		Ok(_) => {
-
-	// 		},
-	// 		Err(_) => todo!(),
-	// 	}
-	// }
-
-
-	// form.file.file.persist(path)?;
-
-	// Save file and return path str
-	// match payload.file.file.persist(path_str) {
-  //   Ok(_persisted_file) => Ok(path.to_str().unwrap().to_string()),
-  //   Err(_) => Err("Error has occurred during the file upload!")
-	// };
-
-	// match std::fs::rename(temp_file_path, path) {
-	// 	Ok(_) => Ok(path.to_str().unwrap().to_string()),
-	// 	Err(_) => Err(UploadError{
-	// 		message: "Could not upload your file, Internal error occurred!.".to_string()
-	// 	}),
-	// }
-
-	// std::fs::rename(temp_file_path, path.clone())?;
-	// // Return uploaded file path
-	// Ok(path.to_str().unwrap().to_string())
 
 	match std::fs::rename(temp_file_path, path.clone()) {
-    Ok(_) => Ok(path.to_str().unwrap().to_string()),
+    Ok(_) => Ok(path_str),
     Err(_) => Err(UploadError{
 			message: "Could not upload your file, Internal error occurred!.:: {}".to_string()
 		})
