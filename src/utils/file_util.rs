@@ -120,7 +120,7 @@ pub async fn index(req: HttpRequest) -> Result<fs::NamedFile, Error> {
 	Ok(file
 		.use_last_modified(true)
 		.set_content_disposition(ContentDisposition {
-			disposition: DispositionType::Inline,
+			disposition: DispositionType::Attachment,
 			parameters: vec![],
 			}))
 }
