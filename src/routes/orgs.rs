@@ -17,5 +17,5 @@ pub fn org_config() -> Scope {
     .route("/member/enable", web::patch().to(enable_member))
 
     //Organization Media
-    .route("/{org}/{section_id}", web::patch().to(update_logo))
+    .route("/{org}", web::patch().to(update_logo))
 }

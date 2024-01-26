@@ -62,8 +62,8 @@ pub fn check_member_authority_by_section(user_id: &i32, section_name: &str, perm
       Ok(section_with_role) => {
 
         if let Some((section_data, role_data)) = section_with_role.into_iter().next(){
-          println!("{:?}", &section_data);
-          println!("{:?}", &role_data);
+          // println!("{:?}", &section_data);
+          // println!("{:?}", &role_data);
           match role_data.privileges.expect("REASON").get(&permission.title) {
             Some(members) => {
               match members.as_array().and_then(|arr| arr.iter().find(|&v|v == &permission.name)){

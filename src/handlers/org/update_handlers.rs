@@ -20,11 +20,11 @@ pub async fn update_logo(
   req: HttpRequest, 
   _: JwtMiddleware, 
   app_data: web::Data<AppState>, 
-  path: web::Path<(String, i32)>,
+  path: web::Path<String>,
   payload: MultipartForm<UploadForm>) -> impl Responder {
 
   //Extract from path
-  let (org, section_id)  = path.into_inner();
+  let org  = path.into_inner();
 
   //  Get extensions
   let ext = req.extensions();
