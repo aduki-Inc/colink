@@ -9,7 +9,7 @@ use serde_json::json;
 use crate::middlewares::{
   auth::{
     auth_middleware::{JwtMiddleware, Claims},
-    role_middleware::check_member_authority
+    role_middleware::check_member_authority_by_section
   },
   org::update_middleware::org_logo_updated
 };
@@ -42,7 +42,7 @@ pub async fn update_logo(
     };
 
     // Check if the user is authorized to perform this action
-    match check_member_authority(&user.id, &section_id, &req_permission, &mut conn) {
+    match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
       Ok(true) => {
         match upload_file(payload, &org, &app_data.static_dir, "orgs/logos").await {
           Ok(file_url) => {

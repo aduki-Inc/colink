@@ -1,4 +1,5 @@
 use crate::db::schema::roles::dsl::*;
+use crate::models::system::Section;
 use crate::models::{system::{Role, RolePrivileges}, custom_types::RoleType};
 use crate::models::orgs::OrgPermission;
 use diesel::prelude::*;
@@ -46,6 +47,40 @@ pub fn check_member_authority(user_id: &i32, section_id: &i32, permission: &OrgP
     Err(Error::NotFound) => Ok(false),
     Err(err) => Err(err),
   }
+}
+
+
+// Check the role for user attempting to create, edit or delete other roles
+pub fn check_member_authority_by_section(user_id: &i32, section_name: &str, permission: &OrgPermission, conn: &mut PgConnection) -> Result<bool, Error> {
+  use crate::db::schema::sections::dsl::*;
+  match sections
+    .filter(identity.eq(section_name))
+    .inner_join(roles)
+    .filter(author.eq(user_id))
+    .select((Section::as_select(), Role::as_select()))
+    .load::<(Section, Role)>(conn){
+      Ok(section_with_role) => {
+
+        if let Some((section_data, role_data)) = section_with_role.into_iter().next(){
+          println!("{:?}", &section_data);
+          println!("{:?}", &role_data);
+          match role_data.privileges.expect("REASON").get(&permission.title) {
+            Some(members) => {
+              match members.as_array().and_then(|arr| arr.iter().find(|&v|v == &permission.name)){
+                Some(_delete_permission) => Ok(true),
+                None => Ok(false)
+              }
+            }
+            None => Ok(false)
+          }
+        }
+        else {
+          return Ok(false)
+        }
+      },
+      Err(Error::NotFound) => Ok(false),
+      Err(err) => Err(err),
+    }
 }
 
 

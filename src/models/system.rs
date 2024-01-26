@@ -24,7 +24,7 @@ pub struct Colink {
 
 
 // - Section
-#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
+#[derive(Debug, Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::db::schema::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Section {
