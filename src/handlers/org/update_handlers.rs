@@ -94,6 +94,14 @@ pub async fn update_logo(
           })
         )
       }
+      Err(Error::NotFound) => {
+        return HttpResponse::NotFound().json(
+          json!({
+            "success": false,
+            "message": "Could not verify your authority, or the organization you're trying to update does not exists!"
+          })
+        )
+      }
       Err(_) => {
         return  HttpResponse::Unauthorized().json(
           json!({

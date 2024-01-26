@@ -61,7 +61,7 @@ pub fn check_member_authority_by_section(user_id: &i32, section_name: &str, perm
     .load::<(Section, Role)>(conn){
       Ok(section_with_role) => {
 
-        if let Some((section_data, role_data)) = section_with_role.into_iter().next(){
+        if let Some((_section_data, role_data)) = section_with_role.into_iter().next(){
           // println!("{:?}", &section_data);
           // println!("{:?}", &role_data);
           match role_data.privileges.expect("REASON").get(&permission.title) {
@@ -78,7 +78,7 @@ pub fn check_member_authority_by_section(user_id: &i32, section_name: &str, perm
           return Ok(false)
         }
       },
-      Err(Error::NotFound) => Ok(false),
+      Err(Error::NotFound) => Err(Error::NotFound),
       Err(err) => Err(err),
     }
 }
