@@ -8,14 +8,13 @@ pub fn org_config() -> Scope {
   
     // Organization
     .route("/create", web::put().to(create_org))
+    .route("/{org}/edit/logo", web::patch().to(update_logo))
 
     //Organization - Members
-    .route("/member/add", web::put().to(add_member))
-    .route("/member/edit", web::patch().to(edit_member))
-    .route("/member/edit/status", web::patch().to(edit_staff_status))
-    .route("/member/disable", web::patch().to(disable_member))
-    .route("/member/enable", web::patch().to(enable_member))
+    .route("/{org}/users/add", web::put().to(add_member))
+    .route("/{org}/users/edit", web::patch().to(edit_member))
+    .route("/{org}/users/edit/status", web::patch().to(edit_staff_status))
+    .route("/{org}/users/disable", web::patch().to(disable_member))
+    .route("/{org}/users/enable", web::patch().to(enable_member))
 
-    //Organization Media
-    .route("/{org}", web::patch().to(update_logo))
 }

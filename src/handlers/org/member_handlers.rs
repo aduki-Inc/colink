@@ -8,12 +8,20 @@ use diesel::result::Error;
 use serde_json::json;
 use crate::middlewares::auth::{
   auth_middleware::{JwtMiddleware, Claims},
-  role_middleware::{ check_member_authority, role_belong_set_expired }
+  role_middleware::{ check_member_authority_by_section, role_belong_set_expired }
 };
 use crate::middlewares::org::editing_middleware::*;
 
 // Handler for editing member info
-pub async fn edit_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, edit_data: web::Json<EditBelong>) -> impl Responder {
+pub async fn edit_member(
+  req: HttpRequest, _: JwtMiddleware, 
+  app_data: web::Data<AppState>, 
+  path: web::Path<String>,
+  edit_data: web::Json<EditBelong>) -> impl Responder {
+
+  //Extract from path
+  let org  = path.into_inner();
+
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -32,7 +40,7 @@ pub async fn edit_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
           name: "update".to_owned()
         };
         // Check if the user is authorized to perform this action
-        match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
+        match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
           Ok(true) => {
             match belong_edited(&belong_data, &mut conn) {
               Ok(belong) => {
@@ -103,7 +111,16 @@ pub async fn edit_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 
 
 // Handler for editing member staff status
-pub async fn edit_staff_status(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, status_data: web::Json<BelongStaff>) -> impl Responder {
+pub async fn edit_staff_status(
+  req: HttpRequest, _: JwtMiddleware, 
+  app_data: web::Data<AppState>, 
+  path: web::Path<String>,
+  status_data: web::Json<BelongStaff>) -> impl Responder {
+
+
+  //Extract from path
+  let org  = path.into_inner();
+
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -121,7 +138,7 @@ pub async fn edit_staff_status(req: HttpRequest, _: JwtMiddleware, app_data: web
     };
 
     // Check if the user is authorized to perform this action
-    match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
+    match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
       Ok(true) => {
         match belong_staff_edited(&belong_data.author, &belong_data.section, &belong_data.staff, &mut conn) {
           Ok(belong) => {
@@ -182,7 +199,15 @@ pub async fn edit_staff_status(req: HttpRequest, _: JwtMiddleware, app_data: web
 
 
 // Handler for deactivating member 
-pub async fn disable_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, status_data: web::Json<BelongIdentity>) -> impl Responder {
+pub async fn disable_member(
+  req: HttpRequest, _: JwtMiddleware, 
+  app_data: web::Data<AppState>, 
+  path: web::Path<String>,
+  status_data: web::Json<BelongIdentity>) -> impl Responder {
+
+  //Extract from path
+  let org  = path.into_inner();
+
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -200,7 +225,7 @@ pub async fn disable_member(req: HttpRequest, _: JwtMiddleware, app_data: web::D
     };
 
     // Check if the user is authorized to perform this action
-    match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
+    match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
       Ok(true) => {
 
         match is_member_active(&belong_data.author, &belong_data.section, &mut conn) {
@@ -305,7 +330,17 @@ pub async fn disable_member(req: HttpRequest, _: JwtMiddleware, app_data: web::D
 
 
 // Handler for re enabling disabled  member 
-pub async fn enable_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, status_data: web::Json<BelongIdentity>) -> impl Responder {
+pub async fn enable_member(
+  req: HttpRequest, _: JwtMiddleware,
+   app_data: web::Data<AppState>, 
+   path: web::Path<String>,
+   status_data: web::Json<BelongIdentity>) -> impl Responder {
+
+
+  //Extract from path
+  let org  = path.into_inner();
+
+
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -323,7 +358,7 @@ pub async fn enable_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
     };
 
     // Check if the user is authorized to perform this action
-    match check_member_authority(&user.id, &belong_data.section, &req_permission, &mut conn) {
+    match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
       Ok(true) => {
 
         match is_member_active(&belong_data.author, &belong_data.section, &mut conn) {
