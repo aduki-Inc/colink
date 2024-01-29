@@ -30,24 +30,24 @@ pub fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, co
 
 
 // Check the role for user attempting to create, edit or delete other roles
-pub fn check_member_authority(user_id: &i32, section_id: &i32, permission: &OrgPermission, conn: &mut PgConnection) -> Result<bool, Error> {
-  match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
-    Ok(role) => {
-      // println!("{:?}", &role);
-      match role.privileges.expect("REASON").get(&permission.title) {
-       Some(members) => {
-        match members.as_array().and_then(|arr| arr.iter().find(|&v|v == &permission.name)){
-          Some(_delete_permission) => Ok(true),
-          None => Ok(false)
-        }
-       }
-       None => Ok(false)
-      }
-    },
-    Err(Error::NotFound) => Ok(false),
-    Err(err) => Err(err),
-  }
-}
+// pub fn check_member_authority(user_id: &i32, section_id: &i32, permission: &OrgPermission, conn: &mut PgConnection) -> Result<bool, Error> {
+//   match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
+//     Ok(role) => {
+//       // println!("{:?}", &role);
+//       match role.privileges.expect("REASON").get(&permission.title) {
+//        Some(members) => {
+//         match members.as_array().and_then(|arr| arr.iter().find(|&v|v == &permission.name)){
+//           Some(_delete_permission) => Ok(true),
+//           None => Ok(false)
+//         }
+//        }
+//        None => Ok(false)
+//       }
+//     },
+//     Err(Error::NotFound) => Ok(false),
+//     Err(err) => Err(err),
+//   }
+// }
 
 
 // Check the role for user attempting to create, edit or delete other roles

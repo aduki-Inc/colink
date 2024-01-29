@@ -13,7 +13,7 @@ use crate::middlewares::auth::{
 use crate::middlewares::org::editing_middleware::*;
 
 // Handler for editing member info
-pub async fn edit_member(
+pub async fn edit_user_info(
   req: HttpRequest, _: JwtMiddleware, 
   app_data: web::Data<AppState>, 
   path: web::Path<String>,
@@ -140,7 +140,7 @@ pub async fn edit_staff_status(
     // Check if the user is authorized to perform this action
     match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
       Ok(true) => {
-        match belong_staff_edited(&belong_data.author, &belong_data.section, &belong_data.staff, &mut conn) {
+        match belong_staff_edited(&belong_data.id, &belong_data.staff, &mut conn) {
           Ok(belong) => {
             return HttpResponse::Ok().json(
               json!({
@@ -199,7 +199,7 @@ pub async fn edit_staff_status(
 
 
 // Handler for deactivating member 
-pub async fn disable_member(
+pub async fn disable_user(
   req: HttpRequest, _: JwtMiddleware, 
   app_data: web::Data<AppState>, 
   path: web::Path<String>,
@@ -228,11 +228,11 @@ pub async fn disable_member(
     match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
       Ok(true) => {
 
-        match is_member_active(&belong_data.author, &belong_data.section, &mut conn) {
+        match is_member_active(&belong_data.id, &mut conn) {
           Ok(true) => {
             match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
               Ok(role) => {
-                match member_disabled(&belong_data.author, &belong_data.section, &mut conn) {
+                match member_disabled(&belong_data.id, &mut conn) {
                   Ok(belong) => {
                     return HttpResponse::Ok().json(
                       json!({
@@ -330,7 +330,7 @@ pub async fn disable_member(
 
 
 // Handler for re enabling disabled  member 
-pub async fn enable_member(
+pub async fn enable_user(
   req: HttpRequest, _: JwtMiddleware,
    app_data: web::Data<AppState>, 
    path: web::Path<String>,
@@ -361,7 +361,7 @@ pub async fn enable_member(
     match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
       Ok(true) => {
 
-        match is_member_active(&belong_data.author, &belong_data.section, &mut conn) {
+        match is_member_active(&belong_data.id, &mut conn) {
           Ok(true) => {
             return HttpResponse::Conflict().json(
               json!({
@@ -373,7 +373,7 @@ pub async fn enable_member(
           Ok(false) => {
             match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
               Ok(role) => {
-                match member_enabled(&belong_data.author, &belong_data.section, &mut conn) {
+                match member_enabled(&belong_data.id,  &mut conn) {
                   Ok(belong) => {
                     return HttpResponse::Ok().json(
                       json!({
