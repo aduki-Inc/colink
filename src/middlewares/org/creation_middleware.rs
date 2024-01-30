@@ -26,6 +26,15 @@ pub fn org_exists(unique_name: &str, other_name: &str, conn: &mut PgConnection) 
   }
 }
 
+pub fn belong_exists(user_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
+  match belongs.filter(author.eq(user_id).and(section.eq(section_id))).first::<Belong>(conn) {
+    Ok(_role) => Ok(true),
+    Err(Error::NotFound) => Ok(false),
+    Err(err) => Err(err),
+  }
+}
+
+
 //Creating the Organization
 pub fn org_created(user_id: &i32, user_name: &str, new_org: &InsertableOrganization, conn: &mut PgConnection) -> Result<Organization, Error> {
   conn.transaction(|conn| {
@@ -132,7 +141,7 @@ pub fn belongs_created(inter_m: &BelongIntermediate, data: &InsertableBelong, co
 
   conn.transaction(|conn| {
 
-    // Check if similar role exists?
+    // Create new belong
     match diesel::insert_into(belongs::table).values(data)
     .get_result::<Belong>(conn) {
       Ok(belong) => {

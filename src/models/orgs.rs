@@ -127,8 +127,6 @@ pub struct BelongIntermediate {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct NewBelong {
   pub author: i32,
-  pub org: i32,
-  pub section: i32,
   pub name: String,
   pub identity: String,
   pub title: String,

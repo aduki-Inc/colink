@@ -9,7 +9,7 @@ use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::{
   auth_middleware::{JwtMiddleware, Claims},
-  role_middleware::{role_exists, check_authority}
+  role_middleware::{role_exists, check_user_authority}
 };
 use crate::models::custom_types::{OrgType, RoleType};
 use crate::middlewares::org::creation_middleware::*;
@@ -115,7 +115,15 @@ pub async fn create_org(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<
 
 
 // Handler Add new member for an Organization
-pub async fn add_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, org_data: web::Json<NewBelong>) -> impl Responder {
+pub async fn add_user(
+  req: HttpRequest, _: JwtMiddleware, 
+  app_data: web::Data<AppState>, 
+  path: web::Path<String>,
+  org_data: web::Json<NewBelong>) -> impl Responder {
+
+  //Extract from path
+  let org  = path.into_inner();
+
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -129,15 +137,23 @@ pub async fn add_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<
     match org_data.validate() {
       Ok(belong_data) => {
 
-        let role_type: RoleType = match belong_data.staff.unwrap() {
-          true => RoleType::Staff,
-          false => RoleType::Period
+        // Determine which role type does the user belong to;
+        let role_type: String = match belong_data.staff.unwrap() {
+          true => "staff".to_owned(),
+          false => "members".to_owned()
+        };
+
+        // Create org permission based on user request
+        let req_permission = OrgPermission {
+          title: role_type,
+          name: "create".to_owned()
         };
 
         // Check if the user is authorized to perform this action
-        match check_authority(&user.id, &belong_data.section, &role_type, &mut conn) {
-          Ok(true) => {
-            match role_exists(&belong_data.author, &belong_data.section, &mut conn) {
+        match check_user_authority(&user.id, &org, &req_permission, &mut conn) {
+          Ok((true, Some(section))) => {
+            let section_data = section.unwrap();
+            match belong_exists(&belong_data.author, &section.id, &mut conn) {
               Ok(true) => {
                 return HttpResponse::Conflict().json(
                   json!({
@@ -149,15 +165,14 @@ pub async fn add_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<
               Ok(false) => {
                 let intermediate = BelongIntermediate {
                   user: user.id,
-                  section: belong_data.section,
+                  section: section_data.id,
                   date: belong_data.date
                 };
 
-
                 let belong = InsertableBelong {
                   author: belong_data.author,
-                  org: belong_data.org,
-                  section: belong_data.section,
+                  org: section_data.target,
+                  section: section_data.id,
                   name: belong_data.name,
                   identity: belong_data.identity,
                   title: belong_data.title,
@@ -197,7 +212,24 @@ pub async fn add_member(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<
             }
           }
 
-          Ok(false) => {
+          Ok((true, None)) => {
+            return HttpResponse::ExpectationFailed().json(
+              json!({
+                "success": false,
+                "message": "The section you are trying to update was not found!"
+              })
+            )
+          }
+
+          Ok((false, Some(_))) => {
+            return HttpResponse::Unauthorized().json(
+              json!({
+                "success": false,
+                "message": "You're not authorized to perform this action!"
+              })
+            )
+          }
+          Ok((false, None)) => {
             return HttpResponse::Unauthorized().json(
               json!({
                 "success": false,
