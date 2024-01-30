@@ -57,7 +57,7 @@ async fn main() -> std::io::Result<()> {
 			.wrap(cors)
 			.service(routes::orgs::org_config())
 			.service(routes::auth::auth_config())
-			.service(routes::static_routes::static_config())
+			.service(routes::r#static::static_config())
 			.service(Files::new("/static", "./static"))
 			.wrap(Logger::default())
 	})
