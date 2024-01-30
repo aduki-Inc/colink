@@ -7,7 +7,7 @@ use diesel::result::Error;
 use diesel::pg::PgConnection;
 use chrono::Utc;
 
-// Check the role for user attempting to create, edit or delete other roles
+// Check the role for user attempting to create, edit, or delete other roles
 pub fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, conn: &mut PgConnection) -> Result<bool, Error> {
   match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
     Ok(role) => {

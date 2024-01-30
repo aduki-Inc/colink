@@ -2,16 +2,15 @@ use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use chrono::NaiveDate;
 use crate::db::connection::establish_connection;
 use crate::models::orgs::{
-  InsertableBelong, BelongIntermediate,
-  InsertableOrganization, NewBelong, NewOrganization
+  BelongIntermediate, InsertableBelong, InsertableOrganization, NewBelong, NewOrganization, OrgPermission
 };
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::{
   auth_middleware::{JwtMiddleware, Claims},
-  role_middleware::{role_exists, check_user_authority}
+  role_middleware::check_org_authority,
 };
-use crate::models::custom_types::{OrgType, RoleType};
+use crate::models::custom_types::OrgType;
 use crate::middlewares::org::creation_middleware::*;
 
 
@@ -150,10 +149,10 @@ pub async fn add_user(
         };
 
         // Check if the user is authorized to perform this action
-        match check_user_authority(&user.id, &org, &req_permission, &mut conn) {
+        match check_org_authority(&user.id, &org, &req_permission, &mut conn) {
           Ok((true, Some(section))) => {
-            let section_data = section.unwrap();
-            match belong_exists(&belong_data.author, &section.id, &mut conn) {
+//            let section_data = section.unwrap();
+            match belong_exists(&belong_data.author, &section.id.unwrap(), &mut conn) {
               Ok(true) => {
                 return HttpResponse::Conflict().json(
                   json!({
@@ -165,14 +164,14 @@ pub async fn add_user(
               Ok(false) => {
                 let intermediate = BelongIntermediate {
                   user: user.id,
-                  section: section_data.id,
+                  section: section.id.unwrap(),
                   date: belong_data.date
                 };
 
                 let belong = InsertableBelong {
                   author: belong_data.author,
-                  org: section_data.target,
-                  section: section_data.id,
+                  org: section.target.unwrap(),
+                  section: section.id.unwrap(),
                   name: belong_data.name,
                   identity: belong_data.identity,
                   title: belong_data.title,

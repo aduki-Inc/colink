@@ -11,7 +11,7 @@ pub fn org_config() -> Scope {
     .route("/{org}/edit/logo", web::patch().to(update_logo))
 
     //Organization - Members
-    .route("/{org}/users/add", web::put().to(add_member))
+    .route("/{org}/users/add", web::put().to(add_user))
     .route("/{org}/users/edit", web::patch().to(edit_user_info))
     .route("/{org}/users/edit/status", web::patch().to(edit_staff_status))
     .route("/{org}/users/disable", web::patch().to(disable_user))
