@@ -36,7 +36,7 @@ pub struct OrganizationInfo {
   pub name: String,
   pub location: Option<String>,
   pub about: Option<String>,
-  pub established: Option<NaiveDate>
+  pub established: Option<String>
 }
 
 #[derive(Clone, Serialize, Deserialize)]

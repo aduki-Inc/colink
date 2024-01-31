@@ -1,5 +1,6 @@
 use crate::db::schema::orgs::dsl::*;
 use crate::models::orgs::{Organization, OrganizationInfo, OrganizationContact};
+use chrono::NaiveDate;
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
@@ -29,12 +30,19 @@ pub async fn org_background_updated(file_url: &str, org_short_name: &str, conn: 
 
 // Updating the Organization/Institution Background Image
 pub async fn org_info_updated(org_info: &OrganizationInfo, org_short_name: &str, conn: &mut PgConnection) -> Result<Organization, Error> {
+  let established_str = org_info.established.unwrap();
+
+  let established_date: Option<NaiveDate> = match NaiveDate::parse_from_str(&established_str, "%Y-%m-%d"){
+    Ok(created_date) => Some(created_date),
+    Err(_) => None,
+  };
+
   match diesel::update(orgs.filter(short_name.eq(org_short_name)))
   .set((
     name.eq(&org_info.name), 
     location.eq(&org_info.location), 
     about.eq(&org_info.about), 
-    established.eq(&org_info.established) 
+    established.eq(&established_date)
   ))
   .get_result::<Organization>(conn) {
     Ok(org) => Ok(org),
