@@ -30,7 +30,7 @@ pub async fn org_background_updated(file_url: &str, org_short_name: &str, conn: 
 
 // Updating the Organization/Institution Background Image
 pub async fn org_info_updated(org_info: &OrganizationInfo, org_short_name: &str, conn: &mut PgConnection) -> Result<Organization, Error> {
-  let established_str = org_info.established.unwrap();
+  let established_str = org_info.established.as_ref().unwrap();
 
   let established_date: Option<NaiveDate> = match NaiveDate::parse_from_str(&established_str, "%Y-%m-%d"){
     Ok(created_date) => Some(created_date),
