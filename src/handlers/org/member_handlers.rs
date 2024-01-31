@@ -254,7 +254,7 @@ pub async fn disable_user(
 
     let belong_data = status_data.into_inner();
     let req_permission = OrgPermission {
-      title: "staff".to_owned(),
+      title: "members".to_owned(),
       name: "delete".to_owned()
     };
 
@@ -383,9 +383,9 @@ pub async fn disable_user(
 // Handler for re enabling disabled  member 
 pub async fn enable_user(
   req: HttpRequest, _: JwtMiddleware,
-   app_data: web::Data<AppState>, 
-   path: web::Path<String>,
-   status_data: web::Json<BelongIdentity>) -> impl Responder {
+  app_data: web::Data<AppState>, 
+  path: web::Path<String>,
+  status_data: web::Json<BelongIdentity>) -> impl Responder {
 
 
   //Extract from path
@@ -404,7 +404,7 @@ pub async fn enable_user(
 
     let belong_data = status_data.into_inner();
     let req_permission = OrgPermission {
-      title: "staff".to_owned(),
+      title: "members".to_owned(),
       name: "delete".to_owned()
     };
 

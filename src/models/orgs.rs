@@ -32,6 +32,19 @@ pub struct Organization {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
+pub struct OrganizationInfo {
+  pub name: String,
+  pub location: Option<String>,
+  pub about: Option<String>,
+  pub established: Option<NaiveDate>
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct OrganizationContact {
+  pub contact: Option<Json>
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct NewOrganization {
   pub short_name: String,
   pub name: String,
