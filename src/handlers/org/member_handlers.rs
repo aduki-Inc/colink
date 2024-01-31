@@ -8,7 +8,7 @@ use diesel::result::Error;
 use serde_json::json;
 use crate::middlewares::auth::{
   auth_middleware::{JwtMiddleware, Claims},
-  role_middleware::{ check_member_authority_by_section, role_belong_set_expired }
+  role_middleware::{ check_org_authority, role_belong_set_expired }
 };
 use crate::middlewares::org::editing_middleware::*;
 
@@ -40,8 +40,8 @@ pub async fn edit_user_info(
           name: "update".to_owned()
         };
         // Check if the user is authorized to perform this action
-        match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
-          Ok(true) => {
+        match check_org_authority(&user.id, &org, &req_permission, &mut conn) {
+          Ok((true, Some(_section))) => {
             match belong_edited(&belong_data, &mut conn) {
               Ok(belong) => {
                 return HttpResponse::Ok().json(
@@ -71,7 +71,24 @@ pub async fn edit_user_info(
             }
           }
 
-          Ok(false) => {
+          Ok((true, None)) => {
+            return HttpResponse::ExpectationFailed().json(
+              json!({
+                "success": false,
+                "message": "The section you are trying to update was not found!"
+              })
+            )
+          }
+
+          Ok((false, Some(_))) => {
+            return HttpResponse::Unauthorized().json(
+              json!({
+                "success": false,
+                "message": "You're not authorized to perform this action!"
+              })
+            )
+          }
+          Ok((false, None)) => {
             return HttpResponse::Unauthorized().json(
               json!({
                 "success": false,
@@ -138,8 +155,8 @@ pub async fn edit_staff_status(
     };
 
     // Check if the user is authorized to perform this action
-    match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
-      Ok(true) => {
+    match check_org_authority(&user.id, &org, &req_permission, &mut conn) {
+      Ok((true, Some(_section))) => {
         match belong_staff_edited(&belong_data.id, &belong_data.staff, &mut conn) {
           Ok(belong) => {
             return HttpResponse::Ok().json(
@@ -169,7 +186,24 @@ pub async fn edit_staff_status(
         }
       }
 
-      Ok(false) => {
+      Ok((true, None)) => {
+        return HttpResponse::ExpectationFailed().json(
+          json!({
+            "success": false,
+            "message": "The section you are trying to update was not found!"
+          })
+        )
+      }
+
+      Ok((false, Some(_))) => {
+        return HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "You're not authorized to perform this action!"
+          })
+        )
+      }
+      Ok((false, None)) => {
         return HttpResponse::Unauthorized().json(
           json!({
             "success": false,
@@ -225,12 +259,12 @@ pub async fn disable_user(
     };
 
     // Check if the user is authorized to perform this action
-    match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
-      Ok(true) => {
+    match check_org_authority(&user.id, &org, &req_permission, &mut conn) {
+      Ok((true, Some(section))) => {
 
         match is_member_active(&belong_data.id, &mut conn) {
           Ok(true) => {
-            match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
+            match role_belong_set_expired(&belong_data.author, &section.id, &mut conn) {
               Ok(role) => {
                 match member_disabled(&belong_data.id, &mut conn) {
                   Ok(belong) => {
@@ -300,7 +334,24 @@ pub async fn disable_user(
         }
       }
 
-      Ok(false) => {
+      Ok((true, None)) => {
+        return HttpResponse::ExpectationFailed().json(
+          json!({
+            "success": false,
+            "message": "The section you are trying to update was not found!"
+          })
+        )
+      }
+
+      Ok((false, Some(_))) => {
+        return HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "You're not authorized to perform this action!"
+          })
+        )
+      }
+      Ok((false, None)) => {
         return HttpResponse::Unauthorized().json(
           json!({
             "success": false,
@@ -358,8 +409,8 @@ pub async fn enable_user(
     };
 
     // Check if the user is authorized to perform this action
-    match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
-      Ok(true) => {
+    match check_org_authority(&user.id, &org, &req_permission, &mut conn) {
+      Ok((true, Some(section))) => {
 
         match is_member_active(&belong_data.id, &mut conn) {
           Ok(true) => {
@@ -371,7 +422,7 @@ pub async fn enable_user(
             )
           }
           Ok(false) => {
-            match role_belong_set_expired(&belong_data.author, &belong_data.section, &mut conn) {
+            match role_belong_set_expired(&belong_data.author, &section.id, &mut conn) {
               Ok(role) => {
                 match member_enabled(&belong_data.id,  &mut conn) {
                   Ok(belong) => {
@@ -433,7 +484,16 @@ pub async fn enable_user(
         }
       }
 
-      Ok(false) => {
+      Ok((true, None)) => {
+        return HttpResponse::ExpectationFailed().json(
+          json!({
+            "success": false,
+            "message": "The section you are trying to update was not found!"
+          })
+        )
+      }
+
+      Ok((false, Some(_))) => {
         return HttpResponse::Unauthorized().json(
           json!({
             "success": false,
@@ -441,6 +501,15 @@ pub async fn enable_user(
           })
         )
       }
+      Ok((false, None)) => {
+        return HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "You're not authorized to perform this action!"
+          })
+        )
+      }
+        
       Err(_) => {
         return  HttpResponse::Unauthorized().json(
           json!({

@@ -151,8 +151,8 @@ pub async fn add_user(
         // Check if the user is authorized to perform this action
         match check_org_authority(&user.id, &org, &req_permission, &mut conn) {
           Ok((true, Some(section))) => {
-//            let section_data = section.unwrap();
-            match belong_exists(&belong_data.author, &section.id.unwrap(), &mut conn) {
+            // let section_data = section.unwrap();
+            match belong_exists(&belong_data.author, &section.id, &mut conn) {
               Ok(true) => {
                 return HttpResponse::Conflict().json(
                   json!({
@@ -164,14 +164,14 @@ pub async fn add_user(
               Ok(false) => {
                 let intermediate = BelongIntermediate {
                   user: user.id,
-                  section: section.id.unwrap(),
+                  section: section.id,
                   date: belong_data.date
                 };
 
                 let belong = InsertableBelong {
                   author: belong_data.author,
-                  org: section.target.unwrap(),
-                  section: section.id.unwrap(),
+                  org: section.target,
+                  section: section.id,
                   name: belong_data.name,
                   identity: belong_data.identity,
                   title: belong_data.title,

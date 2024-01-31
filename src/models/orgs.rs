@@ -192,14 +192,12 @@ impl EditBelong {
 #[derive(Debug,Copy, Serialize, Deserialize, Clone)]
 pub struct BelongStaff {
   pub id: i32,
-  pub section: i32,
   pub staff: bool
 }
 
 #[derive(Debug, Copy, Serialize, Deserialize, Clone)]
 pub struct BelongIdentity {
   pub id: i32,
-  pub author: i32,
-  pub section: i32
+  pub author: i32
 }
 
