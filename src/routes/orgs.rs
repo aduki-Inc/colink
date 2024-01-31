@@ -9,6 +9,7 @@ pub fn org_config() -> Scope {
     // Organization
     .route("/create", web::put().to(create_org))
     .route("/{org}/edit/logo", web::patch().to(update_logo))
+    .route("/{org}/edit/background", web::patch().to(update_background))
 
     //Organization - Members
     .route("/{org}/users/add", web::put().to(add_user))

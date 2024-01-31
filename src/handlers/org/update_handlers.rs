@@ -9,9 +9,9 @@ use serde_json::json;
 use crate::middlewares::{
   auth::{
     auth_middleware::{JwtMiddleware, Claims},
-    role_middleware::check_member_authority_by_section
+    role_middleware::check_org_authority
   },
-  org::update_middleware::org_logo_updated
+  org::update_middleware::{org_logo_updated, org_background_updated}
 };
 use crate::utils::file_util::{ upload_file, UploadForm };
 
@@ -42,8 +42,8 @@ pub async fn update_logo(
     };
 
     // Check if the user is authorized to perform this action
-    match check_member_authority_by_section(&user.id, &org, &req_permission, &mut conn) {
-      Ok(true) => {
+    match check_org_authority(&user.id, &org, &req_permission, &mut conn) {
+      Ok((true, Some(_section))) => {
         match upload_file(payload, &org, &app_data.static_dir, "orgs/logos").await {
           Ok(file_url) => {
             match org_logo_updated(&file_url, &org, &mut conn) {
@@ -86,7 +86,24 @@ pub async fn update_logo(
         
       }
 
-      Ok(false) => {
+      Ok((true, None)) => {
+        return HttpResponse::ExpectationFailed().json(
+          json!({
+            "success": false,
+            "message": "The section you are trying to update was not found!"
+          })
+        )
+      }
+
+      Ok((false, Some(_))) => {
+        return HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "You're not authorized to perform this action!"
+          })
+        )
+      }
+      Ok((false, None)) => {
         return HttpResponse::Unauthorized().json(
           json!({
             "success": false,
@@ -121,3 +138,130 @@ pub async fn update_logo(
     )
 	}
 }
+
+
+
+// Handler for updating organization logo
+pub async fn update_background(
+  req: HttpRequest, 
+  _: JwtMiddleware, 
+  app_data: web::Data<AppState>, 
+  path: web::Path<String>,
+  payload: MultipartForm<UploadForm>) -> impl Responder {
+
+  //Extract from path
+  let org  = path.into_inner();
+
+  //  Get extensions
+  let ext = req.extensions();
+  let mut conn = establish_connection(&app_data.config.database_url).await;
+
+
+  // Use the 'get' method to retrieve the 'Claims' value from extensions
+	if let Some(claims) = ext.get::<Claims>() {
+		// Access 'user' from 'Claims'
+		let user = &claims.user;
+
+    let req_permission = OrgPermission {
+      title: "staff".to_owned(),
+      name: "update".to_owned()
+    };
+
+    // Check if the user is authorized to perform this action
+    match check_org_authority(&user.id, &org, &req_permission, &mut conn) {
+      Ok((true, Some(_section))) => {
+        match upload_file(payload, &org, &app_data.static_dir, "orgs/backgrounds").await {
+          Ok(file_url) => {
+            match org_background_updated(&file_url, &org, &mut conn) {
+              Ok(org) => {
+                return HttpResponse::Ok().json(
+                  json!({
+                    "success": true,
+                    "org": org,
+                    "message": "Organization background image was uploaded successfully!"
+                  })
+                )
+              }
+              Err(Error::NotFound) => {
+                return HttpResponse::NotFound().json(
+                  json!({
+                    "success": false,
+                    "message": "The organization was not found!"
+                  })
+                )
+              }
+              Err(_) => {
+                return  HttpResponse::InternalServerError().json(
+                  json!({
+                    "success": false,
+                    "message": "Could not update the background image: An error occurred during the process!"
+                  })
+                )
+              }
+            }
+          }
+          Err(err) => {
+            return HttpResponse::InternalServerError().json(
+              json!({
+                "success": false,
+                "message": err.to_string()
+              })
+            )
+          }
+        }
+        
+      }
+
+      Ok((true, None)) => {
+        return HttpResponse::ExpectationFailed().json(
+          json!({
+            "success": false,
+            "message": "The section you are trying to update was not found!"
+          })
+        )
+      }
+
+      Ok((false, Some(_))) => {
+        return HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "You're not authorized to perform this action!"
+          })
+        )
+      }
+      Ok((false, None)) => {
+        return HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "You're not authorized to perform this action!"
+          })
+        )
+      }
+      Err(Error::NotFound) => {
+        return HttpResponse::NotFound().json(
+          json!({
+            "success": false,
+            "message": "Could not verify your authority, or the organization you're trying to update does not exists!"
+          })
+        )
+      }
+      Err(_) => {
+        return  HttpResponse::Unauthorized().json(
+          json!({
+            "success": false,
+            "message": "Could not verify your authority: An error occurred during the process!"
+          })
+        )
+      }
+    }
+	}
+	else {
+		return HttpResponse::BadRequest().json(
+      json!({
+        "success": false,
+        "message": "Authorization failure!"
+      })
+    )
+	}
+}
+
