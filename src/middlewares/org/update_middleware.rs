@@ -51,7 +51,7 @@ pub async fn org_info_updated(org_info: &OrganizationInfo, org_short_name: &str,
   }
 }
 
-// Updating the Organization/Institution Background Image
+// Updating the Organization/Institution Background Picture/Image
 pub async fn org_contact_updated(org_contact: &OrganizationContact, org_short_name: &str, conn: &mut PgConnection) -> Result<Organization, Error> {
   match diesel::update(orgs.filter(short_name.eq(org_short_name)))
   .set(contact.eq(&org_contact.contact))
