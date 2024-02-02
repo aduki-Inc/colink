@@ -1,8 +1,11 @@
-use crate::db::schema::orgs::dsl::*;
+use crate::db::org::org::orgs::dsl::*;
 //use crate::db::schema::belongs::dsl::*;
 // use crate::db::schema::approvals::dsl::approvals;
 // use crate::db::schema::sections::dsl::sections;
-use crate::db::schema::{roles, orgs as org_model, approvals, sections, belongs};
+use crate::db::{
+  org::org::{orgs as org_model, belongs}, 
+  platform::platform::{roles, approvals, sections} 
+};
 use crate::models::{
   orgs::{
     Organization, InsertableOrganization, Belong,
@@ -27,7 +30,7 @@ pub fn org_exists(unique_name: &str, other_name: &str, conn: &mut PgConnection) 
 }
 
 pub fn belong_exists(user_id: &i32, section_id: &i32, conn: &mut PgConnection) -> Result<bool, Error> {
-  use crate::db::schema::belongs::dsl::*;
+  use crate::db::org::org::belongs::dsl::*;
   match belongs.filter(author.eq(user_id).and(section.eq(section_id))).first::<Belong>(conn) {
     Ok(_role) => Ok(true),
     Err(Error::NotFound) => Ok(false),

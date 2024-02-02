@@ -1,4 +1,4 @@
-use crate::db::schema::sections::dsl::*;
+use crate::db::platform::platform::sections::dsl::*;
 // use crate::db::schema::sections;
 use crate::models::system::Section;
 use diesel::prelude::*;

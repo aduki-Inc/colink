@@ -1,10 +1,10 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
-use crate::db::schema::users::dsl::*;
+use crate::db::account::account::users::dsl::*;
 use diesel::result::Error;
 use bcrypt::{hash, verify};
 use crate::db::connection::establish_connection;
-use crate::db::schema::users;
+use crate::db::account::account::users;
 use crate::models::users::{User, LoggedUser, NewUser, LoginData, Username};
 use crate::configs::state::AppState;
 use serde_json::json;

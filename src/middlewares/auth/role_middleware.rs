@@ -1,4 +1,4 @@
-use crate::db::schema::roles::dsl::*;
+use crate::db::platform::platform::roles::dsl::*;
 use crate::models::system::Section;
 use crate::models::{system::{Role, RolePrivileges}, custom_types::RoleType};
 use crate::models::orgs::OrgPermission;

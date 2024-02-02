@@ -1,4 +1,4 @@
-use crate::db::schema::orgs::dsl::*;
+use crate::db::org::org::orgs::dsl::*;
 use crate::models::orgs::{Organization, OrganizationInfo, OrganizationContact};
 use chrono::NaiveDate;
 use diesel::prelude::*;

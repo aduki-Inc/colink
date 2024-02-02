@@ -12,7 +12,7 @@ pub struct OrgPermission {
 }
 
 #[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::orgs)]
+#[diesel(table_name = crate::db::org::org::orgs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Organization {
   pub id: i32,
@@ -86,7 +86,7 @@ impl NewOrganization {
 
 
 #[derive(Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::orgs)]
+#[diesel(table_name = crate::db::org::org::orgs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct InsertableOrganization{
   pub short_name: String,
@@ -98,7 +98,7 @@ pub struct InsertableOrganization{
 }
 
 #[derive(Queryable, Selectable, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::belongs)]
+#[diesel(table_name = crate::db::org::org::belongs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Belong {
   pub id: i32,
@@ -116,7 +116,7 @@ pub struct Belong {
 
 
 #[derive(Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::belongs)]
+#[diesel(table_name = crate::db::org::org::belongs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct InsertableBelong {
   pub author: i32,

@@ -3,7 +3,7 @@ use diesel::prelude::*;
 // use crate::db::schema::users::dsl::*;
 use diesel::result::Error;
 use crate::db::connection::establish_connection;
-use crate::db::schema::sections;
+use crate::db::platform::platform::sections;
 use crate::models::system::{Section, NewSection, SectionIdentity};
 use crate::configs::state::AppState;
 use serde_json::json;

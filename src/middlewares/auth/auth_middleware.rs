@@ -2,7 +2,7 @@ use core::fmt;
 use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, Result, dev::Payload, FromRequest, HttpResponse, HttpMessage, ResponseError};
 use std::future::{ready, Ready};
-use crate::db::schema::users::dsl::*;
+use crate::db::account::account::users::dsl::*;
 use crate::models::users::User;
 use diesel::prelude::*;
 use diesel::result::Error;

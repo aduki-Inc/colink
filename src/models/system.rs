@@ -2,14 +2,14 @@ use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
-// use crate::db::schema::RoleType;
 use crate::models::custom_types::RoleType;
+use crate::db::platform::platform;
 
 
 
 // - Colink
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::co_link)]
+#[diesel(table_name = platform::co_link)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct Colink {
@@ -25,7 +25,7 @@ pub struct Colink {
 
 // - Section
 #[derive(Debug, Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::sections)]
+#[diesel(table_name = platform::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Section {
   pub id: i32,
@@ -40,7 +40,7 @@ pub struct Section {
 
 #[derive(Insertable, Clone, Serialize, Deserialize)]
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::sections)]
+#[diesel(table_name = platform::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct NewSection {
   pub identity: String,
@@ -70,7 +70,7 @@ impl NewSection {
 
 #[derive(Insertable, Clone, Serialize, Deserialize)]
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::sections)]
+#[diesel(table_name = platform::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct SectionIdentity {
   pub id: i32,
@@ -94,7 +94,7 @@ impl SectionIdentity {
 
 // - Roles
 #[derive(Debug, Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::roles)]
+#[diesel(table_name = platform::roles)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Role {
   pub id: i32,
@@ -139,7 +139,7 @@ impl NewRole {
 
 
 #[derive(Debug, Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::roles)]
+#[diesel(table_name = platform::roles)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct InsertableRole {
   pub section: i32,
@@ -221,7 +221,7 @@ impl RoleExpiry {
 
 // - Approvals 
 #[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::approvals)]
+#[diesel(table_name = platform::approvals)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Approval {
   pub id: i32,
@@ -234,7 +234,7 @@ pub struct Approval {
 }
 
 #[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
-#[diesel(table_name = crate::db::schema::approvals)]
+#[diesel(table_name = platform::approvals)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct InsertableApproval {
   pub target: i32,

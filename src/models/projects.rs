@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::models::custom_types::ProposalType;
 
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::projects)]
+#[diesel(table_name = crate::db::project::project::projects)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct Project {
@@ -26,7 +26,7 @@ pub struct Project {
 
 
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::proposals)]
+#[diesel(table_name = crate::db::project::project::proposals)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct Proposal {
@@ -38,7 +38,7 @@ pub struct Proposal {
 }
 
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::db::schema::templates)]
+#[diesel(table_name = crate::db::project::project::templates)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct Template {

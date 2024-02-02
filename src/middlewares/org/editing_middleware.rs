@@ -1,4 +1,4 @@
-use crate::db::schema::belongs::dsl::*;
+use crate::db::org::org::belongs::dsl::*;
 // use crate::db::schema::belongs;
 use crate::models::orgs::{Belong, EditBelong};
 use diesel::prelude::*;

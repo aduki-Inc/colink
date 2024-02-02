@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 #[derive(Debug, DbEnum)]
-#[ExistingTypePath = "crate::db::schema::sql_types::InstitutionType"]
+#[ExistingTypePath = "crate::db::org::org::sql_types::InstitutionType"]
 pub enum InstitutionType {
   Vocational,
   High,
@@ -15,7 +15,7 @@ pub enum InstitutionType {
 
 #[derive(Serialize, Deserialize, Clone)]
 #[derive(Debug, DbEnum)]
-#[ExistingTypePath = "crate::db::schema::sql_types::OrgType"]
+#[ExistingTypePath = "crate::db::org::org::sql_types::OrgType"]
 pub enum OrgType {
   Org,
   Ist
@@ -23,7 +23,7 @@ pub enum OrgType {
 
 #[derive(Serialize, Deserialize, Clone)]
 #[derive(Debug, DbEnum)]
-#[ExistingTypePath = "crate::db::schema::sql_types::ProposalType"]
+#[ExistingTypePath = "crate::db::project::project::sql_types::ProposalType"]
 pub enum ProposalType {
   Proposal,
   Revised,
@@ -35,7 +35,7 @@ pub enum ProposalType {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, DbEnum)]
-#[ExistingTypePath = "crate::db::schema::sql_types::RoleType"]
+#[ExistingTypePath = "crate::db::platform::platform::sql_types::RoleType"]
 pub enum RoleType {
   Owner,
   Admin,
