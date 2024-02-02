@@ -14,6 +14,35 @@ begin
   end if;
 end $$;
 
+
+-- Check if the enum type(log_type) exists, if not create it
+do $$ 
+begin
+  if not exists (select 1 from pg_type where typname = 'log_type') then
+    -- Create the enum type(log_type)
+    create type log_type as enum (
+      'request',
+      'security',
+      'error',
+      'action'
+    );
+  end if;
+end $$;
+
+-- Check if the enum type(action_type) exists, if not create it
+do $$ 
+begin
+  if not exists (select 1 from pg_type where typname = 'action_type') then
+    -- Create the enum type(action_type)
+    create type action_type as enum (
+      'create',
+      'read',
+      'update',
+      'delete'
+    );
+  end if;
+end $$;
+
 -- Create system(co_link) table
 create table if not exists co_link (
   id serial primary key,
@@ -59,6 +88,19 @@ create table if not exists approvals (
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );
+
+
+-- Create logs table
+create table if not exists logs (
+  id serial primary key,
+  audit log_type not null;
+  author integer references users(id) on delete cascade not null,
+  target integer not null,
+  action action_type not null,
+  verb varchar(500) not null,
+  created_at timestamp with time zone default current_timestamp
+);
+
 
 -- Create a trigger to run everytime field is updated
 select diesel_manage_updated_at('co_link');
