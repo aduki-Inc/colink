@@ -113,7 +113,7 @@ pub async fn create_org(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<
 }
 
 
-// Handler Add new member for an Organization
+// Handler to add a new member for an Organization
 pub async fn add_user(
   req: HttpRequest, _: JwtMiddleware, 
   app_data: web::Data<AppState>, 
