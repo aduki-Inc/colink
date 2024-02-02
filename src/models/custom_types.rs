@@ -42,3 +42,22 @@ pub enum RoleType {
   Staff,
   Period
 }
+
+#[derive(Clone, Serialize, Deserialize, Debug, DbEnum)]
+#[ExistingTypePath = "crate::db::platform::platform::sql_types::LogType"]
+pub enum LogType {
+  Request,
+  Security,
+  Error,
+  Action
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, DbEnum)]
+#[ExistingTypePath = "crate::db::platform::platform::sql_types::ActionType"]
+pub enum ActionType {
+  Create,
+  Read,
+  Update,
+  Delete
+}
+

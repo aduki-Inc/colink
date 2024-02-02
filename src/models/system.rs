@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
-use crate::models::custom_types::RoleType;
+use crate::models::custom_types::{RoleType, LogType, ActionType};
 use crate::db::platform::platform;
 
 
@@ -241,4 +241,19 @@ pub struct InsertableApproval {
   pub name: String,
   pub approved: Option<bool>,
   pub description: Option<String>,
+}
+
+
+// - Logs
+#[derive(Debug, Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
+#[diesel(table_name = platform::logs)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Log {
+  pub id: i32,
+  pub audit: LogType,
+  pub author: i32,
+  pub target: i32,
+  pub action: ActionType,
+  pub verb: String,
+  pub created_at: Option<NaiveDateTime>
 }
