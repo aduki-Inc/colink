@@ -3,6 +3,12 @@
 
 [print_schema]
 file = "src/db/schema.rs"
+filter = { only_tables = [
+  "platform.co-link", "platform.sections", "platform.roles", "platform.approvals", "platform.logs", 
+  "account.users",
+  "org.orgs", "org.belongs",
+  "project.templates", "project.projects", "project.proposals"
+]}
 custom_type_derives = ["diesel::query_builder::QueryId"]
 
 [migrations_directory]

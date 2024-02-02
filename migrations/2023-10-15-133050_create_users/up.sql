@@ -1,5 +1,11 @@
 -- Your SQL goes here
-create table if not exists users (
+
+
+-- Create schema
+create schema if not exists account;
+
+-- Create table for (Users)
+create table if not exists account.users (
   id serial primary key,
   username varchar(250) not  null unique,
   password varchar(500) not null,
@@ -14,4 +20,4 @@ create table if not exists users (
 );
 
 -- Create a function to update updated_at column
-select diesel_manage_updated_at('users');
+select diesel_manage_updated_at('account.users');

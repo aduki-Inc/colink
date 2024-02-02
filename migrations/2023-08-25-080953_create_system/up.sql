@@ -1,5 +1,8 @@
 -- Your SQL goes here
 
+-- Create schema
+create schema if not exists platform;
+
 -- Check if the enum type(role_type) exists, if not create it
 do $$ 
 begin
@@ -44,7 +47,7 @@ begin
 end $$;
 
 -- Create system(co_link) table
-create table if not exists co_link (
+create table if not exists platform.co_link (
   id serial primary key,
   name varchar(500) not null,
   description text not null,
@@ -54,7 +57,7 @@ create table if not exists co_link (
 );
 
 -- Create sections table
-create table if not exists sections (
+create table if not exists platform.sections (
   id serial primary key,
   identity varchar(250) unique not null,
   target integer not null,
@@ -65,11 +68,11 @@ create table if not exists sections (
 );
 
 -- Create roles table
-create table if not exists roles (
+create table if not exists platform.roles (
   id serial primary key,
-  section integer references sections(id) on delete cascade not null,
+  section integer references platform.sections(id) on delete cascade not null,
   base role_type not null,
-  author integer references users(id) on delete cascade not null,
+  author integer references account.users(id) on delete cascade not null,
   name varchar(500) not null,
   privileges jsonb,
   expiry timestamp with time zone,
@@ -79,7 +82,7 @@ create table if not exists roles (
 
 
 -- Create approvals table
-create table if not exists approvals (
+create table if not exists platform.approvals (
   id serial primary key,
   target integer not null,
   name varchar(250) not null,
@@ -91,10 +94,10 @@ create table if not exists approvals (
 
 
 -- Create logs table
-create table if not exists logs (
+create table if not exists platform.logs (
   id serial primary key,
-  audit log_type not null;
-  author integer references users(id) on delete cascade not null,
+  audit log_type not null,
+  author integer references account.users(id) on delete cascade not null,
   target integer not null,
   action action_type not null,
   verb varchar(500) not null,
@@ -103,7 +106,7 @@ create table if not exists logs (
 
 
 -- Create a trigger to run everytime field is updated
-select diesel_manage_updated_at('co_link');
-select diesel_manage_updated_at('sections');
-select diesel_manage_updated_at('roles');
-select diesel_manage_updated_at('approvals');
+select diesel_manage_updated_at('platform.co_link');
+select diesel_manage_updated_at('platform.sections');
+select diesel_manage_updated_at('platform.roles');
+select diesel_manage_updated_at('platform.approvals');

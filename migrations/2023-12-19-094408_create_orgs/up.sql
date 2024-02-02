@@ -1,5 +1,7 @@
 -- Your SQL goes here
 
+-- Create schema
+create schema if not exists org;
 
 -- Check if the enum type exists
 do $$ 
@@ -33,7 +35,7 @@ end $$;
 
 
 -- Create organizations table
-create table if not exists orgs (
+create table if not exists org.orgs (
   id serial primary key,
   short_name varchar(250) not null unique,
   name varchar(500) not null,
@@ -52,12 +54,12 @@ create table if not exists orgs (
 
 
 --Create belongs table 
-create table if not exists belongs (
+create table if not exists org.belongs (
   id serial primary key,
   active boolean default true,
-  author integer references users(id) on delete cascade not null,
-  org integer references orgs(id) on delete cascade not null,
-  section integer references sections(id) on delete cascade not null,
+  author integer references account.users(id) on delete cascade not null,
+  org integer references org.orgs(id) on delete cascade not null,
+  section integer references platform.sections(id) on delete cascade not null,
   name varchar(500) not null,
   identity varchar(500) not null,
   title varchar(500) not null,
@@ -68,6 +70,6 @@ create table if not exists belongs (
 
 
 -- Create a trigger to run everytime field is updated
-select diesel_manage_updated_at('orgs');
-select diesel_manage_updated_at('belongs');
+select diesel_manage_updated_at('org.orgs');
+select diesel_manage_updated_at('org.belongs');
 

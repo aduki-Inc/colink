@@ -1,5 +1,7 @@
 -- Your SQL goes here
 
+-- Create schema
+create schema if not exists project;
 
 -- Check if the enum type exists
 do $$ 
@@ -19,7 +21,7 @@ begin
 end $$;
 
 -- Create templates table
-create table if not exists templates (
+create table if not exists project.templates (
   id serial primary key,
   name varchar(500) not null,
   description text not null,
@@ -30,32 +32,31 @@ create table if not exists templates (
 
 
 -- Create projects table
-create table if not exists projects (
+create table if not exists project.projects (
   id serial primary key,
-  author integer references users(id) on delete cascade not null,
-  template integer references templates(id) on delete cascade not null,
+  author integer references account.users(id) on delete cascade not null,
+  template integer references project.templates(id) on delete cascade not null,
   title varchar(500) not null,
   field varchar(500) not null,
   type proposal_type not null,
   public boolean not null default true,
   active boolean not null default true,
   owned boolean not null default false,
-  org integer references orgs(id),
+  org integer references org.orgs(id),
   description text,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );
 
-create table if not exists proposals(
+create table if not exists project.proposals(
   id serial primary key,
-  project integer unique references projects(id) on delete cascade not null,
+  project integer unique references project.projects(id) on delete cascade not null,
   summery text not null,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );
 
-
 -- Create a trigger to run everytime field is updated
-select diesel_manage_updated_at('projects');
-select diesel_manage_updated_at('templates');
-select diesel_manage_updated_at('proposals');
+select diesel_manage_updated_at('project.projects');
+select diesel_manage_updated_at('project.templates');
+select diesel_manage_updated_at('project.proposals');
