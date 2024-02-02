@@ -1,6 +1,6 @@
 use diesel::prelude::*;
 use chrono::NaiveDateTime;
-use crate::db::schema::users;
+use crate::db::account::account::users;
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Selectable)]
@@ -35,6 +35,7 @@ pub struct LoggedUser {
 }
 
 #[derive(Insertable, Clone, Serialize, Deserialize)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(table_name = users)]
 pub struct NewUser {
   pub username: String,

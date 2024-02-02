@@ -55,7 +55,7 @@ pub fn check_org_authority(
   user_id: &i32, section_name: &str, 
   permission: &OrgPermission, 
   conn: &mut PgConnection) -> Result<(bool, Option<Section>), Error> {
-  use crate::db::schema::sections::dsl::*;
+  use crate::db::platform::platform::sections::dsl::*;
   match sections
     .filter(identity.eq(section_name))
     .inner_join(roles)
