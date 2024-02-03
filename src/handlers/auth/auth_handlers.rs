@@ -27,7 +27,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 	match data.validate() {
 		Ok(registration_data) => {
 
-
+			// Check if email or username exists
 			let (exists, msg) = email_or_username_exists(
 				&registration_data.email, 
 				&registration_data.username, &mut conn
