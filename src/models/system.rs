@@ -257,3 +257,16 @@ pub struct Log {
   pub verb: String,
   pub created_at: Option<NaiveDateTime>
 }
+
+
+// - Logs
+#[derive(Debug, Insertable, Clone, Serialize, Deserialize)]
+#[diesel(table_name = platform::logs)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertableLog {
+  pub audit: LogType,
+  pub author: i32,
+  pub target: i32,
+  pub action: ActionType,
+  pub verb: String,
+}
