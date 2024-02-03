@@ -73,6 +73,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 			{
 				Ok(user) => {
 
+					// Create new log & save it to db
 					let new_log = InsertableLog {
 						audit: 	LogType::Action,
 						author: user.id,
@@ -91,7 +92,19 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 						})
 					)
 				}
-				Err(_) => {
+				Err(err) => {
+					
+					// Create new log & save it to db
+					let new_log = InsertableLog {
+						audit: LogType::Error,
+						author: 0,
+						target: 0,
+						name: "database".to_owned(),
+						action: ActionType::Create,
+						verb: format!("User registration failed: {}", err.to_string())
+					};
+					create_log(&new_log, &mut conn).await;
+
 					// Handle the database error and return an error response
 					return	HttpResponse::InternalServerError().json(
 						json!({
@@ -140,10 +153,21 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 						"message": "User not found"
 					}));
 				}
-				Err(_) => {
+				Err(err) => {
+					// Create new log & save it to db
+					let new_log = InsertableLog {
+						audit: 	LogType::Error,
+						author: 0,
+						target: 0,
+						name: "database".to_owned(),
+						action: ActionType::Read,
+						verb: format!("User login failed: {}", err.to_string()),
+					};
+					create_log(&new_log, &mut conn).await;
+
 					return HttpResponse::InternalServerError().json(json!({
 						"success": false,
-						"message": "Error, User not found!"
+						"message": "An error occurred while trying to log you in, try again later!"
 					}));
 				}
 		};
@@ -169,7 +193,18 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 							"token": jwt, // Include the JWT
 						}))
 					}
-					Err(_) => {
+					Err(err) => {
+						// Create new log & save it to db
+						let new_log = InsertableLog {
+							audit: 	LogType::Error,
+							author: 0,
+							target: 0,
+							name: "system".to_owned(),
+							action: ActionType::Read,
+							verb: format!("Failed to generate jwt: {}", err.to_string()),
+						};
+						create_log(&new_log, &mut conn).await;
+						
 						HttpResponse::Unauthorized().json(json!({
 							"success": false,
 							"message": "Failed, error occurred while generating auth token"
