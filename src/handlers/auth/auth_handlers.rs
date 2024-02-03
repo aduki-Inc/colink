@@ -8,7 +8,7 @@ use crate::db::account::account::users;
 use crate::models::users::{User, LoggedUser, NewUser, LoginData, Username};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::auth_middleware::{email_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
+use crate::middlewares::auth::auth_middleware::{email_or_username_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
 
 // Logs imports for recording logs
 use crate::middlewares::log::log_middleware::create_log;
@@ -26,22 +26,15 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 	// Collect Registration data from the body
 	match data.validate() {
 		Ok(registration_data) => {
-			// Check if the email already exists
-			if email_exists(&registration_data.email, &mut conn) {
-				return HttpResponse::Conflict().json(
-					json!({
-						"success": false,
-						"message": "Email already exists"
-					})
-				);
-			}
 
-			// Check if the username already exists
-			if username_exists(&registration_data.username, &mut conn) {
+
+			let (exists, msg) = email_or_username_exists(&registration_data.email, &registration_data.username, &mut conn);
+
+			if exists {
 				return HttpResponse::Conflict().json(
 					json!({
 						"success": false,
-						"message": "Username already exists"
+						"message": msg
 					})
 				);
 			}
@@ -81,8 +74,9 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 						audit: 	LogType::Action,
 						author: user.id,
 						target: user.id,
+						name: "users".to_owned(),
 						action: ActionType::Create,
-						verb: format!("{} Created an account", &user.name),
+						verb: format!("{} created an account", &user.name),
 					};
 
 					create_log(&new_log, &mut conn).await;

@@ -253,6 +253,7 @@ pub struct Log {
   pub audit: LogType,
   pub author: i32,
   pub target: i32,
+  pub name: String,
   pub action: ActionType,
   pub verb: String,
   pub created_at: Option<NaiveDateTime>
@@ -267,6 +268,7 @@ pub struct InsertableLog {
   pub audit: LogType,
   pub author: i32,
   pub target: i32,
+  pub name: String,
   pub action: ActionType,
   pub verb: String,
 }

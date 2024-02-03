@@ -39,11 +39,21 @@ impl Clone for Claims {
 }
 
 
-pub fn email_exists(other_email: &str, conn: &mut PgConnection) -> bool {
-  match users.filter(email.eq(other_email)).first::<User>(conn) {
-    Ok(_) => true,
-    Err(Error::NotFound) => false,
-    Err(_) => false,
+pub fn email_or_username_exists(other_email: &str, other_username: &str, conn: &mut PgConnection) -> (bool, Option<String>) {
+  match users.filter(email.eq(other_email).or(username.eq(other_username))).first::<User>(conn) {
+    Ok(user) => {
+      if user.email == other_email {
+        return (true, Some("Similar email already exists!".to_string()));
+      }
+      else if user.username == other_username {
+        return (true, Some("Similar username already exists!".to_string()))
+      }
+      else {
+        return (false, None)
+      }
+    },
+    Err(Error::NotFound) => (false, None),
+    Err(_) => (false, None),
   }
 }
 
