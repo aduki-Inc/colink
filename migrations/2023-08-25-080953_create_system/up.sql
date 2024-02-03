@@ -99,13 +99,14 @@ create table if not exists platform.logs (
   audit log_type not null,
   author integer references account.users(id) on delete cascade not null,
   target integer not null,
+  name varchar(250) not null,
   action action_type not null,
   verb varchar(500) not null,
   created_at timestamp with time zone default current_timestamp
 );
 
 
--- Create a trigger to run everytime field is updated
+-- Create a trigger to run every time field is updated
 select diesel_manage_updated_at('platform.co_link');
 select diesel_manage_updated_at('platform.sections');
 select diesel_manage_updated_at('platform.roles');
