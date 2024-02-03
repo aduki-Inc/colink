@@ -8,7 +8,7 @@ use crate::db::account::account::users;
 use crate::models::users::{User, LoggedUser, NewUser, LoginData, Username};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::auth_middleware::{email_or_username_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
+use crate::middlewares::auth::auth_middleware::{email_or_username_exists, generate_jwt, JwtMiddleware, Claims};
 
 // Logs imports for recording logs
 use crate::middlewares::log::log_middleware::create_log;
@@ -28,7 +28,10 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 		Ok(registration_data) => {
 
 
-			let (exists, msg) = email_or_username_exists(&registration_data.email, &registration_data.username, &mut conn);
+			let (exists, msg) = email_or_username_exists(
+				&registration_data.email, 
+				&registration_data.username, &mut conn
+			).await;
 
 			if exists {
 				return HttpResponse::Conflict().json(
@@ -124,13 +127,6 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 
 	let login_data = data.into_inner();
 
-	// Check if the user exists based on email or username
-	if !email_exists(&login_data.user_key, &mut conn) && !username_exists(&login_data.user_key, &mut conn) {
-		return HttpResponse::Unauthorized().json(json!({
-			"success": false,
-			"message": "User not found"
-		}));
-	}
 
 	// Retrieve the user from the database based on the user_key (email or username)
 	let user = match users::table
@@ -138,6 +134,12 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 		.select((users::columns::id, users::columns::username, users::columns::password, users::columns::email, users::columns::name))
 		.first::<LoggedUser>(&mut conn) {
 				Ok(user) => user,
+				Err(Error::NotFound) => {
+					return HttpResponse::NotFound().json(json!({
+						"success": false,
+						"message": "User not found"
+					}));
+				}
 				Err(_) => {
 					return HttpResponse::InternalServerError().json(json!({
 						"success": false,
@@ -151,7 +153,7 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 			Ok(true) => {
 				// Password is correct
 				// Generate a JWT for the user
-				let jwt_result = generate_jwt(user.id, &user.username, &user.name, &user.email);
+				let jwt_result = generate_jwt(user.id, &user.username, &user.name, &user.email).await;
 				match jwt_result {
 					Ok(jwt) => {
 						// Respond with a successful login message, user info, and the generated JWT

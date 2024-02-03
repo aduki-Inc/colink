@@ -39,7 +39,7 @@ impl Clone for Claims {
 }
 
 
-pub fn email_or_username_exists(other_email: &str, other_username: &str, conn: &mut PgConnection) -> (bool, Option<String>) {
+pub async fn email_or_username_exists(other_email: &str, other_username: &str, conn: &mut PgConnection) -> (bool, Option<String>) {
   match users.filter(email.eq(other_email).or(username.eq(other_username))).first::<User>(conn) {
     Ok(user) => {
       if user.email == other_email {
@@ -57,16 +57,8 @@ pub fn email_or_username_exists(other_email: &str, other_username: &str, conn: &
   }
 }
 
-pub fn username_exists(other_username: &str, conn: &mut PgConnection) -> bool {
-  match users.filter(username.eq(other_username)).first::<User>(conn) {
-    Ok(_) => true,
-    Err(Error::NotFound) => false,
-    Err(_) => false,
-  }
-}
-
 // Function to generate the jwt
-pub fn generate_jwt(user_id: i32, other_username: &str, full_name: &str, other_email: &str) -> Result<String, jsonwebtoken::errors::Error> {
+pub async fn generate_jwt(user_id: i32, other_username: &str, full_name: &str, other_email: &str) -> Result<String, jsonwebtoken::errors::Error> {
   let config = Config::init();
     
   // Set the expiration time for the token (e.g., 1 hour from now)
