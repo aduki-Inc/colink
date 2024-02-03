@@ -10,6 +10,11 @@ use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::auth_middleware::{email_exists, username_exists, generate_jwt, JwtMiddleware, Claims};
 
+// Logs imports for recording logs
+use crate::middlewares::log::log_middleware::create_log;
+use crate::models::system::InsertableLog;
+use crate::models::custom_types::{ActionType, LogType};
+
 
 // Define handler for user registration with JSON data.
 pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUser>) -> impl Responder {
@@ -68,14 +73,27 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 
 			match diesel::insert_into(users::table)
 			.values(&new_user)
-			.execute(&mut conn)
+			.get_result::<User>(&mut conn)
 			{
-				Ok(_) => return HttpResponse::Ok().json(
-					json!({
-						"success": true,
-						"message": "User registered successfully"
-					})
-				),
+				Ok(user) => {
+
+					let new_log = InsertableLog {
+						audit: 	LogType::Action,
+						author: user.id,
+						target: user.id,
+						action: ActionType::Create,
+						verb: format!("{} Created an account", &user.name),
+					};
+
+					create_log(&new_log, &mut conn).await;
+
+					return HttpResponse::Ok().json(
+						json!({
+							"success": true,
+							"message": "User registered successfully"
+						})
+					)
+				}
 				Err(_) => {
 					// Handle the database error and return an error response
 					return	HttpResponse::InternalServerError().json(
