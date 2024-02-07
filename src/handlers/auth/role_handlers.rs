@@ -10,6 +10,10 @@ use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::* };
 
+// Logs imports for recording logs
+use crate::middlewares::log::log_middleware::create_log;
+use crate::models::system::InsertableLog;
+use crate::models::custom_types::{ActionType, LogType};
 
 // Handler for creating new Role
 pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<NewRole>) -> impl Responder {
@@ -93,7 +97,6 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
                     )
                   }
                 }
-
               },
               Err(_) => {
                 return HttpResponse::InternalServerError().json(
@@ -104,17 +107,26 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
                 )
               }
             }
-
           },
 
           Ok(false) => {
+            // Create new log & save it to db
+            let new_log = InsertableLog {
+              audit: 	LogType::Action,
+              author: user.id,
+              target: role.section,
+              name: "sections".to_owned(),
+              action: ActionType::Create,
+              verb: format!("Unauthorized: {} tried to create a role on section -({})-", &user.full_name, &role.section),
+            };
+            create_log(&new_log, &mut conn).await;
+
             return HttpResponse::Forbidden().json(
               json!({
                 "success": false,
                 "message": "You're not authorized to create the role!"
               })
             )
-
           }
 
           Err(_) => {
@@ -127,6 +139,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
           }
         }
       }
+
       Err(_) => {
         // Directly return the HttpResponse
         return HttpResponse::BadRequest().json(
@@ -137,7 +150,6 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
         )
       }
     }
-
 	}
 	else {
 		return HttpResponse::BadRequest().json(
@@ -157,7 +169,7 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
   let mut conn = establish_connection(&app_data.config.database_url).await;
 
 
-  // Use the 'get' method to retrieve the 'Claims' value from extensions
+  // Use the 'get' method to retrieve 'Claims' value from extensions
 	if let Some(claims) = ext.get::<Claims>() {
 		// Access 'user' from 'Claims'
 		let user = &claims.user;
@@ -200,6 +212,17 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
           }
 
           Ok(false) => {
+            // Create new log & save it to db
+            let new_log = InsertableLog {
+              audit: 	LogType::Action,
+              author: user.id,
+              target: role.section,
+              name: "sections".to_owned(),
+              action: ActionType::Create,
+              verb: format!("Unauthorized: {} tried to delete role on section -({})-", &user.full_name, &role.section),
+            };
+            create_log(&new_log, &mut conn).await;
+
             return HttpResponse::Forbidden().json(
               json!({
                 "success": false,
@@ -296,10 +319,20 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
                 "message": "You're not authorized to create the role!"
               })
             )
-
           }
 
-          Err(_) => {
+          Err(err) => {
+            // Create new log & save it to db
+            let new_log = InsertableLog {
+              audit: 	LogType::Error,
+              author: user.id,
+              target: 0,
+              name: "database".to_owned(),
+              action: ActionType::Update,
+              verb: format!("Error occurred while checking for auth: {}", err.to_string()),
+            };
+            create_log(&new_log, &mut conn).await;
+
             return HttpResponse::InternalServerError().json(
               json!({
                 "success": false,

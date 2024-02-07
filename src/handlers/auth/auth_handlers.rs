@@ -71,20 +71,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 			.values(&new_user)
 			.get_result::<User>(&mut conn)
 			{
-				Ok(user) => {
-
-					// Create new log & save it to db
-					let new_log = InsertableLog {
-						audit: 	LogType::Action,
-						author: user.id,
-						target: user.id,
-						name: "users".to_owned(),
-						action: ActionType::Create,
-						verb: format!("{} created an account", &user.name),
-					};
-
-					create_log(&new_log, &mut conn).await;
-
+				Ok(_) => {
 					return HttpResponse::Ok().json(
 						json!({
 							"success": true,
@@ -93,7 +80,6 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 					)
 				}
 				Err(err) => {
-					
 					// Create new log & save it to db
 					let new_log = InsertableLog {
 						audit: LogType::Error,
@@ -236,7 +222,7 @@ pub async fn check_username(app_data: web::Data<AppState>, data: web::Json<Usern
 
 	let username_data = data.into_inner();
 	
-	match users.filter(username.eq(username_data.username)).first::<User>(&mut conn) {
+	match users.filter(username.eq(&username_data.username)).first::<User>(&mut conn) {
     Ok(_) => {
 			return HttpResponse::Ok().json(json!({
 				"success": true,
@@ -251,7 +237,18 @@ pub async fn check_username(app_data: web::Data<AppState>, data: web::Json<Usern
 				"message": "User with that username does not exists"
 			}));
 		},
-    Err(_) => {
+    Err(err) => {
+			// Create new log & save it to db
+			let new_log = InsertableLog {
+				audit: 	LogType::Error,
+				author: 0,
+				target: 0,
+				name: "database".to_owned(),
+				action: ActionType::Read,
+				verb: format!("Check username -({})- failed: {}", username_data.username, err.to_string()),
+			};
+			create_log(&new_log, &mut conn).await;
+
 			return HttpResponse::InternalServerError().json(json!({
 				"success": false,
 				"message": "Internal server error occurred!"
@@ -275,10 +272,9 @@ pub async fn check_user(req: HttpRequest, _: JwtMiddleware) -> impl Responder {
 
 	}
 	else {
-		
-		return HttpResponse::Ok().json(json!({
+		return HttpResponse::Unauthorized().json(json!({
 			"success": false,
-			"user": "An error has occurred"
+			"user": "Authorization failed"
 		}));
 	}
 }
