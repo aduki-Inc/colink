@@ -1,9 +1,8 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
 use diesel::result::{Error, DatabaseErrorKind};
-use chrono::{Utc, Duration, NaiveDateTime};
+use chrono::{Utc, Duration};
 use crate::db::connection::establish_connection;
-use crate::db::platform::platform::roles;
 use crate::db::platform::platform::roles::dsl::*;
 use crate::models::system::{
 	Role, NewRole, InsertableRole,
@@ -42,7 +41,7 @@ pub async fn create_role(
     match role_data.validate() {
       Ok(role) => {
         //Check if user is authorized to create the role
-        match check_authority(&user.id, &role.section, &role.base, &mut conn) {
+        match check_authority(&user.id, &role.section, &role.base, &mut conn).await {
           Ok(true) => {
             // Check if the Role already exists
             match role_exists(&role.author, &role.section, &mut conn) {
@@ -68,10 +67,7 @@ pub async fn create_role(
                   expiry: expiry_date,
                 };
 
-                match diesel::insert_into(roles::table)
-                .values(&new_role)
-                .get_result::<Role>(&mut conn)
-                {
+                match role_created(&new_role, &mut conn).await {
                   Ok(role) => return HttpResponse::Ok().json(
                     json!({
                       "success": true,
@@ -163,11 +159,15 @@ pub async fn create_role(
 
 
 // Handler for deleting existing role
-pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<RoleData>) -> impl Responder {
+pub async fn delete_role(
+  req: HttpRequest,
+  _: JwtMiddleware,
+  app_data: web::Data<AppState>,
+  role_data: web::Json<RoleData>
+) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
-
 
   // Use the 'get' method to retrieve the 'Claims' value from extensions
 	if let Some(claims) = ext.get::<Claims>() {
@@ -177,7 +177,7 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
     match role_data.validate() {
       Ok(role) => {
 
-        match check_authority(&user.id, &role.section, &role.base, &mut conn) {
+        match check_authority(&user.id, &role.section, &role.base, &mut conn).await {
           Ok(true) => {
 
             // Attempt to delete the role
@@ -230,7 +230,6 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
               })
             )
           }
-
           Err(_) => {
             return HttpResponse::InternalServerError().json(
               json!({
@@ -263,7 +262,12 @@ pub async fn delete_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
 
 
 // Handler for updating privileges of existing role
-pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_privileges: web::Json<RolePrivileges>) -> impl Responder {
+pub async fn update_privileges(
+  req: HttpRequest,
+  _: JwtMiddleware,
+  app_data: web::Data<AppState>,
+  role_privileges: web::Json<RolePrivileges>
+) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -276,9 +280,8 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
     match role_privileges.validate() {
       Ok(role) => {
 
-        match check_authority(&user.id, &role.section, &role.base, &mut conn) {
+        match check_authority(&user.id, &role.section, &role.base, &mut conn).await {
           Ok(true) => {
-
             // Check if the section already exists
             match privileges_updated(&role, &mut conn) {
               Ok(updated_role) => {
@@ -290,7 +293,6 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
                   })
                 )
               }
-
               Err(Error::NotFound) => {
                 return HttpResponse::NotFound().json(
                   json!({
@@ -299,7 +301,6 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
                   })
                 )
               }
-
               Err(err) => {
                 return HttpResponse::InternalServerError().json(
                   json!({
@@ -310,7 +311,6 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
               }
             }
           }
-
           Ok(false) => {
             return HttpResponse::Forbidden().json(
               json!({
@@ -319,7 +319,6 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
               })
             )
           }
-
           Err(err) => {
             // Create new log & save it to db
             let new_log = InsertableLog {
@@ -365,7 +364,12 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
 
 
 // Handler for updating expiry date
-pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<RoleExpiry>) -> impl Responder {
+pub async fn update_expiry(
+  req: HttpRequest,
+  _: JwtMiddleware,
+  app_data: web::Data<AppState>,
+  role_data: web::Json<RoleExpiry>
+) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -380,7 +384,7 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
     match role_data.validate() {
       Ok(role_expiry) => {
 
-        match check_authority(&user.id, &role_expiry.section, &role_expiry.base, &mut conn) {
+        match check_authority(&user.id, &role_expiry.section, &role_expiry.base, &mut conn).await {
           Ok(true) => {
 
             match roles.filter(id.eq(role_expiry.id)).first::<Role>(&mut conn) {
