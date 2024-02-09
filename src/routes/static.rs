@@ -1,5 +1,5 @@
 use actix_web::{web, Scope};
-use crate::utils::file_util::index;
+use crate::utilities::file_utility::index;
 
 pub fn static_config() -> Scope {
   web::scope("")

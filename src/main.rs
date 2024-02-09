@@ -4,7 +4,7 @@ mod handlers;
 mod middlewares;
 mod models;
 mod routes;
-mod utils;
+mod utilities;
 
 // use std::path::PathBuf;
 use std::sync::Mutex;

@@ -12,19 +12,19 @@ use crate::middlewares::{
     role_middleware::check_org_authority
   },
   org::update_middleware::{
-    org_logo_updated, 
-    org_background_updated, 
-    org_info_updated, 
+    org_logo_updated,
+    org_background_updated,
+    org_info_updated,
     org_contact_updated
   }
 };
-use crate::utils::file_util::{ upload_file, UploadForm };
+use crate::utilities::file_utility::{ upload_file, UploadForm };
 
 // Handler for updating organization logo
 pub async fn update_logo(
-  req: HttpRequest, 
-  _: JwtMiddleware, 
-  app_data: web::Data<AppState>, 
+  req: HttpRequest,
+  _: JwtMiddleware,
+  app_data: web::Data<AppState>,
   path: web::Path<String>,
   payload: MultipartForm<UploadForm>) -> impl Responder {
 

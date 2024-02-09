@@ -5,10 +5,17 @@ use chrono::{Utc, Duration, NaiveDateTime};
 use crate::db::connection::establish_connection;
 use crate::db::platform::platform::roles;
 use crate::db::platform::platform::roles::dsl::*;
-use crate::models::system::{ Role, NewRole, InsertableRole, RoleData, RolePrivileges, RoleExpiry };
+use crate::models::system::{
+	Role, NewRole, InsertableRole,
+	RoleData, RolePrivileges, RoleExpiry
+};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, role_middleware::* };
+use crate::middlewares::auth::{
+	auth_middleware::{JwtMiddleware, Claims},
+	role_middleware::*
+};
+use crate::utilities::time_utility::future_date;
 
 // Logs imports for recording logs
 use crate::middlewares::log::log_middleware::create_log;
@@ -16,11 +23,15 @@ use crate::models::system::InsertableLog;
 use crate::models::custom_types::{ActionType, LogType};
 
 // Handler for creating new Role
-pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, role_data: web::Json<NewRole>) -> impl Responder {
+pub async fn create_role(
+	req: HttpRequest,
+	_: JwtMiddleware,
+	app_data: web::Data<AppState>,
+	role_data: web::Json<NewRole>
+) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
-
 
   // Use the 'get' method to retrieve the 'Claims' value from extensions
 	if let Some(claims) = ext.get::<Claims>() {
@@ -45,18 +56,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
                 }
               Ok(false) => {
 
-                // If expiry days are supplied convert to future date from today
-                let expiry_date: Option<NaiveDateTime> = if role.expiry.is_some() {
-                  let days_to_be_added: i64 = role.expiry.unwrap_or(0);
-                  let initial_date = Utc::now();
-
-                  let future_date = initial_date + Duration::days(days_to_be_added);
-
-                  Some(future_date.naive_utc())
-                } else {
-                  None
-                };
-
+								let expiry_date = future_date(role.expiry).await;
 
                 // No existing role - creating one
                 let new_role = InsertableRole {
@@ -67,7 +67,7 @@ pub async fn create_role(req: HttpRequest, _: JwtMiddleware, app_data: web::Data
                   privileges: role.privileges,
                   expiry: expiry_date,
                 };
-        
+
                 match diesel::insert_into(roles::table)
                 .values(&new_role)
                 .get_result::<Role>(&mut conn)
