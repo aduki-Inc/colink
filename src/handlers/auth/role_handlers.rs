@@ -309,7 +309,6 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
                 )
               }
             }
-            
           }
 
           Ok(false) => {
@@ -343,7 +342,6 @@ pub async fn update_privileges(req: HttpRequest, _: JwtMiddleware, app_data: web
         }
 
       },
-      
       Err(err) => {
         return HttpResponse::ExpectationFailed().json(
           json!({
@@ -392,9 +390,7 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
                 if role.expiry.is_some() {
                   let today_date = Utc::now().naive_utc();
                   let date_time = role.expiry.unwrap() + duration;
-          
                   let diff_days = (date_time - today_date).num_days();
-          
                   if diff_days <= 0 || diff_days > 180 {
                     return HttpResponse::ExpectationFailed().json(
                       json!({
@@ -405,15 +401,12 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
                   } else {
                     role.expiry = Some(date_time);
                   }
-                  
                 } else {
                   let initial_date = Utc::now();
-          
                   let future_date = initial_date + duration;
-          
                   role.expiry = Some(future_date.naive_utc())
                 };
-    
+
                 // Check if the section expiry date was updated
                 match expiry_updated(&role, &mut conn) {
                   Ok(updated_role) => {
@@ -425,7 +418,7 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
                       })
                     )
                   }
-    
+
                   Err(_) => {
                     return HttpResponse::InternalServerError().json(
                       json!({
@@ -435,7 +428,6 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
                     )
                   }
                 }
-    
               },
               Err(Error::NotFound) => {
                 return HttpResponse::NotFound().json(
@@ -445,7 +437,6 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
                   })
                 )
               }
-              
               Err(_) => {
                 return HttpResponse::InternalServerError().json(
                   json!({
@@ -454,7 +445,7 @@ pub async fn update_expiry(req: HttpRequest, _: JwtMiddleware, app_data: web::Da
                   })
                 )
               }
-            }  
+            }
           }
 
           Ok(false) => {
