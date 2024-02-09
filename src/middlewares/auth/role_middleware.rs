@@ -1,14 +1,30 @@
 use crate::db::platform::platform::roles::dsl::*;
+use crate::db::platform::platform::roles;
 use crate::models::system::Section;
-use crate::models::{system::{Role, RolePrivileges}, custom_types::RoleType};
+use crate::models::{
+  system::{Role, RolePrivileges, InsertableRole},
+  custom_types::RoleType
+};
 use crate::models::orgs::OrgPermission;
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;
 use chrono::Utc;
 
+
+// Creating new role
+pub async fn role_created(role: &InsertableRole, conn: &mut PgConnection) -> Result<Role, Error> {
+  match diesel::insert_into(roles::table)
+  .values(role)
+  .get_result::<Role>(conn)
+  {
+    Ok(role) => Ok(role),
+    Err(err) => Err(err)
+  }
+}
+
 // Check the role for user attempting to create, edit, or delete other roles
-pub fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, conn: &mut PgConnection) -> Result<bool, Error> {
+pub async fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, conn: &mut PgConnection) -> Result<bool, Error> {
   match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
     Ok(role) => {
       match role.base {
@@ -30,31 +46,11 @@ pub fn check_authority(user_id: &i32, section_id: &i32, role_type: &RoleType, co
 
 
 // Check the role for user attempting to create, edit or delete other roles
-// pub fn check_member_authority(user_id: &i32, section_id: &i32, permission: &OrgPermission, conn: &mut PgConnection) -> Result<bool, Error> {
-//   match roles.filter(author.eq(user_id).and(section.eq(section_id))).first::<Role>(conn) {
-//     Ok(role) => {
-//       // println!("{:?}", &role);
-//       match role.privileges.expect("REASON").get(&permission.title) {
-//        Some(members) => {
-//         match members.as_array().and_then(|arr| arr.iter().find(|&v|v == &permission.name)){
-//           Some(_delete_permission) => Ok(true),
-//           None => Ok(false)
-//         }
-//        }
-//        None => Ok(false)
-//       }
-//     },
-//     Err(Error::NotFound) => Ok(false),
-//     Err(err) => Err(err),
-//   }
-// }
-
-
-// Check the role for user attempting to create, edit or delete other roles
 pub fn check_org_authority(
-  user_id: &i32, section_name: &str, 
-  permission: &OrgPermission, 
-  conn: &mut PgConnection) -> Result<(bool, Option<Section>), Error> {
+  user_id: &i32, section_name: &str,
+  permission: &OrgPermission,
+  conn: &mut PgConnection
+) -> Result<(bool, Option<Section>), Error> {
   use crate::db::platform::platform::sections::dsl::*;
   match sections
     .filter(identity.eq(section_name))
