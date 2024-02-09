@@ -155,12 +155,12 @@ pub async fn create_role(
 				}
 			}
 
-			Err(_) => {
+			Err(err) => {
 				// Directly return the HttpResponse
 				return HttpResponse::BadRequest().json(
 					json!({
 						"success": false,
-						"message": "Failed to create the role: Internal Error Occurred!"
+						"message": err
 					})
 				)
 			}
@@ -195,10 +195,8 @@ pub async fn delete_role(
 
 		match role_data.validate() {
 			Ok(role) => {
-
 				match check_authority(&user.id, &role.section, &role.base, &mut conn).await {
 					Ok(true) => {
-
 						// Attempt to delete the role
 						match role_deleted(&role.id, &mut conn) {
 							Ok(true) => {
@@ -209,7 +207,6 @@ pub async fn delete_role(
 									})
 								)
 							}
-
 							Ok(false) => {
 								return HttpResponse::NotFound().json(
 									json!({
