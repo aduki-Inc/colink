@@ -84,7 +84,7 @@ pub async fn create_role(
                     )
                   }
                   Err(err) => {
-
+                    // Create log
                     let new_log = new_database_error(
                       user.id, ActionType::Create,
                       err.to_string()
