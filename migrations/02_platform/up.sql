@@ -4,7 +4,7 @@
 create schema if not exists platform;
 
 -- Check if the enum type(role_type) exists, if not create it
-do $$ 
+do $$
 begin
   if not exists (select 1 from pg_type where typname = 'role_type') then
     -- Create the enum type(role_type)
@@ -19,7 +19,7 @@ end $$;
 
 
 -- Check if the enum type(log_type) exists, if not create it
-do $$ 
+do $$
 begin
   if not exists (select 1 from pg_type where typname = 'log_type') then
     -- Create the enum type(log_type)
@@ -33,7 +33,7 @@ begin
 end $$;
 
 -- Check if the enum type(action_type) exists, if not create it
-do $$ 
+do $$
 begin
   if not exists (select 1 from pg_type where typname = 'action_type') then
     -- Create the enum type(action_type)

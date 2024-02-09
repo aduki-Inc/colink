@@ -68,13 +68,26 @@ pub async fn create_role(
                 };
 
                 match role_created(&new_role, &mut conn).await {
-                  Ok(role) => return HttpResponse::Ok().json(
-                    json!({
-                      "success": true,
-                      "role": role,
-                      "message": format!("Role - ({}) - was created successfully", &role.name)
-                    })
-                  ),
+                  Ok(role) => {
+                    //Create log
+                    let new_log = new_action_log(
+                      user.id,
+                      role.section,
+                      "section".to_owned(),
+                      ActionType::Create,
+                      format!("{} created a new role with id -({})-", &user.full_name, &role.id)
+                    ).await;
+
+                    create_log(&new_log, &mut conn).await;
+
+                    return HttpResponse::Ok().json(
+                      json!({
+                        "success": true,
+                        "role": role,
+                        "message": format!("Role - ({}) - was created successfully", &role.name)
+                      })
+                    )
+                  },
                   Err(Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _)) => {
                     return HttpResponse::NotFound().json(
                       json!({

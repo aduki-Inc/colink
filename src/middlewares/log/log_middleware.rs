@@ -21,3 +21,20 @@ pub async fn new_database_error(author: i32, action: ActionType, err: String) ->
     verb: format!("Database Error: {}", &err)
   };
 }
+
+pub async fn new_action_log(
+  author: i32,
+  target: i32,
+  name: String,
+  action: ActionType,
+  verb: String
+) -> InsertableLog {
+  return InsertableLog {
+    audit: LogType::Action,
+    author,
+    target,
+    name,
+    action,
+    verb,
+  };
+}
