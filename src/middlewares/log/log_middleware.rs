@@ -22,10 +22,9 @@ pub async fn new_database_error(author: i32, action: ActionType, err: String) ->
   };
 }
 
-pub async fn new_action_log(
+pub async fn new_section_log(
   author: i32,
   target: i32,
-  name: String,
   action: ActionType,
   verb: String
 ) -> InsertableLog {
@@ -33,7 +32,7 @@ pub async fn new_action_log(
     audit: LogType::Action,
     author,
     target,
-    name,
+    name: "section".to_owned(),
     action,
     verb,
   };
