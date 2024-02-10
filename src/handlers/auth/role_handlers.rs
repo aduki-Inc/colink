@@ -200,6 +200,17 @@ pub async fn delete_role(
 						// Attempt to delete the role
 						match role_deleted(&role.id, &mut conn) {
 							Ok(true) => {
+
+								//Create section log
+								let new_log = new_section_log(
+									user.id,
+									role.section,
+									ActionType::Create,
+									format!("{} deleted a role on section: {}", &user.full_name, &role.section)
+								).await;
+
+								create_log(&new_log, &mut conn).await;
+
 								return HttpResponse::Ok().json(
 									json!({
 										"success": true,
@@ -215,7 +226,6 @@ pub async fn delete_role(
 									})
 								)
 							}
-
 							Err(_) => {
 								return HttpResponse::InternalServerError().json(
 									json!({
@@ -475,7 +485,6 @@ pub async fn update_expiry(
 								"message": "You're not authorized to create the role!"
 							})
 						)
-
 					}
 
 					Err(_) => {
