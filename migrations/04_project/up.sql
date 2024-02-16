@@ -1,6 +1,6 @@
 -- Your SQL goes here
 
--- Create schema
+-- Create schema project(s)
 create schema if not exists project;
 
 -- Check if the enum type exists
