@@ -17,6 +17,7 @@ use crate::middlewares::auth::{
 use crate::utilities::time_utility::future_date;
 
 // Logs imports for recording logs
+use tokio::spawn;
 use crate::middlewares::log::log_middleware::*;
 use crate::models::system::InsertableLog;
 use crate::models::custom_types::{ActionType, LogType};
@@ -77,7 +78,10 @@ pub async fn create_role(
 											format!("{} created a new role with id -({})-", &user.full_name, &role.id)
 										).await;
 
-										create_log(&new_log, &mut conn).await;
+										// Spawn an independent task(Record log)
+										spawn(async move {
+											create_log(&new_log, &mut conn).await;
+										});
 
 										return HttpResponse::Ok().json(
 											json!({
@@ -102,7 +106,10 @@ pub async fn create_role(
 											err.to_string()
 										).await;
 
-										create_log(&new_log, &mut conn).await;
+										// Spawn an independent task(Record log)
+										spawn(async move {
+											create_log(&new_log, &mut conn).await;
+										});
 
 										// Handle the database error and return an error response
 										return	HttpResponse::InternalServerError().json(
@@ -134,7 +141,10 @@ pub async fn create_role(
 							format!("Unauthorized User({}) tried to a new role", &user.full_name)
 						).await;
 
-						create_log(&new_log, &mut conn).await;
+						// Spawn an independent task(Record log)
+						spawn(async move {
+							create_log(&new_log, &mut conn).await;
+						});
 
 						return HttpResponse::Forbidden().json(
 							json!({
