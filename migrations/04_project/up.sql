@@ -56,7 +56,7 @@ create table if not exists project.proposals(
   updated_at timestamp with time zone default current_timestamp
 );
 
--- Create a trigger to run everytime field is updated
+-- Create a trigger to run every time field is updated
 select diesel_manage_updated_at('project.projects');
 select diesel_manage_updated_at('project.templates');
 select diesel_manage_updated_at('project.proposals');
