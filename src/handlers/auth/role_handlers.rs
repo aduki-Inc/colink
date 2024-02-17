@@ -75,7 +75,7 @@ pub async fn create_role(
 											user.id,
 											role.section,
 											ActionType::Create,
-											format!("{} created a new role with id -({})-", &user.full_name, &role.id)
+											format!("{} created a new role with id -({})-", &user.username, &role.id)
 										).await;
 
 										// Spawn an independent task(Record log)
@@ -100,17 +100,6 @@ pub async fn create_role(
 										)
 									}
 									Err(err) => {
-										// Create log
-										let new_log = new_database_error(
-											user.id, ActionType::Create,
-											err.to_string()
-										).await;
-
-										// Spawn an independent task(Record log)
-										spawn(async move {
-											create_log(&new_log, &mut conn).await;
-										});
-
 										// Handle the database error and return an error response
 										return	HttpResponse::InternalServerError().json(
 											json!({
@@ -138,7 +127,7 @@ pub async fn create_role(
 							user.id,
 							role.section,
 							ActionType::Create,
-							format!("Unauthorized User({}) tried to a new role", &user.full_name)
+							format!("Unauthorized User({}) tried to create a new role", &user.username)
 						).await;
 
 						// Spawn an independent task(Record log)
@@ -216,10 +205,13 @@ pub async fn delete_role(
 									user.id,
 									role.section,
 									ActionType::Create,
-									format!("{} deleted a role on section: {}", &user.full_name, &role.section)
+									format!("{} deleted a role", &user.username)
 								).await;
 
-								create_log(&new_log, &mut conn).await;
+								// Spawn an independent task(Record log)
+								spawn(async move {
+									create_log(&new_log, &mut conn).await;
+								});
 
 								return HttpResponse::Ok().json(
 									json!({
@@ -255,9 +247,12 @@ pub async fn delete_role(
 							target: role.section,
 							name: "sections".to_owned(),
 							action: ActionType::Create,
-							verb: format!("Unauthorized: {} tried to delete role on section -({})-", &user.full_name, &role.section),
+							verb: format!("Unauthorized: {} tried to delete role", &user.username),
 						};
-						create_log(&new_log, &mut conn).await;
+						// Spawn an independent task(Record log)
+						spawn(async move {
+							create_log(&new_log, &mut conn).await;
+						});
 
 						return HttpResponse::Forbidden().json(
 							json!({
@@ -355,18 +350,7 @@ pub async fn update_privileges(
 							})
 						)
 					}
-					Err(err) => {
-						// Create new log & save it to db
-						let new_log = InsertableLog {
-							audit: 	LogType::Error,
-							author: user.id,
-							target: 0,
-							name: "database".to_owned(),
-							action: ActionType::Update,
-							verb: format!("Error occurred while checking for auth: {}", err.to_string()),
-						};
-						create_log(&new_log, &mut conn).await;
-
+					Err(_) => {
 						return HttpResponse::InternalServerError().json(
 							json!({
 								"success": false,
