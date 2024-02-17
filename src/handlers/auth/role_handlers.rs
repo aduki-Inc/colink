@@ -75,7 +75,7 @@ pub async fn create_role(
 											user.id,
 											role.section,
 											ActionType::Create,
-											format!("{} created a new role with id -({})-", &user.username, &role.id)
+											format!("{} created a new role", &user.username)
 										).await;
 
 										// Spawn an independent task(Record log)
