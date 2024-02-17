@@ -4,7 +4,7 @@
 create schema if not exists org;
 
 -- Check if the enum type exists
-do $$ 
+do $$
 begin
   if not exists (select 1 from pg_type where typname = 'org_type') then
     -- Create the enum type
@@ -16,7 +16,7 @@ begin
 end $$;
 
 -- Check if the enum type exists
-do $$ 
+do $$
 begin
   if not exists (select 1 from pg_type where typname = 'institution_type') then
     -- Create the enum type

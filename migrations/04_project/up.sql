@@ -4,7 +4,7 @@
 create schema if not exists project;
 
 -- Check if the enum type exists
-do $$ 
+do $$
 begin
   if not exists (select 1 from pg_type where typname = 'proposal_type') then
     -- Create the enum type

@@ -219,7 +219,7 @@ impl RoleExpiry {
 }
 
 
-// - Approvals 
+// - Approvals
 #[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = platform::approvals)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
