@@ -310,12 +310,24 @@ pub async fn update_privileges(
 
 		match role_privileges.validate() {
 			Ok(role) => {
-
 				match check_authority(&user.id, &role.section, &role.base, &mut conn).await {
 					Ok(true) => {
 						// Check if the section already exists
 						match privileges_updated(&role, &mut conn) {
 							Ok(updated_role) => {
+								// Create new log & save it to db
+								let new_log = InsertableLog {
+									audit: 	LogType::Action,
+									author: user.id,
+									target: updated_role.section,
+									name: "sections".to_owned(),
+									action: ActionType::Create,
+									verb: format!("{} updated role privileges", &user.username),
+								};
+								// Spawn an independent task(Record log)
+								spawn(async move {
+									create_log(&new_log, &mut conn).await;
+								});
 								return HttpResponse::Ok().json(
 									json!({
 										"success": true,
@@ -343,6 +355,19 @@ pub async fn update_privileges(
 						}
 					}
 					Ok(false) => {
+						// Create new log & save it to db
+						let new_log = InsertableLog {
+							audit: 	LogType::Action,
+							author: user.id,
+							target: role.section,
+							name: "sections".to_owned(),
+							action: ActionType::Update,
+							verb: format!("Unauthorized user -({})- tried to update role", &user.username),
+						};
+						// Spawn an independent task(Record log)
+						spawn(async move {
+							create_log(&new_log, &mut conn).await;
+						});
 						return HttpResponse::Forbidden().json(
 							json!({
 								"success": false,
@@ -403,10 +428,8 @@ pub async fn update_expiry(
 
 		match role_data.validate() {
 			Ok(role_expiry) => {
-
 				match check_authority(&user.id, &role_expiry.section, &role_expiry.base, &mut conn).await {
 					Ok(true) => {
-
 						match roles.filter(id.eq(role_expiry.id)).first::<Role>(&mut conn) {
 							Ok(mut role) => {
 								// If expiry days exists add the supplied number/ else supplied convert to future date from today
