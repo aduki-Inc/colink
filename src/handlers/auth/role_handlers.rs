@@ -204,7 +204,7 @@ pub async fn delete_role(
 								let new_log = new_section_log(
 									user.id,
 									role.section,
-									ActionType::Create,
+									ActionType::Delete,
 									format!("{} deleted a role", &user.username)
 								).await;
 
@@ -362,7 +362,7 @@ pub async fn update_privileges(
 							target: role.section,
 							name: "sections".to_owned(),
 							action: ActionType::Update,
-							verb: format!("Unauthorized user -({})- tried to update role", &user.username),
+							verb: format!("Unauthorized user -({})- tried to update role privileges", &user.username),
 						};
 						// Spawn an independent task(Record log)
 						spawn(async move {
