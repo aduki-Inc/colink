@@ -99,7 +99,7 @@ pub async fn create_role(
 											})
 										)
 									}
-									Err(err) => {
+									Err(_) => {
 										// Handle the database error and return an error response
 										return	HttpResponse::InternalServerError().json(
 											json!({
@@ -422,10 +422,11 @@ pub async fn update_expiry(
 												"message": "Roles permissions cannot be less than 1 or exceed 180 days!"
 											})
 										)
-									} else {
-										role.expiry = Some(date_time);
 									}
-								} else {
+									//Update expiry
+        					role.expiry = Some(date_time);
+								}
+								else {
 									let initial_date = Utc::now();
 									let future_date = initial_date + duration;
 									role.expiry = Some(future_date.naive_utc())
@@ -434,6 +435,21 @@ pub async fn update_expiry(
 								// Check if the section expiry date was updated
 								match expiry_updated(&role, &mut conn) {
 									Ok(updated_role) => {
+
+										// Create new log & save it to db
+										let new_log = InsertableLog {
+											audit: 	LogType::Action,
+											author: user.id,
+											target: updated_role.section,
+											name: "sections".to_owned(),
+											action: ActionType::Update,
+											verb: format!("{} updated a role", &user.username),
+										};
+										// Spawn an independent task(Record log)
+										spawn(async move {
+											create_log(&new_log, &mut conn).await;
+										});
+
 										return HttpResponse::Ok().json(
 											json!({
 												"success": true,
@@ -473,6 +489,20 @@ pub async fn update_expiry(
 					}
 
 					Ok(false) => {
+						// Create new log & save it to db
+						let new_log = InsertableLog {
+							audit: 	LogType::Action,
+							author: user.id,
+							target: role_expiry.section,
+							name: "sections".to_owned(),
+							action: ActionType::Update,
+							verb: format!("Unauthorized user -({})- tried to update a role", &user.username),
+						};
+						// Spawn an independent task(Record log)
+						spawn(async move {
+							create_log(&new_log, &mut conn).await;
+						});
+
 						return HttpResponse::Forbidden().json(
 							json!({
 								"success": false,

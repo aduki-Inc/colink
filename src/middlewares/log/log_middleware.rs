@@ -11,16 +11,16 @@ pub async fn create_log(log_data: &InsertableLog, conn: &mut PgConnection) {
   let _ = diesel::insert_into(logs::table).values(log_data).execute(conn);
 }
 
-pub async fn new_database_error(author: i32, action: ActionType, err: String) -> InsertableLog {
-  return InsertableLog {
-    audit: 	LogType::Error,
-    author,
-    target: 0,
-    name: "database".to_owned(),
-    action,
-    verb: format!("Database Error: {}", &err)
-  };
-}
+// pub async fn new_database_error(author: i32, action: ActionType, err: String) -> InsertableLog {
+//   return InsertableLog {
+//     audit: 	LogType::Error,
+//     author,
+//     target: 0,
+//     name: "database".to_owned(),
+//     action,
+//     verb: format!("Database Error: {}", &err)
+//   };
+// }
 
 pub async fn new_section_log(
   author: i32,
