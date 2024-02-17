@@ -247,7 +247,7 @@ pub async fn delete_role(
 							target: role.section,
 							name: "sections".to_owned(),
 							action: ActionType::Create,
-							verb: format!("Unauthorized: {} tried to delete role", &user.username),
+							verb: format!("Unauthorized user -({})- tried to delete role", &user.username),
 						};
 						// Spawn an independent task(Record log)
 						spawn(async move {
