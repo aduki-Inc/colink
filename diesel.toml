@@ -3,7 +3,7 @@
 
 [print_schema]
 file = "src/db/schema.rs"
-# schema="public, org, account,project, platform"
+# schema="public, org<organisation>, account,project, platform"
 custom_type_derives = ["diesel::query_builder::QueryId"]
 
 [migrations_directory]
