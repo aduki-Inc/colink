@@ -1,4 +1,4 @@
-use actix_web::{web::{self, route}, Scope};
+use actix_web::{web, Scope};
 use crate::handlers::project::template::*;
 
 pub fn template_config() -> Scope {
