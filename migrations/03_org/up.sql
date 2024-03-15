@@ -53,7 +53,7 @@ create table if not exists org.orgs (
 );
 
 
---Create belongs table 
+--Create belongs table
 create table if not exists org.belongs (
   id serial primary key,
   active boolean default true,
@@ -69,7 +69,7 @@ create table if not exists org.belongs (
 );
 
 
--- Create a trigger to run everytime field is updated
+-- Create a trigger to run every time field is updated
 select diesel_manage_updated_at('org.orgs');
 select diesel_manage_updated_at('org.belongs');
 
