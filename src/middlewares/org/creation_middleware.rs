@@ -73,7 +73,7 @@ pub fn org_created(user_id: &i32, user_name: &str, new_org: &InsertableOrganizat
                       "members": ["create", "read", "update", "delete"],
                       "staff": ["create", "read", "update", "delete"]
                     });
-            
+
                     let new_role = InsertableRole {
                       section: inserted_section.id,
                       base: RoleType::Owner,
@@ -109,7 +109,7 @@ pub fn org_created(user_id: &i32, user_name: &str, new_org: &InsertableOrganizat
                     }
                   }
                   Err(err) => Err(err)
-                }  
+                }
               }
               Err(err) => Err(err)
           }

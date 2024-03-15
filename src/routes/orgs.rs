@@ -5,7 +5,6 @@ use crate::handlers::org::{
 
 pub fn org_config() -> Scope {
   web::scope("/api/v1/org")
-  
     // Organization
     .route("/create", web::put().to(create_org))
     .route("/{org}/edit/logo", web::patch().to(update_logo))
@@ -19,5 +18,4 @@ pub fn org_config() -> Scope {
     .route("/{org}/users/edit/status", web::patch().to(edit_staff_status))
     .route("/{org}/users/disable", web::patch().to(disable_user))
     .route("/{org}/users/enable", web::patch().to(enable_user))
-
 }

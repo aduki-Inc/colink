@@ -23,13 +23,22 @@ end $$;
 -- Create templates table
 create table if not exists project.templates (
   id serial primary key,
+  author integer references account.users(id) on delete cascade not null,
   name varchar(500) not null,
   description text not null,
-  layout jsonb,
+  layout jsonb not null,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );
 
+-- Create organization templates choice table
+create table if not exists project.selections (
+  id serial primary key,
+  org integer references org.orgs(id) on delete cascade not null,
+  template integer references project.templates(id) on delete cascade not null,
+  created_at timestamp with time zone default current_timestamp,
+  updated_at timestamp with time zone default current_timestamp
+);
 
 -- Create projects table
 create table if not exists project.projects (
@@ -60,3 +69,4 @@ create table if not exists project.proposals(
 select diesel_manage_updated_at('project.projects');
 select diesel_manage_updated_at('project.templates');
 select diesel_manage_updated_at('project.proposals');
+select diesel_manage_updated_at('project.selections');
