@@ -35,6 +35,15 @@ pub struct InsertableTemplate {
   pub layout: Json,
 }
 
+#[derive(Insertable, Clone, Serialize, Deserialize)]
+#[diesel(table_name = templates)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct EditTemplate {
+  pub name: String,
+  pub description: String,
+  pub layout: Json,
+}
+
 #[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = projects)]
 #[diesel(check_for_backend(diesel::pg::Pg))]

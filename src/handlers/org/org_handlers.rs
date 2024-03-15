@@ -15,7 +15,12 @@ use crate::middlewares::org::creation_middleware::*;
 
 
 // Handler for creating new Organization
-pub async fn create_org(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<AppState>, org_data: web::Json<NewOrganization>) -> impl Responder {
+pub async fn create_org(
+  req: HttpRequest,
+  _: JwtMiddleware,
+  app_data: web::Data<AppState>,
+  org_data: web::Json<NewOrganization>
+) -> impl Responder {
   //  Get extensions
   let ext = req.extensions();
   let mut conn = establish_connection(&app_data.config.database_url).await;
@@ -115,10 +120,11 @@ pub async fn create_org(req: HttpRequest, _: JwtMiddleware, app_data: web::Data<
 
 // Handler to add a new member for an Organization
 pub async fn add_user(
-  req: HttpRequest, _: JwtMiddleware, 
-  app_data: web::Data<AppState>, 
+  req: HttpRequest, _: JwtMiddleware,
+  app_data: web::Data<AppState>,
   path: web::Path<String>,
-  org_data: web::Json<NewBelong>) -> impl Responder {
+  org_data: web::Json<NewBelong>
+) -> impl Responder {
 
   //Extract from path
   let org  = path.into_inner();
@@ -197,9 +203,8 @@ pub async fn add_user(
                     )
                   }
                 }
-    
               }
-    
+
               Err(_) => {
                 return  HttpResponse::InternalServerError().json(
                   json!({

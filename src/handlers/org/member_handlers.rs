@@ -17,7 +17,8 @@ pub async fn edit_user_info(
   req: HttpRequest, _: JwtMiddleware,
   app_data: web::Data<AppState>,
   path: web::Path<String>,
-  edit_data: web::Json<EditBelong>) -> impl Responder {
+  edit_data: web::Json<EditBelong>
+) -> impl Responder {
 
   //Extract from path
   let org  = path.into_inner();
