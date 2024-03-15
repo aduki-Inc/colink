@@ -1,12 +1,12 @@
 use diesel::prelude::*;
-use crate::db::project::project;
-use chrono::{NaiveDateTime, NaiveDate};
+use crate::db::project::project::{ projects, proposals, templates, selections};
+use chrono::NaiveDateTime;
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
 use crate::models::custom_types::ProposalType;
 
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = project::projects)]
+#[diesel(table_name = projects)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct Project {
@@ -16,7 +16,7 @@ pub struct Project {
   pub title: String,
   pub field: String,
   pub type_: ProposalType,
-  pub public: Option<bool>,
+  pub public: bool,
   pub active: bool,
   pub owned: bool,
   pub org: Option<i32>,
@@ -27,7 +27,7 @@ pub struct Project {
 
 
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = project::proposals)]
+#[diesel(table_name = proposals)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct Proposal {
@@ -39,7 +39,7 @@ pub struct Proposal {
 }
 
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = project::templates)]
+#[diesel(table_name = templates)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(Serialize, Deserialize)]
 pub struct Template {
@@ -51,3 +51,16 @@ pub struct Template {
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>
 }
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = selections)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Serialize, Deserialize)]
+pub struct Selection {
+  pub id: i32,
+  pub org: i32,
+  pub template: i32,
+  pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>
+}
+

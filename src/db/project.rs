@@ -54,10 +54,11 @@ pub mod project {
     diesel::table! {
         project.templates (id) {
             id -> Int4,
+            author -> Int4,
             #[max_length = 500]
             name -> Varchar,
             description -> Text,
-            layout -> Nullable<Jsonb>,
+            layout -> Jsonb,
             created_at -> Nullable<Timestamptz>,
             updated_at -> Nullable<Timestamptz>,
         }

@@ -31,7 +31,6 @@ create table if not exists project.templates (
   updated_at timestamp with time zone default current_timestamp
 );
 
-
 -- Create organization templates choice table
 create table if not exists project.selections (
   id serial primary key,
