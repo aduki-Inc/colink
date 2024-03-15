@@ -23,10 +23,10 @@ end $$;
 -- Create templates table
 create table if not exists project.templates (
   id serial primary key,
+  author integer references account.users(id) on delete cascade not null,
   name varchar(500) not null,
   description text not null,
-  author integer references account.users(id) on delete cascade not null,
-  layout jsonb,
+  layout jsonb not null,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );
