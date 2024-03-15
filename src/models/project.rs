@@ -5,10 +5,39 @@ use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
 use crate::models::custom_types::ProposalType;
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
+#[diesel(table_name = templates)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Template {
+  pub id: i32,
+  pub author: i32,
+  pub name: String,
+  pub description: String,
+  pub layout: Json,
+  pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct NewTemplate {
+  pub name: String,
+  pub description: String,
+  pub layout: Json,
+}
+
+#[derive(Insertable, Clone, Serialize, Deserialize)]
+#[diesel(table_name = templates)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertableTemplate {
+  pub author: i32,
+  pub name: String,
+  pub description: String,
+  pub layout: Json,
+}
+
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = projects)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
 pub struct Project {
   pub id: i32,
   pub author: i32,
@@ -26,10 +55,9 @@ pub struct Project {
 }
 
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = proposals)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
 pub struct Proposal {
   pub id: i32,
   pub project: i32,
@@ -38,24 +66,10 @@ pub struct Proposal {
   pub updated_at: Option<NaiveDateTime>
 }
 
-#[derive(Queryable, Selectable)]
-#[diesel(table_name = templates)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
-pub struct Template {
-  pub id: i32,
-  pub name: String,
-  pub description: String,
-  pub author: i32,
-  pub layout: Json,
-  pub created_at: Option<NaiveDateTime>,
-  pub updated_at: Option<NaiveDateTime>
-}
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = selections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(Serialize, Deserialize)]
 pub struct Selection {
   pub id: i32,
   pub org: i32,

@@ -171,7 +171,6 @@ impl NewBelong {
           return Err("Member Expiry date cannot be today or in the past!".to_string());
         }
       }
-  
     }
 		Ok(self.clone())
 	}

@@ -29,10 +29,10 @@ async fn main() -> std::io::Result<()> {
 
 	// println!("Root Dir: {:?}", static_path);
 	let app_data = web::Data::new(
-		configs::state::AppState { 
+		configs::state::AppState {
 			counter: Mutex::new(0),
 			static_dir: static_path,
-			config: configs::config::Config::init() 
+			config: configs::config::Config::init()
 		}
 	);
 
@@ -55,6 +55,7 @@ async fn main() -> std::io::Result<()> {
 				.error_handler(|err, _req| handlers::error_handlers::json_cfg(err)),
 			)
 			.wrap(cors)
+			.service(routes::project::template_config())
 			.service(routes::orgs::org_config())
 			.service(routes::auth::auth_config())
 			.service(routes::r#static::static_config())

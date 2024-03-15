@@ -14,8 +14,8 @@ use crate::middlewares::org::editing_middleware::*;
 
 // Handler for editing member info
 pub async fn edit_user_info(
-  req: HttpRequest, _: JwtMiddleware, 
-  app_data: web::Data<AppState>, 
+  req: HttpRequest, _: JwtMiddleware,
+  app_data: web::Data<AppState>,
   path: web::Path<String>,
   edit_data: web::Json<EditBelong>) -> impl Responder {
 
