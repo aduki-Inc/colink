@@ -44,22 +44,22 @@ pub async fn upload_file(
 		return Err(UploadError{
 			message: "The uploaded file cannot be of size zero bytes.".to_string()
 		})
-	} 
+	}
 	// reject malformed requests - If size is greater  than 10Mbs
 	if payload.file.size > (1024 * 1024 * 10) {
 		return Err(UploadError{
-			message: format!("The uploaded file is too large. Maximum size is {} bytes.", MAX_FILE_SIZE).to_string()
+			message: format!("The uploaded file is too large. Maximum size should be {} bytes.", MAX_FILE_SIZE).to_string()
 		})
 	}
-	
+
 
 	let temp_file_path = payload.file.file.path();
-	
+
 	// let dir = std::env::temp_dir();
   // println!("Temporary directory: {:?}", payload.file);
 
 	let original_filename = payload.file.file_name.clone().unwrap();
-	
+
   let extension = original_filename.rsplit('.').next().unwrap();
 
   // Generate a new unique filename with the same extension
@@ -91,5 +91,5 @@ pub async fn index(req: HttpRequest) -> Result<fs::NamedFile, Error> {
 		.set_content_disposition(ContentDisposition {
 			disposition: DispositionType::Attachment,
 			parameters: vec![],
-			}))
+		}))
 }
