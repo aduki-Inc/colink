@@ -60,7 +60,7 @@ pub async fn email_or_username_exists(other_email: &str, other_username: &str, c
 // Function to generate the jwt
 pub async fn generate_jwt(user_id: i32, other_username: &str, full_name: &str, other_email: &str) -> Result<String, jsonwebtoken::errors::Error> {
   let config = Config::init();
-    
+
   // Set the expiration time for the token (e.g., 1 hour from now)
   let exp_time = SystemTime::now()
     .duration_since(UNIX_EPOCH)
@@ -82,7 +82,6 @@ pub async fn generate_jwt(user_id: i32, other_username: &str, full_name: &str, o
     user: user_claims, // Include the UserClaims in the payload
   };
 
-  
   // Encode the JWT using the secret key
   let header = Header::new(Algorithm::HS256);
   let token = encode(&header, &claims, &EncodingKey::from_secret(config.jwt_secret.as_ref()))?;
@@ -161,7 +160,7 @@ impl FromRequest for JwtMiddleware {
 
     req.extensions_mut()
       .insert::<Claims>(claims.to_owned());
-    
+
       ready(Ok(JwtMiddleware { claims }))
 
   }
