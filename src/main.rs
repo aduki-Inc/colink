@@ -13,6 +13,7 @@ use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
 extern crate diesel_derive_enum;
+extern crate tempdir;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

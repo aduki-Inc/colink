@@ -56,7 +56,7 @@ pub async fn upload_file(
 	let temp_file_path = payload.file.file.path();
 
 	// let dir = std::env::temp_dir();
-  // println!("Temporary directory: {:?}", payload.file);
+  // println!("Temporary directory is: {:?}", payload.file);
 
 	let original_filename = payload.file.file_name.clone().unwrap();
 
