@@ -4,3 +4,5 @@
 .vscode
 .env
 .fleet/
+/projects
+projects
