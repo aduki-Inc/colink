@@ -45,6 +45,7 @@ create table if not exists project.projects (
   id serial primary key,
   author integer references account.users(id) on delete cascade not null,
   template integer references project.templates(id) on delete cascade not null,
+  name varchar(250) not  null unique,
   title varchar(500) not null,
   field varchar(500) not null,
   type proposal_type not null,

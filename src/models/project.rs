@@ -51,6 +51,7 @@ pub struct Project {
   pub id: i32,
   pub author: i32,
   pub template: i32,
+  pub name: String,
   pub title: String,
   pub field: String,
   pub type_: ProposalType,
@@ -61,6 +62,37 @@ pub struct Project {
   pub description: Option<String>,
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct NewProject {
+  pub template: i32,
+  pub name: String,
+  pub title: String,
+  pub field: String,
+  pub type_: ProposalType,
+  pub public: bool,
+  pub active: bool,
+  pub owned: bool,
+  pub org: Option<i32>,
+  pub description: Option<String>,
+}
+
+#[derive(Insertable, Clone, Serialize, Deserialize)]
+#[diesel(table_name = projects)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertableProject {
+  pub author: i32,
+  pub template: i32,
+  pub name: String,
+  pub title: String,
+  pub field: String,
+  pub type_: ProposalType,
+  pub public: bool,
+  pub active: bool,
+  pub owned: bool,
+  pub org: Option<i32>,
+  pub description: Option<String>,
 }
 
 

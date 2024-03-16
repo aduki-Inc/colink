@@ -15,6 +15,8 @@ pub mod project {
             id -> Int4,
             author -> Int4,
             template -> Int4,
+            #[max_length = 250]
+            name -> Varchar,
             #[max_length = 500]
             title -> Varchar,
             #[max_length = 500]
