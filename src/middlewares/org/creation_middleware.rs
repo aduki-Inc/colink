@@ -3,14 +3,14 @@ use crate::db::org::org::orgs::dsl::*;
 // use crate::db::schema::approvals::dsl::approvals;
 // use crate::db::schema::sections::dsl::sections;
 use crate::db::{
-  org::org::{orgs as org_model, belongs}, 
-  platform::platform::{roles, approvals, sections} 
+  org::org::{orgs as org_model, belongs},
+  platform::platform::{roles, approvals, sections}
 };
 use crate::models::{
   orgs::{
     Organization, InsertableOrganization, Belong,
     InsertableBelong, BelongIntermediate
-  }, 
+  },
   system::{InsertableRole, NewSection, Section, InsertableApproval}
 };
 use crate::models::custom_types::{RoleType, OrgType};

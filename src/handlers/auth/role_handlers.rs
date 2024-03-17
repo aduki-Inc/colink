@@ -1,7 +1,7 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use diesel::prelude::*;
 use diesel::result::{Error, DatabaseErrorKind};
-use chrono::{Utc, Duration};
+use chrono::{Utc, Days};
 use crate::db::connection::establish_connection;
 use crate::db::platform::platform::roles::dsl::*;
 use crate::models::system::{
@@ -433,7 +433,7 @@ pub async fn update_expiry(
 						match roles.filter(id.eq(role_expiry.id)).first::<Role>(&mut conn) {
 							Ok(mut role) => {
 								// If expiry days exists add the supplied number/ else supplied convert to future date from today
-								let duration = Duration::days(role_expiry.expiry);
+								let duration = Days::new(role_expiry.expiry.try_into().unwrap());
 								if role.expiry.is_some() {
 									let today_date = Utc::now().naive_utc();
 									let date_time = role.expiry.unwrap() + duration;

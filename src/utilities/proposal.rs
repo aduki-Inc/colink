@@ -41,7 +41,7 @@ async fn initialize_proposal(
   };
 
 
-  let repo = match Repository::init_opts(temp_dir, &RepositoryInitOptions::new()) {
+  let repo = match Repository::init_opts(temp_dir.path(), &RepositoryInitOptions::new()) {
     Ok(repo) => repo,
     Err(_) => {
       return Err(RepoError{
@@ -52,7 +52,7 @@ async fn initialize_proposal(
 
   // Create a README.md file inside the temp_dir
   let file_path = temp_dir.path().join("README.md");
-  let temp_file = match File::create(file_path) {
+  let mut temp_file = match File::create(file_path.clone()) {
     Ok(created_file) => created_file,
     Err(_) =>  {
       return Err(RepoError{
@@ -61,8 +61,11 @@ async fn initialize_proposal(
     },
   };
 
+  // Create initial readme contents
+  let readme_contents = format!("# {}\n\nWelcome to your proposal", name);
+
   // Write contents to the README.md file
-  if let Err(e) = writeln!(&mut temp_file, "{}", readme_content) {
+  if let Err(_) = writeln!(&mut temp_file, "{}", readme_contents) {
     return Err(RepoError{
 			message: "Could not create initial file!".to_string()
 		})
@@ -106,7 +109,7 @@ async fn initialize_proposal(
     },
   };
 
-  repo.commit(
+  let _ = repo.commit(
     Some("HEAD"),
     &author,
     &committer,
@@ -125,7 +128,16 @@ async fn initialize_proposal(
     },
   };
 
-  bare_repo.remote("origin", temp_dir).unwrap();
+  let origin_path = match repo.path().to_str() {
+    Some(path) => path,
+    None => {
+      return Err(RepoError{
+			  message: "Something went wrong, Error occurred in the server!".to_string()
+		  })
+    }
+  };
+
+  bare_repo.remote("origin", origin_path).unwrap();
 
   let mut fetch_options = FetchOptions::new();
   let mut callbacks = RemoteCallbacks::new();
@@ -144,7 +156,16 @@ async fn initialize_proposal(
 
   // Drop/delete temporary file and directory
   drop(temp_file);
-  temp_dir.close()?;
+  if let Err(_) = temp_dir.close() {
+    return Err(RepoError{
+			message: "Proposal created but something unexpected has happened!".to_string()
+		})
+  }
 
-  Ok(proposal_path.to_str())
+  let bare_path = match bare_repo.path().to_str() {
+    Some(path) => path.into(),
+    None => path_str
+  };
+
+  Ok(bare_path)
 }

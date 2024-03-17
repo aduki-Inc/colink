@@ -1,4 +1,4 @@
-use chrono::{NaiveDateTime, Duration, Utc};
+use chrono::{NaiveDateTime, Days, Utc};
 
 // Function to get current date plus numbers of days supplied
 pub async fn future_date(days: Option<i64>) -> Option<NaiveDateTime> {
@@ -7,7 +7,7 @@ pub async fn future_date(days: Option<i64>) -> Option<NaiveDateTime> {
     let days_to_be_added: i64 = days.unwrap_or(0);
     let initial_date = Utc::now();
 
-    let future_date = initial_date + Duration::days(days_to_be_added);
+    let future_date = initial_date + Days::new(days_to_be_added.try_into().unwrap());
 
     Some(future_date.naive_utc())
   }

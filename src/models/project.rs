@@ -50,10 +50,9 @@ pub struct EditTemplate {
 pub struct Project {
   pub id: i32,
   pub author: i32,
-  pub template: i32,
+  pub name: String,
   pub title: String,
   pub field: String,
-  pub type_: ProposalType,
   pub public: bool,
   pub active: bool,
   pub owned: bool,
@@ -63,13 +62,51 @@ pub struct Project {
   pub updated_at: Option<NaiveDateTime>
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct NewProject {
+  pub name: String,
+  pub title: String,
+  pub field: String,
+  pub public: bool,
+}
+
+
+// Validate NewUser
+impl NewProject {
+	pub fn validate(&self) -> Result<NewProject, String> {
+		// Check if required fields are present
+		if self.name.len() < 2 || self.name.len() > 15 {
+			return Err("Name must be between 2 and 15!".to_string());
+		}
+
+		// If all checks pass, return the validated NewUser
+		Ok(self.clone())
+	}
+}
+
+#[derive(Insertable, Clone, Serialize, Deserialize)]
+#[diesel(table_name = projects)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertableProject {
+  pub author: i32,
+  pub name: String,
+  pub title: String,
+  pub field: String,
+  pub public: bool,
+  pub active: bool,
+  pub owned: bool,
+  pub org: Option<i32>,
+}
+
 
 #[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = proposals)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Proposal {
   pub id: i32,
+  pub template: i32,
   pub project: i32,
+  pub kind: ProposalType,
   pub summery: String,
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>

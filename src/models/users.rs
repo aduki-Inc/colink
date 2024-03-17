@@ -50,8 +50,6 @@ pub struct NewUser {
   pub updated_at: Option<NaiveDateTime>,
 }
 
-
-
 // Validate NewUser
 impl NewUser {
 	pub fn validate(&self) -> Result<NewUser, String> {
