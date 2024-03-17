@@ -38,7 +38,7 @@ async fn main() -> std::io::Result<()> {
 		.unwrap();
 
 	// Set up TLS config options
-	let tls_config = rustls::server::server_conn::ServerConfig::builder()
+	let tls_config = rustls::ServerConfig::builder()
 		.with_no_client_auth()
 		.with_single_cert(tls_certs, rustls::pki_types::PrivateKeyDer::Pkcs8(tls_key))
 		.unwrap();
@@ -90,7 +90,7 @@ async fn main() -> std::io::Result<()> {
 			.wrap(Logger::default())
 			.configure(routes::init)
 	})
-	.bind_rustls(("127.0.0.1", 8080), tls_config)?
+	.bind_rustls_0_22(("127.0.0.1", 8080), tls_config)?
 	// .bind(("127.0.0.1", 8080))?
 	.run()
 	.await
