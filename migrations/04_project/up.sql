@@ -44,7 +44,7 @@ create table if not exists project.selections (
 create table if not exists project.projects (
   id serial primary key,
   author integer references account.users(id) on delete cascade not null,
-  name varchar(250) not  null unique,
+  name varchar(250) not  null,
   title varchar(500) not null,
   field varchar(500) not null,
   public boolean not null default true,
