@@ -11,7 +11,7 @@ use std::sync::Mutex;
 use actix_files::Files;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
-use actix_web::{http::header, web, App, HttpServer};
+use actix_web::{http::header, guard, web, App, HttpServer};
 extern crate diesel_derive_enum;
 extern crate tempdir;
 
@@ -53,10 +53,15 @@ async fn main() -> std::io::Result<()> {
 			.app_data(app_data.clone())
 			.app_data(web::JsonConfig::default()
 				.limit(4096)
-				.error_handler(|err, _req| handlers::error_handlers::json_cfg(err)),
+				.error_handler(|err, _req| handlers::system::json_cfg(err)),
 			)
 			.wrap(cors)
 			.service(Files::new("/static", "./static"))
+			.default_service(
+				web::route()
+					.guard(guard::Not(guard::Get()))
+					.to(handlers::system::url_not_found)
+			)
 			.wrap(Logger::default())
 			.configure(routes::init)
 	})
