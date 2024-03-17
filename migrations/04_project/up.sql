@@ -44,11 +44,9 @@ create table if not exists project.selections (
 create table if not exists project.projects (
   id serial primary key,
   author integer references account.users(id) on delete cascade not null,
-  template integer references project.templates(id) on delete cascade not null,
   name varchar(250) not  null unique,
   title varchar(500) not null,
   field varchar(500) not null,
-  type proposal_type not null,
   public boolean not null default true,
   active boolean not null default true,
   owned boolean not null default false,
@@ -60,7 +58,9 @@ create table if not exists project.projects (
 
 create table if not exists project.proposals(
   id serial primary key,
+  template integer references project.templates(id) on delete cascade not null,
   project integer unique references project.projects(id) on delete cascade not null,
+  kind proposal_type not null,
   summery text not null,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp

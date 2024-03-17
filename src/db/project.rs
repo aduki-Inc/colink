@@ -8,21 +8,15 @@ pub mod project {
     }
 
     diesel::table! {
-        use diesel::sql_types::*;
-        use super::sql_types::ProposalType;
-
         project.projects (id) {
             id -> Int4,
             author -> Int4,
-            template -> Int4,
             #[max_length = 250]
             name -> Varchar,
             #[max_length = 500]
             title -> Varchar,
             #[max_length = 500]
             field -> Varchar,
-            #[sql_name = "type"]
-            type_ -> ProposalType,
             public -> Bool,
             active -> Bool,
             owned -> Bool,
@@ -34,9 +28,14 @@ pub mod project {
     }
 
     diesel::table! {
+        use diesel::sql_types::*;
+        use super::sql_types::ProposalType;
+
         project.proposals (id) {
             id -> Int4,
+            template -> Int4,
             project -> Int4,
+            kind -> ProposalType,
             summery -> Text,
             created_at -> Nullable<Timestamptz>,
             updated_at -> Nullable<Timestamptz>,
@@ -66,8 +65,8 @@ pub mod project {
         }
     }
 
-    diesel::joinable!(projects -> templates (template));
     diesel::joinable!(proposals -> projects (project));
+    diesel::joinable!(proposals -> templates (template));
     diesel::joinable!(selections -> templates (template));
 
     diesel::allow_tables_to_appear_in_same_query!(

@@ -50,7 +50,6 @@ pub struct EditTemplate {
 pub struct Project {
   pub id: i32,
   pub author: i32,
-  pub template: i32,
   pub name: String,
   pub title: String,
   pub field: String,
@@ -66,17 +65,11 @@ pub struct Project {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct NewProject {
-  pub template: i32,
   pub name: String,
   pub title: String,
-  pub field: String,
-  pub type_: ProposalType,
-  pub public: bool,
-  pub active: bool,
-  pub owned: bool,
-  pub org: Option<i32>,
-  pub description: Option<String>,
+  pub field: String
 }
+
 
 // Validate NewUser
 impl NewProject {
@@ -96,16 +89,13 @@ impl NewProject {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct InsertableProject {
   pub author: i32,
-  pub template: i32,
   pub name: String,
   pub title: String,
   pub field: String,
-  pub type_: ProposalType,
   pub public: bool,
   pub active: bool,
   pub owned: bool,
   pub org: Option<i32>,
-  pub description: Option<String>,
 }
 
 
@@ -114,7 +104,9 @@ pub struct InsertableProject {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Proposal {
   pub id: i32,
+  pub template: i32,
   pub project: i32,
+  pub kind: ProposalType,
   pub summery: String,
   pub created_at: Option<NaiveDateTime>,
   pub updated_at: Option<NaiveDateTime>
