@@ -27,26 +27,39 @@ pub async fn create_project(
 		// Access 'user' from 'Claims'
 		let user = &claims.user;
 
-    let template_data = payload.into_inner();
+    let project_data = payload.into_inner();
 
-    match template_created(&user.id, template_data, &mut conn) {
-      Ok(template) => {
-        return HttpResponse::Ok().json(
-          json!({
-            "success": true,
-            "template": template,
-            "message": format!("Template - {} - was changed successfully!", &template.name)
-          })
-        )
-      }
-      Err(_) => {
-        return  HttpResponse::InternalServerError().json(
+    match project_data.validate() {
+      Ok(new_project) => {
+        match project_created(&user.id, new_project, &mut conn).await {
+          Ok(created_project) => {
+            return HttpResponse::Ok().json(
+              json!({
+                "success": true,
+                "project": created_project,
+                "message": format!("Project - {} - was changed successfully!", &created_project.name)
+              })
+            )
+          }
+          Err(err) => {
+            return  HttpResponse::NotFound().json(
+              json!({
+                "success": false,
+                "message": err.to_string()
+              })
+            )
+          }
+        }
+      },
+      Err(err) => {
+        // Directly return the HttpResponse
+        return HttpResponse::ExpectationFailed().json(
           json!({
             "success": false,
-            "message": "Could add the template: An error occurred during the process!"
+            "message": err.to_string()
           })
         )
-      }
+      },
     }
 	}
 	else {

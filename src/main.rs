@@ -56,9 +56,9 @@ async fn main() -> std::io::Result<()> {
 				.error_handler(|err, _req| handlers::error_handlers::json_cfg(err)),
 			)
 			.wrap(cors)
-			.service(routes::project::template_config())
 			.service(routes::orgs::org_config())
 			.service(routes::auth::auth_config())
+			.service(routes::project::project_config())
 			.service(routes::r#static::static_config())
 			.service(Files::new("/static", "./static"))
 			.wrap(Logger::default())

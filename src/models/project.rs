@@ -78,6 +78,19 @@ pub struct NewProject {
   pub description: Option<String>,
 }
 
+// Validate NewUser
+impl NewProject {
+	pub fn validate(&self) -> Result<NewProject, String> {
+		// Check if required fields are present
+		if self.name.len() < 2 || self.name.len() > 15 {
+			return Err("Name must be between 2 and 15!".to_string());
+		}
+
+		// If all checks pass, return the validated NewUser
+		Ok(self.clone())
+	}
+}
+
 #[derive(Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = projects)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
