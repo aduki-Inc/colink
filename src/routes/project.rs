@@ -6,6 +6,7 @@ pub fn project_config() -> Scope {
 
     //Project Routes
     .route("/add", web::put().to(create_project))
+    .route("/{org}/add", web::put().to(create_org_project))
 }
 
 pub fn template_config() -> Scope {

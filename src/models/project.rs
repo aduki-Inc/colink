@@ -53,7 +53,6 @@ pub struct Project {
   pub name: String,
   pub title: String,
   pub field: String,
-  pub type_: ProposalType,
   pub public: bool,
   pub active: bool,
   pub owned: bool,
