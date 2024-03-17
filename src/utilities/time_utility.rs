@@ -7,7 +7,7 @@ pub async fn future_date(days: Option<i64>) -> Option<NaiveDateTime> {
     let days_to_be_added: i64 = days.unwrap_or(0);
     let initial_date = Utc::now();
 
-    let future_date = initial_date + Duration::days(days_to_be_added);
+    let future_date = initial_date + Duration::TimeDelta::try_days(days_to_be_added);
 
     Some(future_date.naive_utc())
   }

@@ -14,19 +14,21 @@ use actix_web::middleware::Logger;
 use actix_web::{http::header, guard, web, App, HttpServer};
 extern crate diesel_derive_enum;
 extern crate tempdir;
+use rustls_pemfile;
+use std::{fs::File, io::BufReader};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
 	// Certificates
-	let mut certs_file = BuffReader::new(File::open("cert.pem").unwrap());
-	let mut key_file = BuffReader::new(File::open("key.pem").unwrap());
+	let mut certs_file = BufReader::new(File::open("cert.pem").unwrap());
+	let mut key_file = BufReader::new(File::open("key.pem").unwrap());
 
 
 	// Load TLS certs and key
 	// to create a self-signed temporary for cert for testing: dev
 	// `openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'`
-	let tls_certs = rustls_permfile::certs(&mut certs_file)
+	let tls_certs = rustls_pemfile::certs(&mut certs_file)
 		.collect::<Result<Vec<_>, _>>()
 		.unwrap();
 
@@ -36,9 +38,9 @@ async fn main() -> std::io::Result<()> {
 		.unwrap();
 
 	// Set up TLS config options
-	let tls_config = rustls::ServiceConfig::builder()
+	let tls_config = rustls::server::server_conn::ServerConfig::builder()
 		.with_no_client_auth()
-		.with_single_cert(tls_cert, rustls::pki_types::PrivateKeyDer::Pkcs8(tls_key))
+		.with_single_cert(tls_certs, rustls::pki_types::PrivateKeyDer::Pkcs8(tls_key))
 		.unwrap();
 
 	// Get current directory of the app
@@ -88,7 +90,7 @@ async fn main() -> std::io::Result<()> {
 			.wrap(Logger::default())
 			.configure(routes::init)
 	})
-	.bind_rustls_0_22("127.0.0.1", tls_config)?
+	.bind_rustls(("127.0.0.1", 8080), tls_config)?
 	// .bind(("127.0.0.1", 8080))?
 	.run()
 	.await
