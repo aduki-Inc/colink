@@ -75,13 +75,13 @@ pub async fn org_project_created(user_id: &i32, org_short_name: &str, project: N
             .get_result::<Project>(conn) {
               Ok(inserted_project) => Ok(inserted_project),
               Err(err) => {
-                println!(":?", err);
+                println!("{:?}", err);
                 return Err(Error::QueryBuilderError("Something went wrong, try again".into()));
               }
             }
           },
           Err(err) => {
-            println!(":?", err);
+            println!("{:?}", err);
             return Err(Error::QueryBuilderError("Something went wrong, try again".into()));
           }
         }
