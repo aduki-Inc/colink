@@ -67,7 +67,8 @@ pub struct Project {
 pub struct NewProject {
   pub name: String,
   pub title: String,
-  pub field: String
+  pub field: String,
+  pub public: bool,
 }
 
 
