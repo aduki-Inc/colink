@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
 
 	// Load TLS certs and key
 	// to create a self-signed temporary for cert for testing: dev
-	// `openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'`
+	// run this on terminal `openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'`
 	let tls_certs = rustls_pemfile::certs(&mut certs_file)
 		.collect::<Result<Vec<_>, _>>()
 		.unwrap();
