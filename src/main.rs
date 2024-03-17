@@ -18,6 +18,29 @@ extern crate tempdir;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
+	// Certificates
+	let mut certs_file = BuffReader::new(File::open("cert.pem").unwrap());
+	let mut key_file = BuffReader::new(File::open("key.pem").unwrap());
+
+
+	// Load TLS certs and key
+	// to create a self-signed temporary for cert for testing: dev
+	// `openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'`
+	let tls_certs = rustls_permfile::certs(&mut certs_file)
+		.collect::<Result<Vec<_>, _>>()
+		.unwrap();
+
+	let tls_key = rustls_pemfile::pkcs8_private_keys(&mut key_file)
+		.next()
+		.unwrap()
+		.unwrap();
+
+	// Set up TLS config options
+	let tls_config = rustls::ServiceConfig::builder()
+		.with_no_client_auth()
+		.with_single_cert(tls_cert, rustls::pki_types::PrivateKeyDer::Pkcs8(tls_key))
+		.unwrap();
+
 	// Get current directory of the app
 	let static_path = match std::env::current_dir() {
     Ok(root_path) => {
@@ -65,7 +88,8 @@ async fn main() -> std::io::Result<()> {
 			.wrap(Logger::default())
 			.configure(routes::init)
 	})
-	.bind(("127.0.0.1", 8080))?
+	.bind_rustls_0_22("127.0.0.1", tls_config)?
+	// .bind(("127.0.0.1", 8080))?
 	.run()
 	.await
 }
