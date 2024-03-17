@@ -37,7 +37,7 @@ pub async fn create_project(
               json!({
                 "success": true,
                 "project": created_project,
-                "message": format!("Project - {} - was changed successfully!", &created_project.name)
+                "message": format!("Project - {} - was added successfully!", &created_project.name)
               })
             )
           }

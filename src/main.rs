@@ -14,6 +14,7 @@ use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
 extern crate diesel_derive_enum;
 extern crate tempdir;
+use routes::{auth, project, orgs};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -56,9 +57,10 @@ async fn main() -> std::io::Result<()> {
 				.error_handler(|err, _req| handlers::error_handlers::json_cfg(err)),
 			)
 			.wrap(cors)
-			.service(routes::orgs::org_config())
-			.service(routes::auth::auth_config())
-			.service(routes::project::project_config())
+			.service(orgs::org_config())
+			.service(auth::auth_config())
+			.service(project::project_config())
+			.service(project::template_config())
 			.service(routes::r#static::static_config())
 			.service(Files::new("/static", "./static"))
 			.wrap(Logger::default())

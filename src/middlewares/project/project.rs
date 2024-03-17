@@ -41,6 +41,7 @@ pub async fn project_created(user_id: &i32, project: NewProject, conn: &mut PgCo
         .get_result::<Project>(conn) {
           Ok(inserted_project) => Ok(inserted_project),
           Err(_) => {
+            // println!("{:?}", error);
             let err = Error::QueryBuilderError("Something went wrong, try again".into());
             return Err(err);
           }
