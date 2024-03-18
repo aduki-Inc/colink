@@ -87,7 +87,7 @@ pub async fn org_project_created(user_id: &i32, org_short_name: &str, project: N
         }
       },
       Err(_) => {
-        return Err(Error::QueryBuilderError("Organization does not seem to exists, try again".into()));
+        return Err(Error::QueryBuilderError("The organization does't seem to exists!".into()));
       }
     }
   })
