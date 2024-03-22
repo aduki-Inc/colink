@@ -18,6 +18,22 @@ begin
 end $$;
 
 
+-- Check if the enum type exists
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'section_type') then
+    -- Create the enum type
+    create type section_type as enum (
+			'system',
+      'project',
+      'doc',
+      'org',
+      'other'
+    );
+  end if;
+end $$;
+
+
 -- Check if the enum type(log_type) exists, if not create it
 do $$
 begin
@@ -59,7 +75,8 @@ create table if not exists platform.co_link (
 -- Create sections table
 create table if not exists platform.sections (
 	id serial primary key,
-	identity varchar(250) unique not null,
+	kind section_type not null,
+	identity varchar(300) not null,
 	target integer not null,
 	name varchar(500) not null,
 	description varchar(500),

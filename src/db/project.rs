@@ -3,8 +3,23 @@
 pub mod project {
     pub mod sql_types {
         #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
-        #[diesel(postgres_type(name = "proposal_type"))]
-        pub struct ProposalType;
+        #[diesel(postgres_type(name = "doc_type"))]
+        pub struct DocType;
+    }
+
+    diesel::table! {
+        use diesel::sql_types::*;
+        use super::sql_types::DocType;
+
+        project.docs (id) {
+            id -> Int4,
+            template -> Int4,
+            project -> Int4,
+            kind -> DocType,
+            summery -> Text,
+            created_at -> Nullable<Timestamptz>,
+            updated_at -> Nullable<Timestamptz>,
+        }
     }
 
     diesel::table! {
@@ -22,21 +37,6 @@ pub mod project {
             owned -> Bool,
             org -> Nullable<Int4>,
             description -> Nullable<Text>,
-            created_at -> Nullable<Timestamptz>,
-            updated_at -> Nullable<Timestamptz>,
-        }
-    }
-
-    diesel::table! {
-        use diesel::sql_types::*;
-        use super::sql_types::ProposalType;
-
-        project.proposals (id) {
-            id -> Int4,
-            template -> Int4,
-            project -> Int4,
-            kind -> ProposalType,
-            summery -> Text,
             created_at -> Nullable<Timestamptz>,
             updated_at -> Nullable<Timestamptz>,
         }
@@ -65,13 +65,13 @@ pub mod project {
         }
     }
 
-    diesel::joinable!(proposals -> projects (project));
-    diesel::joinable!(proposals -> templates (template));
+    diesel::joinable!(docs -> projects (project));
+    diesel::joinable!(docs -> templates (template));
     diesel::joinable!(selections -> templates (template));
 
     diesel::allow_tables_to_appear_in_same_query!(
+        docs,
         projects,
-        proposals,
         selections,
         templates,
     );

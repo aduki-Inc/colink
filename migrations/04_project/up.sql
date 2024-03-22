@@ -6,9 +6,10 @@ create schema if not exists project;
 -- Check if the enum type exists
 do $$
 begin
-  if not exists (select 1 from pg_type where typname = 'proposal_type') then
+  if not exists (select 1 from pg_type where typname = 'doc_type') then
     -- Create the enum type
-    create type proposal_type as enum (
+    create type doc_type as enum (
+      'doc',
       'approval',
       'revised',
       'supplemental',
@@ -56,11 +57,11 @@ create table if not exists project.projects (
   updated_at timestamp with time zone default current_timestamp
 );
 
-create table if not exists project.proposals(
+create table if not exists project.docs(
   id serial primary key,
   template integer references project.templates(id) on delete cascade not null,
-  project integer unique references project.projects(id) on delete cascade not null,
-  kind proposal_type not null,
+  project integer references project.projects(id) on delete cascade not null,
+  kind doc_type not null,
   summery text not null,
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
@@ -69,5 +70,5 @@ create table if not exists project.proposals(
 -- Create a trigger to run every time field is updated
 select diesel_manage_updated_at('project.projects');
 select diesel_manage_updated_at('project.templates');
-select diesel_manage_updated_at('project.proposals');
+select diesel_manage_updated_at('project.docs');
 select diesel_manage_updated_at('project.selections');

@@ -19,5 +19,15 @@ create table if not exists account.users (
   updated_at timestamp with time zone default current_timestamp
 );
 
+-- Create table for (Follow system)
+create table if not exists account.contacts (
+  id serial primary key,
+  user_from integer references account.users(id) on delete cascade not null,
+  user_to integer references account.users(id) on delete cascade not null,
+  created_at timestamp with time zone default current_timestamp,
+  updated_at timestamp with time zone default current_timestamp
+);
+
 -- Create a function to update updated_at column
 select diesel_manage_updated_at('account.users');
+select diesel_manage_updated_at('account.contacts');
