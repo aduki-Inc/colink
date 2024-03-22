@@ -102,8 +102,9 @@ pub struct InsertableProject {
 #[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = docs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct Proposal {
+pub struct Doc {
   pub id: i32,
+  pub name: String,
   pub template: i32,
   pub project: i32,
   pub kind: DocType,
