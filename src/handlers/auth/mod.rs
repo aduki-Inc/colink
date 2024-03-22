@@ -1,3 +1,3 @@
-pub mod auth_handlers;
-pub mod section_handlers;
-pub mod role_handlers;
+pub mod user;
+pub mod section;
+pub mod role;

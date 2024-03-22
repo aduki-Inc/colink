@@ -10,7 +10,7 @@ use crate::middlewares::auth::{
   auth_middleware::{JwtMiddleware, Claims},
   role_middleware::check_org_authority,
 };
-use crate::models::custom_types::OrgType;
+use crate::models::custom::OrgType;
 use crate::middlewares::org::creation_middleware::*;
 
 

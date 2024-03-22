@@ -1,6 +1,6 @@
 use actix_web::{web, Scope};
 use crate::handlers::org::{
-  org_handlers::*, member_handlers::*, update_handlers::*
+  org::*, member::*, info::*
 };
 
 pub fn org_config() -> Scope {

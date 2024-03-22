@@ -13,16 +13,16 @@ use crate::models::{
 		RoleData, RolePrivileges, RoleExpiry
 	},
 	platform::InsertableLog,
-	custom_types::{ ActionType, LogType }
+	custom::{ ActionType, LogType }
 };
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::{
 	auth::{
-		auth_middleware::{JwtMiddleware, Claims},
-		role_middleware::*
+		auth::{JwtMiddleware, Claims},
+		role::*
 	},
-	log::log_middleware::*
+	log::log::*
 };
 use crate::utilities::time_utility::future_date;
 

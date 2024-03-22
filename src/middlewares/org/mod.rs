@@ -1,3 +1,3 @@
-pub mod creation_middleware;
-pub mod editing_middleware;
-pub mod update_middleware;
+pub mod creation;
+pub mod member;
+pub mod info;

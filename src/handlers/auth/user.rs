@@ -10,14 +10,14 @@ use crate::db::{
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::{
-	log::log_middleware::create_log,
-	auth::auth_middleware::{
+	log::log::create_log,
+	auth::auth::{
 		email_or_username_exists, generate_jwt, JwtMiddleware, Claims
 	}
 };
 
 use crate::models::{
-	custom_types::{ActionType, LogType},
+	custom::{ActionType, LogType},
 	users::{User, LoggedUser, NewUser, LoginData, Username},
 	platform::InsertableLog
 };
@@ -197,7 +197,7 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 							verb: format!("Failed to generate jwt: {}", err.to_string()),
 						};
 						create_log(&new_log, &mut conn).await;
-						
+
 						HttpResponse::Unauthorized().json(json!({
 							"success": false,
 							"message": "Failed, error occurred while generating auth token"
@@ -228,7 +228,7 @@ pub async fn check_username(app_data: web::Data<AppState>, data: web::Json<Usern
 	let mut conn = establish_connection(&app_data.config.database_url).await;
 
 	let username_data = data.into_inner();
-	
+
 	match users.filter(username.eq(&username_data.username)).first::<User>(&mut conn) {
     Ok(_) => {
 			return HttpResponse::Ok().json(json!({

@@ -1,7 +1,7 @@
 use crate::db::platform::platform::{roles, roles::dsl::*};
 use crate::models::{
   platform::{Section, Role, RolePrivileges, InsertableRole},
-  custom_types::RoleType,
+  custom::RoleType,
   orgs::OrgPermission
 };
 use diesel::prelude::*;

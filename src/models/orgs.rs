@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use chrono::{NaiveDateTime, NaiveDate, Local};
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
-use crate::models::custom_types::{InstitutionType, OrgType};
+use crate::models::custom::{InstitutionType, OrgType};
 
 
 #[derive(Debug,Serialize, Deserialize, Clone)]

@@ -10,9 +10,9 @@ use crate::models::{
   },
   platform::{
     InsertableRole, NewSection, Section, InsertableApproval
-  }
+  },
+  custom::{RoleType, OrgType}
 };
-use crate::models::custom_types::{RoleType, OrgType};
 use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::pg::PgConnection;

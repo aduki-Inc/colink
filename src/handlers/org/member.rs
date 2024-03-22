@@ -7,10 +7,10 @@ use crate::configs::state::AppState;
 use diesel::result::Error;
 use serde_json::json;
 use crate::middlewares::auth::{
-  auth_middleware::{JwtMiddleware, Claims},
-  role_middleware::{ check_org_authority, role_belong_set_expired }
+  auth::{JwtMiddleware, Claims},
+  role::{ check_org_authority, role_belong_set_expired }
 };
-use crate::middlewares::org::editing_middleware::*;
+use crate::middlewares::org::member::*;
 
 // Handler for editing member info
 pub async fn edit_user_info(

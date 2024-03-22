@@ -1,7 +1,7 @@
 // use crate::db::platform::platform::logs::dsl::*;
 use crate::db::platform::platform::logs;
 use crate::models::{
-  custom_types::{LogType, ActionType},
+  custom::{LogType, ActionType},
   platform::InsertableLog
 };
 use diesel::prelude::*;
