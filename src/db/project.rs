@@ -13,6 +13,8 @@ pub mod project {
 
         project.docs (id) {
             id -> Int4,
+            #[max_length = 250]
+            name -> Varchar,
             template -> Int4,
             project -> Int4,
             kind -> DocType,

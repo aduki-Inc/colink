@@ -145,7 +145,7 @@ create table if not exists platform.logs (
 -- Add indices for logs
 create index idx_log_id on platform.logs(id);
 create index idx_log_audit on platform.logs(audit);
-create index idx_log_action on platform.roles(action);
+create index idx_log_action on platform.logs(action);
 
 
 -- Create a trigger to run every time field is updated
