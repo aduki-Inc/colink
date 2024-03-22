@@ -1,3 +1,3 @@
-pub mod auth_middleware;
-pub mod section_middleware;
-pub mod role_middleware;
+pub mod auth;
+pub mod section;
+pub mod role;

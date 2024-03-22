@@ -6,8 +6,8 @@ use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::{
   auth::{
-    auth_middleware::{JwtMiddleware, Claims},
-    role_middleware::check_org_authority
+    auth::{JwtMiddleware, Claims},
+    role::check_org_authority
   },
   project::project::{project_created, org_project_created}
 };
