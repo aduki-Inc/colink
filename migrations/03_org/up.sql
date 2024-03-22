@@ -52,6 +52,12 @@ create table if not exists org.orgs (
   updated_at timestamp with time zone default current_timestamp
 );
 
+-- Add indices for orgs
+create index idx_org_id on org.orgs(id);
+create index idx_org_short_name on org.orgs(short_name);
+create index idx_org_base on org.orgs(base);
+create index idx_org_active on org.orgs(active);
+
 
 --Create belongs table
 create table if not exists org.belongs (
@@ -67,6 +73,12 @@ create table if not exists org.belongs (
   created_at timestamp with time zone default current_timestamp,
   updated_at timestamp with time zone default current_timestamp
 );
+
+-- Add indices for belongs
+create index idx_belong_id on org.belongs(id);
+create index idx_belong_active on org.belongs(active);
+create index idx_belong_org on org.belongs(org);
+create index idx_belong_identity on org.belongs(identity);
 
 
 -- Create a trigger to run every time field is updated

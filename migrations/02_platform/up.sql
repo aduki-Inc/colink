@@ -72,6 +72,10 @@ create table if not exists platform.co_link (
 	updated_at timestamp with time zone default current_timestamp
 );
 
+-- Add indices for system table
+create index idx_system_id on platform.co_link(id);
+create index idx_system_created on platform.co_link(created_at);
+
 -- Create sections table
 create table if not exists platform.sections (
 	id serial primary key,
@@ -83,6 +87,11 @@ create table if not exists platform.sections (
 	created_at timestamp with time zone default current_timestamp,
 	updated_at timestamp with time zone default current_timestamp
 );
+
+-- Add indices for sections
+create index idx_section_id on platform.sections(id);
+create index idx_section_kind on platform.sections(kind);
+create index idx_section_identity on platform.sections(identity);
 
 -- Create roles table
 create table if not exists platform.roles (
@@ -97,6 +106,13 @@ create table if not exists platform.roles (
 	updated_at timestamp with time zone default current_timestamp
 );
 
+-- Add indices for sections
+create index idx_role_id on platform.roles(id);
+create index idx_role_section on platform.roles(section);
+create index idx_role_base on platform.roles(base);
+create index idx_role_author on platform.roles(author);
+create index idx_role_expiry on platform.roles(expiry);
+
 
 -- Create approvals table
 create table if not exists platform.approvals (
@@ -108,6 +124,10 @@ create table if not exists platform.approvals (
 	created_at timestamp with time zone default current_timestamp,
 	updated_at timestamp with time zone default current_timestamp
 );
+
+-- Add indices for approvals
+create index idx_approval_id on platform.approvals(id);
+create index idx_approved_approval on platform.approvals(approved);
 
 
 -- Create logs table
@@ -121,6 +141,11 @@ create table if not exists platform.logs (
 	verb varchar(500) not null,
 	created_at timestamp with time zone default current_timestamp
 );
+
+-- Add indices for logs
+create index idx_log_id on platform.logs(id);
+create index idx_log_audit on platform.logs(audit);
+create index idx_log_action on platform.roles(action);
 
 
 -- Create a trigger to run every time field is updated
