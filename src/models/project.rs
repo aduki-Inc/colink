@@ -1,9 +1,9 @@
 use diesel::prelude::*;
-use crate::db::project::project::{ projects, proposals, templates, selections};
+use crate::db::project::project::{ projects, docs, templates, selections};
 use chrono::NaiveDateTime;
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
-use crate::models::custom_types::ProposalType;
+use crate::models::custom_types::DocType;
 
 #[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = templates)]
@@ -100,7 +100,7 @@ pub struct InsertableProject {
 
 
 #[derive(Queryable, Selectable, Serialize, Deserialize)]
-#[diesel(table_name = proposals)]
+#[diesel(table_name = docs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Proposal {
   pub id: i32,

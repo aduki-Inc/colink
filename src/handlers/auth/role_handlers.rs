@@ -1,26 +1,30 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
+use tokio::spawn;
 use diesel::prelude::*;
 use diesel::result::{Error, DatabaseErrorKind};
 use chrono::{Utc, Days};
-use crate::db::connection::establish_connection;
-use crate::db::platform::platform::roles::dsl::*;
-use crate::models::system::{
-	Role, NewRole, InsertableRole,
-	RoleData, RolePrivileges, RoleExpiry
+use crate::db::{
+	connection::establish_connection,
+	platform::platform::roles::dsl::*
+};
+use crate::models::{
+	platform::{
+		Role, NewRole, InsertableRole,
+		RoleData, RolePrivileges, RoleExpiry
+	},
+	platform::InsertableLog,
+	custom_types::{ ActionType, LogType }
 };
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::{
-	auth_middleware::{JwtMiddleware, Claims},
-	role_middleware::*
+use crate::middlewares::{
+	auth::{
+		auth_middleware::{JwtMiddleware, Claims},
+		role_middleware::*
+	},
+	log::log_middleware::*
 };
 use crate::utilities::time_utility::future_date;
-
-// Logs imports for recording logs
-use tokio::spawn;
-use crate::middlewares::log::log_middleware::*;
-use crate::models::system::InsertableLog;
-use crate::models::custom_types::{ActionType, LogType};
 
 // Handler for creating new Role
 pub async fn create_role(

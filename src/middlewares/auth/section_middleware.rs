@@ -1,10 +1,8 @@
 use crate::db::platform::platform::sections::dsl::*;
-// use crate::db::schema::sections;
-use crate::models::system::Section;
-use diesel::prelude::*;
-use diesel::result::Error;
-use diesel::pg::PgConnection;
-
+use crate::models::platform::Section;
+use diesel::{
+  prelude::*, result::Error, pg::PgConnection
+};
 
 pub fn section_exists(other_identity: &str, conn: &mut PgConnection) -> bool {
   match sections.filter(identity.eq(other_identity)).first::<Section>(conn) {

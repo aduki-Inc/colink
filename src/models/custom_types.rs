@@ -23,8 +23,20 @@ pub enum OrgType {
 
 #[derive(Serialize, Deserialize, Clone)]
 #[derive(Debug, DbEnum)]
-#[ExistingTypePath = "crate::db::project::project::sql_types::ProposalType"]
-pub enum ProposalType {
+#[ExistingTypePath = "crate::db::platform::platform::sql_types::SectionType"]
+pub enum SectionType {
+  System,
+  Project,
+  Doc,
+  Org,
+  Other
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, DbEnum)]
+#[ExistingTypePath = "crate::db::project::project::sql_types::DocType"]
+pub enum DocType {
+  Doc,
   Proposal,
   Revised,
   Supplemental,

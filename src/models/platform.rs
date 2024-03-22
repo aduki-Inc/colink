@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use serde_json::Value as Json;
 use serde::{Deserialize, Serialize};
-use crate::models::custom_types::{RoleType, LogType, ActionType};
+use crate::models::custom_types::{RoleType, SectionType, LogType, ActionType};
 use crate::db::platform::platform;
 
 
@@ -21,14 +21,13 @@ pub struct Colink {
   pub updated_at: Option<NaiveDateTime>
 }
 
-
-
 // - Section
 #[derive(Debug, Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = platform::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Section {
   pub id: i32,
+  pub kind: SectionType,
   pub identity: String,
   pub target: i32,
   pub name: String,

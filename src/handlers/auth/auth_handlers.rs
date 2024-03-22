@@ -1,19 +1,26 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
-use diesel::prelude::*;
-use crate::db::account::account::users::dsl::*;
-use diesel::result::Error;
+use diesel::{ prelude::*, result::Error };
 use bcrypt::{hash, verify};
-use crate::db::connection::establish_connection;
-use crate::db::account::account::users;
-use crate::models::users::{User, LoggedUser, NewUser, LoginData, Username};
+use crate::db::{
+	connection::establish_connection,
+	account::account::{
+		users, users::dsl::*
+	}
+};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::auth_middleware::{email_or_username_exists, generate_jwt, JwtMiddleware, Claims};
+use crate::middlewares::{
+	log::log_middleware::create_log,
+	auth::auth_middleware::{
+		email_or_username_exists, generate_jwt, JwtMiddleware, Claims
+	}
+};
 
-// Logs imports for recording logs
-use crate::middlewares::log::log_middleware::create_log;
-use crate::models::system::InsertableLog;
-use crate::models::custom_types::{ActionType, LogType};
+use crate::models::{
+	custom_types::{ActionType, LogType},
+	users::{User, LoggedUser, NewUser, LoginData, Username},
+	platform::InsertableLog
+};
 
 
 // Define handler for user registration with JSON data.
