@@ -8,10 +8,10 @@ use diesel::result::Error;
 use serde_json::json;
 use crate::middlewares::{
   auth::{
-    auth_middleware::{JwtMiddleware, Claims},
-    role_middleware::check_org_authority
+    auth::{JwtMiddleware, Claims},
+    role::check_org_authority
   },
-  org::update_middleware::{
+  org::info::{
     org_logo_updated,
     org_background_updated,
     org_info_updated,

@@ -5,7 +5,7 @@ use crate::configs::state::AppState;
 use diesel::result::Error;
 use serde_json::json;
 use crate::middlewares::{
-  auth::auth_middleware::{JwtMiddleware, Claims},
+  auth::auth::{JwtMiddleware, Claims},
   project::template::{template_created, template_edited}
 };
 

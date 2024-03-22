@@ -13,6 +13,10 @@ pub mod platform {
         #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
         #[diesel(postgres_type(name = "role_type"))]
         pub struct RoleType;
+
+        #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+        #[diesel(postgres_type(name = "section_type"))]
+        pub struct SectionType;
     }
 
     diesel::table! {
@@ -79,9 +83,13 @@ pub mod platform {
     }
 
     diesel::table! {
+        use diesel::sql_types::*;
+        use super::sql_types::SectionType;
+
         platform.sections (id) {
             id -> Int4,
-            #[max_length = 250]
+            kind -> SectionType,
+            #[max_length = 300]
             identity -> Varchar,
             target -> Int4,
             #[max_length = 500]

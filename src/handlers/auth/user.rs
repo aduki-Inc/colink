@@ -1,19 +1,26 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
-use diesel::prelude::*;
-use crate::db::account::account::users::dsl::*;
-use diesel::result::Error;
+use diesel::{ prelude::*, result::Error };
 use bcrypt::{hash, verify};
-use crate::db::connection::establish_connection;
-use crate::db::account::account::users;
-use crate::models::users::{User, LoggedUser, NewUser, LoginData, Username};
+use crate::db::{
+	connection::establish_connection,
+	account::account::{
+		users, users::dsl::*
+	}
+};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::auth_middleware::{email_or_username_exists, generate_jwt, JwtMiddleware, Claims};
+use crate::middlewares::{
+	log::log::create_log,
+	auth::auth::{
+		email_or_username_exists, generate_jwt, JwtMiddleware, Claims
+	}
+};
 
-// Logs imports for recording logs
-use crate::middlewares::log::log_middleware::create_log;
-use crate::models::system::InsertableLog;
-use crate::models::custom_types::{ActionType, LogType};
+use crate::models::{
+	custom::{ActionType, LogType},
+	users::{User, LoggedUser, NewUser, LoginData, Username},
+	platform::InsertableLog
+};
 
 
 // Define handler for user registration with JSON data.
@@ -190,7 +197,7 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 							verb: format!("Failed to generate jwt: {}", err.to_string()),
 						};
 						create_log(&new_log, &mut conn).await;
-						
+
 						HttpResponse::Unauthorized().json(json!({
 							"success": false,
 							"message": "Failed, error occurred while generating auth token"
@@ -221,7 +228,7 @@ pub async fn check_username(app_data: web::Data<AppState>, data: web::Json<Usern
 	let mut conn = establish_connection(&app_data.config.database_url).await;
 
 	let username_data = data.into_inner();
-	
+
 	match users.filter(username.eq(&username_data.username)).first::<User>(&mut conn) {
     Ok(_) => {
 			return HttpResponse::Ok().json(json!({

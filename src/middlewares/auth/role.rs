@@ -1,14 +1,14 @@
-use crate::db::platform::platform::roles::dsl::*;
-use crate::db::platform::platform::roles;
-use crate::models::system::Section;
+use crate::db::platform::platform::{roles, roles::dsl::*};
 use crate::models::{
-  system::{Role, RolePrivileges, InsertableRole},
-  custom_types::RoleType
+  platform::{Section, Role, RolePrivileges, InsertableRole},
+  custom::RoleType,
+  orgs::OrgPermission
 };
-use crate::models::orgs::OrgPermission;
 use diesel::prelude::*;
-use diesel::result::Error;
-use diesel::pg::PgConnection;
+use diesel::{
+  result::Error,
+  pg::PgConnection
+};
 use chrono::Utc;
 
 

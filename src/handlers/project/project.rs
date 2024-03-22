@@ -6,8 +6,8 @@ use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::{
   auth::{
-    auth_middleware::{JwtMiddleware, Claims},
-    role_middleware::check_org_authority
+    auth::{JwtMiddleware, Claims},
+    role::check_org_authority
   },
   project::project::{project_created, org_project_created}
 };
@@ -29,11 +29,6 @@ pub async fn create_project(
 	if let Some(claims) = ext.get::<Claims>() {
 		// Access 'user' from 'Claims'
 		let user = &claims.user;
-
-    let req_permission = OrgPermission {
-      title: "projects".to_owned(),
-      name: "create".to_owned()
-    };
 
     let project_data = payload.into_inner();
 
@@ -112,7 +107,10 @@ pub async fn create_org_project(
     };
 
     // Check if the user is authorized to perform this action
-    match check_org_authority(&user.id, &org_short_name &req_permission, &mut conn) {
+    match check_org_authority(
+      &user.id, &org_short_name,
+      &req_permission, &mut conn
+    ) {
       Ok((true, Some(_section))) => {
 
         let project_data = payload.into_inner();

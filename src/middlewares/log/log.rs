@@ -1,9 +1,10 @@
 // use crate::db::platform::platform::logs::dsl::*;
 use crate::db::platform::platform::logs;
-use crate::models::custom_types::{LogType, ActionType};
-use crate::models::system::InsertableLog;
+use crate::models::{
+  custom::{LogType, ActionType},
+  platform::InsertableLog
+};
 use diesel::prelude::*;
-// use diesel::result::Error;
 use diesel::pg::PgConnection;
 
 // Creating logs

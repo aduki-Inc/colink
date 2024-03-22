@@ -1,13 +1,13 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
-use diesel::prelude::*;
-// use crate::db::schema::users::dsl::*;
-use diesel::result::Error;
-use crate::db::connection::establish_connection;
-use crate::db::platform::platform::sections;
-use crate::models::system::{Section, NewSection, SectionIdentity};
+use diesel::{ prelude::*, result::Error};
+use crate::db::{
+  connection::establish_connection,
+  platform::platform::sections,
+};
+use crate::models::platform::{Section, NewSection, SectionIdentity};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, section_middleware::* };
+use crate::middlewares::auth::{auth::{JwtMiddleware, Claims}, section::* };
 
 
 // Handler for creating new section/org section

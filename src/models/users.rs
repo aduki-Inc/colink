@@ -1,6 +1,6 @@
 use diesel::prelude::*;
 use chrono::NaiveDateTime;
-use crate::db::account::account::users;
+use crate::db::account::account::{users, contacts};
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Selectable)]
@@ -77,4 +77,17 @@ pub struct LoginData {
 #[derive(Serialize, Deserialize)]
 pub struct Username {
   pub username: String,
+}
+
+// - Contact ( Follow System )
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = contacts)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Serialize, Deserialize)]
+pub struct Contact {
+  pub id: i32,
+  pub user_from: i32,
+  pub user_to: i32,
+  pub created_at: Option<NaiveDateTime>,
+  pub updated_at: Option<NaiveDateTime>,
 }

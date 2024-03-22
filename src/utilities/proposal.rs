@@ -1,10 +1,6 @@
 use git2::{Repository, RepositoryInitOptions, Signature, FetchOptions, RemoteCallbacks, Cred};
-use std::fs::File;
-// use std::prelude::*;
-use std::fmt;
-use std::io::Write;
-use crate::middlewares::auth::auth_middleware::UserClaims;
-use std::path::PathBuf;
+use std::{fmt, fs::File, path::PathBuf, io::Write};
+use crate::middlewares::auth::auth::UserClaims;
 use tempdir::TempDir;
 
 
