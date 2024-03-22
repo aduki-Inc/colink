@@ -3,7 +3,7 @@ use crate::db::project::project::projects;
 use crate::db::org::org::orgs::dsl::orgs;
 use crate::db::org::org::orgs::short_name;
 use crate::models::{
-  project::{ Project, NewProject, InsertableProject},
+  project::{ Project, NewProject, InsertableProject },
   orgs::Organization
 };
 
@@ -80,14 +80,14 @@ pub async fn org_project_created(user_id: &i32, org_short_name: &str, project: N
               }
             }
           },
-          Err(_err) => {
+          Err(_) => {
             // println!("{:?}", err);
             return Err(Error::QueryBuilderError("Something went wrong, try again".into()));
           }
         }
       },
       Err(_) => {
-        return Err(Error::QueryBuilderError("Organization does not seem to exists, try again".into()));
+        return Err(Error::QueryBuilderError("The organization does't seem to exists!".into()));
       }
     }
   })
