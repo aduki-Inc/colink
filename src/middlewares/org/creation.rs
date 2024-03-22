@@ -1,6 +1,5 @@
-use crate::db::org::org::orgs::dsl::*;
 use crate::db::{
-  org::org::{orgs as org_model, belongs},
+  org::org::{orgs as org_model, orgs::dsl::*, belongs},
   platform::platform::{roles, approvals, sections}
 };
 use crate::models::{
@@ -11,11 +10,9 @@ use crate::models::{
   platform::{
     InsertableRole, NewSection, Section, InsertableApproval
   },
-  custom::{RoleType, OrgType}
+  custom::{RoleType, OrgType, SectionType}
 };
-use diesel::prelude::*;
-use diesel::result::Error;
-use diesel::pg::PgConnection;
+use diesel::{prelude::*, result::Error, pg::PgConnection};
 use chrono::{NaiveDateTime, NaiveDate, NaiveTime};
 use serde_json::json;
 
@@ -45,6 +42,7 @@ pub fn org_created(user_id: &i32, user_name: &str, new_org: &InsertableOrganizat
     .get_result::<Organization>(conn) {
         Ok(org) => {
           let new_section = NewSection {
+            kind: SectionType::Org,
             identity: org.short_name.clone(),
             target: org.id.clone(),
             name: org.short_name.clone(),
@@ -70,7 +68,7 @@ pub fn org_created(user_id: &i32, user_name: &str, new_org: &InsertableOrganizat
                     let roles_json = json!({
                       "project": ["create", "read", "update", "delete"],
                       "members": ["create", "read", "update", "delete"],
-                      "staff": ["create", "read", "update", "delete"]
+                      "staff": ["create", "read", "update", "delete"],
                     });
 
                     let new_role = InsertableRole {

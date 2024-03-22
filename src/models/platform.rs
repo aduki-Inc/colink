@@ -5,8 +5,6 @@ use serde::{Deserialize, Serialize};
 use crate::models::custom::{RoleType, SectionType, LogType, ActionType};
 use crate::db::platform::platform;
 
-
-
 // - Colink
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = platform::co_link)]
@@ -42,6 +40,7 @@ pub struct Section {
 #[diesel(table_name = platform::sections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct NewSection {
+  pub kind: SectionType,
   pub identity: String,
   pub target: i32,
   pub name: String,
