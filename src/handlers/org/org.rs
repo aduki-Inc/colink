@@ -1,17 +1,22 @@
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use chrono::NaiveDate;
 use crate::db::connection::establish_connection;
-use crate::models::orgs::{
-  BelongIntermediate, InsertableBelong, InsertableOrganization, NewBelong, NewOrganization, OrgPermission
+use crate::models::{
+  orgs::{
+    BelongIntermediate, InsertableBelong, InsertableOrganization,
+    NewBelong, NewOrganization, OrgPermission
+  },
+  custom::OrgType
 };
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::{
-  auth::{JwtMiddleware, Claims},
-  role::check_org_authority,
+use crate::middlewares::{
+  auth::{
+    auth::{JwtMiddleware, Claims},
+    role::check_org_authority,
+  },
+  org::creation::*
 };
-use crate::models::custom::OrgType;
-use crate::middlewares::org::creation_middleware::*;
 
 
 // Handler for creating new Organization
