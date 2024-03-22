@@ -7,8 +7,8 @@ use crate::models::orgs::{
 use crate::configs::state::AppState;
 use serde_json::json;
 use crate::middlewares::auth::{
-  auth_middleware::{JwtMiddleware, Claims},
-  role_middleware::check_org_authority,
+  auth::{JwtMiddleware, Claims},
+  role::check_org_authority,
 };
 use crate::models::custom::OrgType;
 use crate::middlewares::org::creation_middleware::*;

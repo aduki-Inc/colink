@@ -7,7 +7,7 @@ use crate::db::{
 use crate::models::platform::{Section, NewSection, SectionIdentity};
 use crate::configs::state::AppState;
 use serde_json::json;
-use crate::middlewares::auth::{auth_middleware::{JwtMiddleware, Claims}, section_middleware::* };
+use crate::middlewares::auth::{auth::{JwtMiddleware, Claims}, section::* };
 
 
 // Handler for creating new section/org section
