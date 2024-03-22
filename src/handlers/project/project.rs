@@ -30,11 +30,6 @@ pub async fn create_project(
 		// Access 'user' from 'Claims'
 		let user = &claims.user;
 
-    let req_permission = OrgPermission {
-      title: "projects".to_owned(),
-      name: "create".to_owned()
-    };
-
     let project_data = payload.into_inner();
 
     match project_data.validate() {
@@ -112,7 +107,10 @@ pub async fn create_org_project(
     };
 
     // Check if the user is authorized to perform this action
-    match check_org_authority(&user.id, &org_short_name &req_permission, &mut conn) {
+    match check_org_authority(
+      &user.id, &org_short_name,
+      &req_permission, &mut conn
+    ) {
       Ok((true, Some(_section))) => {
 
         let project_data = payload.into_inner();
