@@ -22,24 +22,22 @@ use crate::models::{
 	platform::InsertableLog
 };
 
-
 // Define handler for user registration with JSON data.
 pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUser>) -> impl Responder {
 	// let mut counter = app_data.counter.lock().unwrap();
 	// *counter += 1; // <- Access counters inside MutexGuard
-
 	let mut conn = establish_connection(&app_data.config.database_url).await;
 
 	// Collect Registration data from the body
-	match data.validate() {
+	return match data.validate() {
 		Ok(registration_data) => {
-
+			
 			// Check if email or username exists
 			let (exists, msg) = email_or_username_exists(
 				&registration_data.email,
 				&registration_data.username, &mut conn
 			).await;
-
+			
 			if exists {
 				return HttpResponse::Conflict().json(
 					json!({
@@ -48,8 +46,8 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 					})
 				);
 			}
-
-
+			
+			
 			// Hash the user's password securely using bcrypt.
 			let hashed_password = match hash(&registration_data.password, 12) {
 				Ok(h) => h,
@@ -60,7 +58,7 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 					})
 				),
 			};
-
+			
 			let new_user = NewUser {
 				username: registration_data.username,
 				email: registration_data.email,
@@ -73,13 +71,13 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 				created_at: None,
 				updated_at: None
 			};
-
+			
 			match diesel::insert_into(users::table)
-			.values(&new_user)
-			.get_result::<User>(&mut conn)
+				.values(&new_user)
+				.get_result::<User>(&mut conn)
 			{
 				Ok(_) => {
-					return HttpResponse::Ok().json(
+					HttpResponse::Ok().json(
 						json!({
 							"success": true,
 							"message": "User registered successfully"
@@ -97,9 +95,9 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 						verb: format!("User registration failed: {}", err.to_string())
 					};
 					create_log(&new_log, &mut conn).await;
-
+					
 					// Handle the database error and return an error response
-					return	HttpResponse::InternalServerError().json(
+					HttpResponse::InternalServerError().json(
 						json!({
 							"success": false,
 							"message": "Failed to register user: Internal Error occurred!"
@@ -110,16 +108,14 @@ pub async fn register_user(app_data: web::Data<AppState>, data: web::Json<NewUse
 		}
 		Err(err) => {
 			// Directly return the HttpResponse
-			return HttpResponse::ExpectationFailed().json(
+			HttpResponse::ExpectationFailed().json(
 				json!({
 					"success": false,
 					"message": err.to_string()
 				})
 			)
 		}
-	}
-
-
+	};
 }
 
 
@@ -128,11 +124,8 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 	// let mut conn = establish_connection().await;
 	// let mut counter = app_data.counter.lock().unwrap();
 	// *counter += 1; // <- Access counters inside MutexGuard
-
 	let mut conn = establish_connection(&app_data.config.database_url).await;
-
 	let login_data = data.into_inner();
-
 
 	// Retrieve the user from the database based on the user_key (email or username)
 	let user = match users::table
@@ -226,28 +219,26 @@ pub async fn login_user(app_data: web::Data<AppState>, data: web::Json<LoginData
 // Check if username already exists
 pub async fn check_username(app_data: web::Data<AppState>, data: web::Json<Username>) -> impl Responder {
 	let mut conn = establish_connection(&app_data.config.database_url).await;
-
 	let username_data = data.into_inner();
-
-	match users.filter(username.eq(&username_data.username)).first::<User>(&mut conn) {
-    Ok(_) => {
-			return HttpResponse::Ok().json(json!({
+	return match users.filter(username.eq(&username_data.username)).first::<User>(&mut conn) {
+		Ok(_) => {
+			HttpResponse::Ok().json(json!({
 				"success": true,
 				"user_exists": true,
 				"message": "User with that username already exists"
-			}));
+			}))
 		},
-    Err(Error::NotFound) => {
-			return HttpResponse::Ok().json(json!({
+		Err(Error::NotFound) => {
+			HttpResponse::Ok().json(json!({
 				"success": true,
 				"user_exists": false,
 				"message": "User with that username does not exists"
-			}));
+			}))
 		},
-    Err(err) => {
+		Err(err) => {
 			// Create new log & save it to db
 			let new_log = InsertableLog {
-				audit: 	LogType::Error,
+				audit: LogType::Error,
 				author: 0,
 				target: 0,
 				name: "database".to_owned(),
@@ -255,33 +246,32 @@ pub async fn check_username(app_data: web::Data<AppState>, data: web::Json<Usern
 				verb: format!("Check username -({})- failed: {}", username_data.username, err.to_string()),
 			};
 			create_log(&new_log, &mut conn).await;
-
-			return HttpResponse::InternalServerError().json(json!({
+			
+			HttpResponse::InternalServerError().json(json!({
 				"success": false,
 				"message": "Internal server error occurred!"
-			}));
+			}))
 		},
-  }
+	}
 }
 
 pub async fn check_user(req: HttpRequest, _: JwtMiddleware) -> impl Responder {
 	let ext = req.extensions();
-
+	
 	// Use the 'get' method to retrieve the 'Claims' value from extensions
-	if let Some(claims) = ext.get::<Claims>() {
-		// Access 'user' from 'Claims'
-		let user_info = &claims.user;
-
-		return HttpResponse::Ok().json(json!({
-			"success": true,
-			"user": user_info
-		}));
-
-	}
-	else {
-		return HttpResponse::Unauthorized().json(json!({
+	match ext.get::<Claims>() {
+		Some(claims) => {
+			// Access 'user' from 'Claims'
+			let user_info = &claims.user;
+			
+			HttpResponse::Ok().json(json!({
+				"success": true,
+				"user": user_info
+			}))
+		}
+		None => HttpResponse::Unauthorized().json(json!({
 			"success": false,
 			"user": "Authorization failed"
-		}));
+		})),
 	}
 }

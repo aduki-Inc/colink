@@ -4,7 +4,7 @@ use diesel::{
   prelude::*, result::Error, pg::PgConnection
 };
 
-pub fn section_exists(other_identity: &str, conn: &mut PgConnection) -> bool {
+pub fn section_exists(other_identity: &i32, conn: &mut PgConnection) -> bool {
   match sections.filter(identity.eq(other_identity)).first::<Section>(conn) {
     Ok(_) => true,
     Err(Error::NotFound) => false,

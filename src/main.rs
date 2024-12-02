@@ -19,23 +19,18 @@ use std::{fs::File, io::BufReader};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
 	// Certificates
-	let mut certs_file = BufReader::new(File::open("cert.pem").unwrap());
-	let mut key_file = BufReader::new(File::open("key.pem").unwrap());
-
+	let mut certs_file = BufReader::new(File::open("cert.pem")?);
+	let mut key_file = BufReader::new(File::open("key.pem")?);
 
 	// Load TLS certs and key
 	// to create a self-signed temporary for cert for testing: dev
-	// run this on terminal `openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'`
 	let tls_certs = rustls_pemfile::certs(&mut certs_file)
-		.collect::<Result<Vec<_>, _>>()
-		.unwrap();
+		.collect::<Result<Vec<_>, _>>()?;
 
 	let tls_key = rustls_pemfile::pkcs8_private_keys(&mut key_file)
 		.next()
-		.unwrap()
-		.unwrap();
+		.unwrap()?;
 
 	// Set up TLS config options
 	let tls_config = rustls::ServerConfig::builder()
@@ -43,7 +38,7 @@ async fn main() -> std::io::Result<()> {
 		.with_single_cert(tls_certs, rustls::pki_types::PrivateKeyDer::Pkcs8(tls_key))
 		.unwrap();
 
-	// Get current directory of the app
+	// Get the current directory of the app
 	let static_path = match std::env::current_dir() {
     Ok(root_path) => {
 			root_path.join("static").display().to_string()
